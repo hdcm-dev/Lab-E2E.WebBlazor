@@ -1,0 +1,279 @@
+@page "/encuesta"
+@inject ServicioDeEncuestas ServicioDeEncuestas
+@inject ServicioDeLocalidades ServicioDeLocalidades
+
+<PageTitle>Movilidad Urbana — Encuesta</PageTitle>
+
+<h1 class="mb-4" data-testid="titulo">Encuesta de uso del transporte</h1>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span data-testid="etiqueta-paso">@EtiquetaDelPaso</span>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="badge text-bg-secondary" data-testid="contador-encuestas">
+                    Registradas: @_registradas
+                </span>
+                <span class="badge text-bg-primary" data-testid="indicador-paso">@_paso/@ReglasDeEncuesta.TotalDePasos</span>
+            </div>
+        </div>
+        <div class="progress" role="progressbar" aria-label="Avance de la encuesta"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="@Porcentaje"
+             data-testid="progreso-contenedor">
+            <div class="progress-bar @(_respuesta is null ? null : "bg-success")"
+                 data-testid="progreso" style="width: @(Porcentaje)%"></div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="alert alert-danger @(_aviso is null ? "d-none" : null)" role="alert" data-testid="aviso">
+            @_aviso
+        </div>
+
+        @if (_respuesta is null)
+        {
+            <EditForm Model="_modelo" OnSubmit="SiguienteAsync" data-testid="formulario">
+                @if (_paso == 1)
+                {
+                    <section data-testid="paso-1">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="nombre" class="form-label">Nombre y apellido</label>
+                                <input type="text" class="form-control @Marca("nombre")" id="nombre"
+                                       data-testid="campo-nombre" autocomplete="off" maxlength="80"
+                                       value="@_modelo.Nombre"
+                                       @oninput="e => _modelo.Nombre = e.Value?.ToString() ?? string.Empty" />
+                                <div class="invalid-feedback" data-testid="error-nombre">@Error("nombre")</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="edad" class="form-label">Edad</label>
+                                <input type="number" class="form-control @Marca("edad")" id="edad"
+                                       data-testid="campo-edad" min="16" max="110" step="1"
+                                       @bind="_modelo.Edad" @bind:event="oninput" />
+                                <div class="invalid-feedback" data-testid="error-edad">@Error("edad")</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="localidad" class="form-label">Localidad</label>
+                                <select class="form-select @Marca("localidad")" id="localidad"
+                                        data-testid="campo-localidad" @bind="_modelo.Localidad">
+                                    <option value="">Seleccione…</option>
+                                    @foreach (var localidad in _localidades)
+                                    {
+                                        <option value="@localidad.Nombre">@localidad.Nombre (@localidad.Provincia)</option>
+                                    }
+                                </select>
+                                <div class="form-text">Se completa con el ABM de localidades.</div>
+                                <div class="invalid-feedback" data-testid="error-localidad">@Error("localidad")</div>
+                            </div>
+                        </div>
+                    </section>
+                }
+
+                @if (_paso == 2)
+                {
+                    <section data-testid="paso-2">
+                        <fieldset>
+                            <legend class="h6">¿Qué medios utiliza para viajar? (uno o más)</legend>
+                            <div class="row row-cols-1 row-cols-md-2 g-2" data-testid="grupo-medios">
+                                @foreach (var medio in Catalogos.Medios)
+                                {
+                                    <div class="col">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="medio-@medio.Clave" data-testid="medio-@medio.Clave"
+                                                   checked="@_modelo.Medios.Contains(medio.Clave)"
+                                                   @onchange="e => _modelo.AlternarMedio(medio.Clave, (bool)(e.Value ?? false))" />
+                                            <label class="form-check-label" for="medio-@medio.Clave">@medio.Etiqueta</label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="text-danger small mt-2 @(Error("medios") is null ? "d-none" : null)"
+                                 data-testid="error-medios">@Error("medios")</div>
+                        </fieldset>
+
+                        <div class="mt-4" style="max-width: 22rem">
+                            <label for="frecuencia" class="form-label">Frecuencia de uso</label>
+                            <select class="form-select @Marca("frecuencia")" id="frecuencia"
+                                    data-testid="campo-frecuencia" @bind="_modelo.Frecuencia">
+                                <option value="">Seleccione…</option>
+                                @foreach (var frecuencia in Catalogos.Frecuencias)
+                                {
+                                    <option value="@frecuencia.Clave">@frecuencia.Etiqueta</option>
+                                }
+                            </select>
+                            <div class="invalid-feedback" data-testid="error-frecuencia">@Error("frecuencia")</div>
+                        </div>
+                    </section>
+                }
+
+                @if (_paso == 3)
+                {
+                    <section data-testid="paso-3">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="distancia" class="form-label">Distancia diaria (km)</label>
+                                <input type="number" class="form-control @Marca("distancia")" id="distancia"
+                                       data-testid="campo-distancia" min="0" max="500" step="0.1"
+                                       @bind="_modelo.Distancia" @bind:event="oninput" />
+                                <div class="invalid-feedback" data-testid="error-distancia">@Error("distancia")</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="minutos" class="form-label">Tiempo de viaje (minutos)</label>
+                                <input type="number" class="form-control @Marca("minutos")" id="minutos"
+                                       data-testid="campo-minutos" min="1" max="600" step="1"
+                                       @bind="_modelo.Minutos" @bind:event="oninput" />
+                                <div class="invalid-feedback" data-testid="error-minutos">@Error("minutos")</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="motivo" class="form-label">Motivo principal</label>
+                                <select class="form-select @Marca("motivo")" id="motivo"
+                                        data-testid="campo-motivo" @bind="_modelo.Motivo">
+                                    <option value="">Seleccione…</option>
+                                    @foreach (var motivo in Catalogos.Motivos)
+                                    {
+                                        <option value="@motivo.Clave">@motivo.Etiqueta</option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback" data-testid="error-motivo">@Error("motivo")</div>
+                            </div>
+                        </div>
+                    </section>
+                }
+            </EditForm>
+        }
+        else
+        {
+            <section data-testid="resumen">
+                <div class="alert alert-success" role="alert" data-testid="mensaje-envio">
+                    Encuesta registrada. ¡Gracias por participar!
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Persona</dt>
+                    <dd class="col-sm-8" data-testid="resumen-persona">@_respuesta.Nombre (@_respuesta.Edad años)</dd>
+                    <dt class="col-sm-4">Localidad</dt>
+                    <dd class="col-sm-8" data-testid="resumen-localidad">@_respuesta.Localidad</dd>
+                    <dt class="col-sm-4">Medios</dt>
+                    <dd class="col-sm-8" data-testid="resumen-medios">
+                        @string.Join(", ", _respuesta.Medios.Select(Catalogos.EtiquetaDeMedio))
+                    </dd>
+                    <dt class="col-sm-4">Frecuencia</dt>
+                    <dd class="col-sm-8" data-testid="resumen-frecuencia">@Catalogos.EtiquetaDeFrecuencia(_respuesta.Frecuencia)</dd>
+                    <dt class="col-sm-4">Distancia diaria</dt>
+                    <dd class="col-sm-8" data-testid="resumen-distancia">@_respuesta.Distancia.ToString("0.###") km</dd>
+                    <dt class="col-sm-4">Tiempo de viaje</dt>
+                    <dd class="col-sm-8" data-testid="resumen-minutos">@_respuesta.Minutos min</dd>
+                    <dt class="col-sm-4">Motivo</dt>
+                    <dd class="col-sm-8" data-testid="resumen-motivo">@Catalogos.EtiquetaDeMotivo(_respuesta.Motivo)</dd>
+                </dl>
+            </section>
+        }
+    </div>
+
+    <div class="card-footer d-flex justify-content-between">
+        @if (_respuesta is null)
+        {
+            <button type="button" class="btn btn-outline-secondary" data-testid="boton-anterior"
+                    disabled="@(_paso == 1)" @onclick="Anterior">Anterior</button>
+            <div class="d-flex gap-2">
+                @if (_paso < ReglasDeEncuesta.TotalDePasos)
+                {
+                    <button type="button" class="btn btn-primary" data-testid="boton-siguiente"
+                            @onclick="SiguienteAsync">Siguiente</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-success" data-testid="boton-finalizar"
+                            @onclick="FinalizarAsync">Finalizar</button>
+                }
+            </div>
+        }
+        else
+        {
+            <span></span>
+            <button type="button" class="btn btn-outline-primary" data-testid="boton-reiniciar"
+                    @onclick="Reiniciar">Nueva encuesta</button>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly IReadOnlyDictionary<int, string> Titulos = new Dictionary<int, string>
+    {
+        [1] = "Datos de la persona",
+        [2] = "Medios que utiliza para viajar",
+        [3] = "Distancia recorrida"
+    };
+
+    private IReadOnlyList<Localidad> _localidades = [];
+    private ModeloDeEncuesta _modelo = new();
+    private IReadOnlyDictionary<string, string> _errores = new Dictionary<string, string>();
+    private RespuestaDeEncuesta? _respuesta;
+    private string? _aviso;
+    private int _paso = 1;
+    private int _registradas;
+
+    private int Porcentaje => _respuesta is null
+        ? (int)Math.Round(_paso * 100d / ReglasDeEncuesta.TotalDePasos)
+        : 100;
+
+    private string EtiquetaDelPaso => _respuesta is null
+        ? $"Paso {_paso} de {ReglasDeEncuesta.TotalDePasos} — {Titulos[_paso]}"
+        : "Encuesta completada";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // El desplegable se alimenta del ABM: las dos pantallas comparten el mismo almacén.
+        _localidades = await ServicioDeLocalidades.ListarAsync();
+        _registradas = await ServicioDeEncuestas.ContarAsync();
+    }
+
+    private string? Error(string campo) => _errores.TryGetValue(campo, out var mensaje) ? mensaje : null;
+
+    private string? Marca(string campo) => _errores.ContainsKey(campo) ? "is-invalid" : null;
+
+    private Task SiguienteAsync()
+    {
+        if (_paso == ReglasDeEncuesta.TotalDePasos) return FinalizarAsync();
+
+        if (!ValidarPasoActual()) return Task.CompletedTask;
+
+        _paso += 1;
+        return Task.CompletedTask;
+    }
+
+    private void Anterior()
+    {
+        _aviso = null;
+        _errores = new Dictionary<string, string>();
+        if (_paso > 1) _paso -= 1;
+    }
+
+    private async Task FinalizarAsync()
+    {
+        if (!ValidarPasoActual()) return;
+
+        _respuesta = await ServicioDeEncuestas.RegistrarAsync(_modelo);
+        _registradas = await ServicioDeEncuestas.ContarAsync();
+    }
+
+    private bool ValidarPasoActual()
+    {
+        _aviso = null;
+        _errores = ServicioDeEncuestas.ValidarPaso(_paso, _modelo);
+
+        if (_errores.Count == 0) return true;
+
+        _aviso = "Complete los datos del paso antes de continuar.";
+        return false;
+    }
+
+    private void Reiniciar()
+    {
+        _modelo = new ModeloDeEncuesta();
+        _errores = new Dictionary<string, string>();
+        _respuesta = null;
+        _aviso = null;
+        _paso = 1;
+    }
+}

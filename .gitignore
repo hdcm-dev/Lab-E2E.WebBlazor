@@ -427,3 +427,17 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Laboratorio E2E
+# Base SQLite de desarrollo (la crea `dotnet run`) y de las pruebas.
+datos/
+*.db
+*.db-wal
+*.db-shm
+/publicacion/
+/datos-e2e/
+/.nuget/
+/playwright-report/
+/blob-report/
+/test-results/
+/playwright/.cache/

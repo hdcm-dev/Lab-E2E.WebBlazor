@@ -1,0 +1,27 @@
+@page "/Error"
+@using System.Diagnostics
+@layout MainLayout
+
+<PageTitle>Movilidad Urbana — Error</PageTitle>
+
+<h1 class="text-danger" data-testid="titulo">Error</h1>
+<p class="lead">Se produjo un error al procesar la solicitud.</p>
+
+@if (HayIdentificador)
+{
+    <p><strong>Identificador de la petición:</strong> <code>@Identificador</code></p>
+}
+
+<a class="btn btn-primary" href="">Volver al inicio</a>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? ContextoHttp { get; set; }
+
+    private string? Identificador { get; set; }
+
+    private bool HayIdentificador => !string.IsNullOrEmpty(Identificador);
+
+    protected override void OnInitialized() =>
+        Identificador = Activity.Current?.Id ?? ContextoHttp?.TraceIdentifier;
+}

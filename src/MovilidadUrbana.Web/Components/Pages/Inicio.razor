@@ -1,0 +1,37 @@
+@page "/"
+
+<PageTitle>Movilidad Urbana — Inicio</PageTitle>
+
+<h1 class="mb-3" data-testid="titulo">Demostración de pruebas E2E</h1>
+<p class="lead">
+    Dos pantallas típicas de una aplicación de gestión, resueltas con Blazor en modo
+    <em>interactive server</em> y persistidas en SQLite, para practicar pruebas de extremo a
+    extremo con Playwright y su integración en la cadena de desarrollo.
+</p>
+
+<div class="row g-4 mt-1">
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h5">ABM de localidades</h2>
+                <p class="card-text">
+                    Alta, baja y modificación sobre una tabla, con validación en el servidor y
+                    persistencia en la base de datos.
+                </p>
+                <a href="localidades" class="btn btn-primary" data-testid="ir-localidades">Abrir ABM</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title h5">Encuesta de transporte</h2>
+                <p class="card-text">
+                    Asistente de tres pasos: datos de la persona, medios que utiliza para viajar y
+                    distancia recorrida, con resumen final.
+                </p>
+                <a href="encuesta" class="btn btn-primary" data-testid="ir-encuesta">Abrir encuesta</a>
+            </div>
+        </div>
+    </div>
+</div>

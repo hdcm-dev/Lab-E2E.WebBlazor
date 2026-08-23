@@ -1,0 +1,280 @@
+# Workflow reutilizable de pruebas E2E sobre la aplicación Blazor.
+#
+# Se puede invocar de tres maneras:
+#   1. `workflow_call`  — desde otro workflow del repo (ver ci.yml) o de otro repositorio.
+#   2. `workflow_dispatch` — a mano desde la pestaña Actions, eligiendo navegador y entorno.
+#   3. `schedule` — corrida nocturna de regresión sobre `main`.
+#
+# A diferencia de un sitio estático, acá hay una aplicación que compilar. El workflow la publica
+# una sola vez como binario autocontenido y todos los shards reutilizan ese artefacto: se compila
+# una vez y se prueba muchas, que es lo que evita que el tiempo de CI crezca con la matriz.
+name: E2E
+
+on:
+  workflow_call:
+    inputs:
+      navegadores:
+        description: Proyectos de Playwright a ejecutar, separados por coma.
+        type: string
+        default: chromium
+      cantidad-shards:
+        description: En cuántos shards se reparte la corrida.
+        type: number
+        default: 1
+      url-base:
+        description: URL ya desplegada contra la que probar. Vacío = se publica y se levanta localmente.
+        type: string
+        default: ''
+      referencia:
+        description: Rama, tag o SHA a probar. Vacío = el del evento que disparó.
+        type: string
+        default: ''
+      retencion-dias:
+        description: Días de retención de los artefactos.
+        type: number
+        default: 7
+    outputs:
+      resultado:
+        description: Resultado agregado de las pruebas (success / failure).
+        value: ${{ jobs.reporte.outputs.resultado }}
+
+  workflow_dispatch:
+    inputs:
+      navegadores:
+        description: Proyectos de Playwright a ejecutar, separados por coma.
+        type: choice
+        default: chromium
+        options:
+          - chromium
+          - chromium,firefox
+          - chromium,firefox,webkit
+          - chromium,firefox,webkit,mobile-chrome
+      cantidad-shards:
+        description: En cuántos shards se reparte la corrida.
+        type: choice
+        default: '1'
+        options: ['1', '2', '4']
+      url-base:
+        description: URL ya desplegada contra la que probar. Vacío = se publica y se levanta localmente.
+        type: string
+        default: ''
+
+  schedule:
+    # Regresión completa todas las noches (03:15 UTC ≈ 00:15 en Argentina).
+    - cron: '15 3 * * *'
+
+# Una corrida por rama: si llega un push nuevo, la anterior se cancela.
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  # Las variables de nivel workflow llegan a todos los jobs y pasos.
+  # `inputs` está vacío en `schedule`, de ahí los valores por defecto explícitos.
+  CI: 'true'
+  NAVEGADORES: ${{ inputs.navegadores || 'chromium,firefox,webkit,mobile-chrome' }}
+  CANTIDAD_SHARDS: ${{ inputs.cantidad-shards || 2 }}
+  URL_BASE: ${{ inputs.url-base || '' }}
+  RETENCION_DIAS: ${{ inputs.retencion-dias || 7 }}
+  IMAGEN_PLAYWRIGHT: mcr.microsoft.com/playwright:v1.62.1-noble
+  IMAGEN_SDK: mcr.microsoft.com/dotnet/sdk:10.0
+  ARTEFACTO_APLICACION: aplicacion-publicada
+
+jobs:
+  # Compila una única vez la aplicación que van a ejercitar todos los shards.
+  publicar:
+    name: Publicar la aplicación
+    # Contra un entorno ya desplegado no hay nada que compilar.
+    if: ${{ inputs.url-base == '' }}
+    runs-on: [self-hosted, i7infra-dev]
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:10.0
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.referencia || github.ref }}
+
+      - name: Verificar que el SDK coincide con el framework del proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          framework="$(grep -oP '(?<=<TargetFramework>)[^<]+' src/MovilidadUrbana.Web/MovilidadUrbana.Web.csproj)"
+          sdk="net$(dotnet --version | cut -d. -f1).0"
+          echo "csproj: $framework — contenedor: $sdk"
+          test "$framework" = "$sdk"
+
+      - name: Publicar autocontenido para linux-x64
+        # Autocontenido: el contenedor de Playwright trae los navegadores pero no el runtime
+        # de .NET, y así el mismo binario corre en las dos imágenes sin instalar nada.
+        run: >-
+          dotnet publish src/MovilidadUrbana.Web/MovilidadUrbana.Web.csproj
+          --configuration Release
+          --runtime linux-x64
+          --self-contained true
+          --output publicacion
+
+      - name: Subir la aplicación publicada
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ARTEFACTO_APLICACION }}
+          path: publicacion
+          retention-days: ${{ env.RETENCION_DIAS }}
+
+  # Convierte "cantidad de shards" y "lista de navegadores" en la matriz del job siguiente.
+  preparar:
+    name: Preparar matriz
+    runs-on: [self-hosted, i7infra-dev]
+    timeout-minutes: 5
+    outputs:
+      shards: ${{ steps.matriz.outputs.shards }}
+      navegadores: ${{ steps.matriz.outputs.navegadores }}
+      cantidad-shards: ${{ steps.matriz.outputs.cantidad-shards }}
+    steps:
+      - id: matriz
+        shell: bash
+        env:
+          ENTRADA_SHARDS: ${{ env.CANTIDAD_SHARDS }}
+          ENTRADA_NAVEGADORES: ${{ env.NAVEGADORES }}
+        run: |
+          set -euo pipefail
+          total="${ENTRADA_SHARDS}"
+          shards="$(seq 1 "$total" | paste -sd, -)"
+          echo "shards=[${shards}]" >> "$GITHUB_OUTPUT"
+          navegadores="$(echo "$ENTRADA_NAVEGADORES" | tr -d ' ' | awk -F, '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i<NF?",":"")}')"
+          echo "navegadores=[${navegadores}]" >> "$GITHUB_OUTPUT"
+          echo "cantidad-shards=${total}" >> "$GITHUB_OUTPUT"
+          echo "Matriz: [${shards}] x [${navegadores}]" >> "$GITHUB_STEP_SUMMARY"
+
+  pruebas:
+    name: Pruebas (${{ matrix.navegador }} · shard ${{ matrix.shard }})
+    needs: [publicar, preparar]
+    # `publicar` se saltea cuando se prueba un entorno ya desplegado; eso no debe arrastrar a este job.
+    if: ${{ !cancelled() && needs.preparar.result == 'success' && needs.publicar.result != 'failure' }}
+    runs-on: [self-hosted, i7infra-dev]
+    timeout-minutes: 30
+    # El contenedor oficial trae Node y los navegadores ya instalados: el runner self-hosted
+    # no necesita mantener esas dependencias.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        navegador: ${{ fromJSON(needs.preparar.outputs.navegadores) }}
+        shard: ${{ fromJSON(needs.preparar.outputs.shards) }}
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.referencia || github.ref }}
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificar que la versión de Playwright coincide con la imagen
+        run: |
+          set -euo pipefail
+          esperada="$(node -p "require('./package.json').devDependencies['@playwright/test'].replace(/^[^0-9]*/, '')")"
+          instalada="$(npx playwright --version | awk '{print $2}')"
+          echo "package.json: $esperada — contenedor: $instalada"
+          test "$esperada" = "$instalada"
+
+      - name: Traer la aplicación publicada
+        if: ${{ inputs.url-base == '' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTEFACTO_APLICACION }}
+          path: publicacion
+
+      - name: Devolver el permiso de ejecución
+        # Los artefactos de Actions se empaquetan en zip y pierden el bit de ejecución.
+        if: ${{ inputs.url-base == '' }}
+        run: chmod +x publicacion/MovilidadUrbana.Web
+
+      - name: Ejecutar Playwright
+        env:
+          URL_BASE: ${{ inputs.url-base || '' }}
+        run: >-
+          npx playwright test
+          --project=${{ matrix.navegador }}
+          --shard=${{ matrix.shard }}/${{ needs.preparar.outputs.cantidad-shards }}
+
+      - name: Subir reporte parcial
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: reporte-parcial-${{ matrix.navegador }}-${{ matrix.shard }}
+          path: blob-report
+          retention-days: ${{ env.RETENCION_DIAS }}
+          if-no-files-found: ignore
+
+      - name: Subir trazas y capturas de los fallos
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fallos-${{ matrix.navegador }}-${{ matrix.shard }}
+          path: test-results
+          retention-days: ${{ env.RETENCION_DIAS }}
+          if-no-files-found: ignore
+
+  reporte:
+    name: Reporte unificado
+    needs: [preparar, pruebas]
+    if: ${{ !cancelled() }}
+    runs-on: [self-hosted, i7infra-dev]
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+    outputs:
+      resultado: ${{ needs.pruebas.result }}
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.referencia || github.ref }}
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Traer los reportes parciales
+        uses: actions/download-artifact@v8
+        with:
+          path: reportes-parciales
+          pattern: reporte-parcial-*
+          merge-multiple: true
+
+      - name: Unir en un reporte HTML
+        run: npx playwright merge-reports --reporter=html,github reportes-parciales
+
+      - name: Subir el reporte
+        uses: actions/upload-artifact@v7
+        with:
+          name: reporte-e2e
+          path: playwright-report
+          retention-days: ${{ env.RETENCION_DIAS }}
+          if-no-files-found: ignore
+
+      - name: Resumen en la corrida
+        shell: bash
+        run: |
+          {
+            echo "## Pruebas E2E"
+            echo
+            echo "| Concepto | Valor |"
+            echo "| --- | --- |"
+            echo "| Resultado | \`${{ needs.pruebas.result }}\` |"
+            echo "| Navegadores | \`${{ env.NAVEGADORES }}\` |"
+            echo "| Shards | \`${{ needs.preparar.outputs.cantidad-shards }}\` |"
+            echo "| Entorno | \`${URL_BASE:-aplicación publicada en el propio job}\` |"
+            echo
+            echo "El reporte HTML queda en el artefacto **reporte-e2e** de esta corrida."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Reflejar el resultado de las pruebas
+        if: ${{ needs.pruebas.result != 'success' }}
+        run: exit 1
