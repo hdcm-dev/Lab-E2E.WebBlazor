@@ -13,6 +13,11 @@ const EJECUTABLE = process.env.EJECUTABLE || './MovilidadUrbana.Web';
 // Ruta absoluta: la aplicación se lanza desde su propia carpeta, no desde la raíz del repositorio.
 const BASE_DE_DATOS = path.resolve(process.env.BASE_DE_DATOS || 'datos-e2e/movilidad.db');
 
+// Dentro de un contenedor `/dev/shm` suele quedar en 64 MB —es el caso del runner
+// `i7infra-dev`—. Chromium lo agota y muere con «Target closed» a mitad de la corrida; con este
+// argumento usa /tmp en su lugar. Firefox y WebKit no lo necesitan.
+const CHROMIUM_EN_CONTENEDOR = { launchOptions: { args: ['--disable-dev-shm-usage'] } };
+
 module.exports = defineConfig({
   testDir: './e2e',
   // Cada prueba estrena su cookie de sesión, y con ella su propio conjunto de datos en el
@@ -36,10 +41,10 @@ module.exports = defineConfig({
     timezoneId: 'America/Argentina/Buenos_Aires'
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], ...CHROMIUM_EN_CONTENEDOR } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-    { name: 'mobile-chrome', use: { ...devices['Pixel 7'] } }
+    { name: 'mobile-chrome', use: { ...devices['Pixel 7'], ...CHROMIUM_EN_CONTENEDOR } }
   ],
   // Cuando se apunta a un entorno ya desplegado (URL_BASE externa) no se levanta nada.
   webServer: process.env.URL_BASE

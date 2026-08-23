@@ -8,6 +8,11 @@
 # A diferencia de un sitio estático, acá hay una aplicación que compilar. El workflow la publica
 # una sola vez como binario autocontenido y todos los shards reutilizan ese artefacto: se compila
 # una vez y se prueba muchas, que es lo que evita que el tiempo de CI crezca con la matriz.
+#
+# Los jobs corren directamente sobre el runner y no dentro de un contenedor: el runner
+# `i7infra-dev` es él mismo un contenedor y no tiene acceso al demonio de Docker, así que
+# `container:` no es una opción. Ya trae el SDK de .NET 10 y Node sobre Ubuntu 24.04; los
+# navegadores los pone Playwright.
 name: E2E
 
 on:
@@ -79,8 +84,6 @@ env:
   CANTIDAD_SHARDS: ${{ inputs.cantidad-shards || 2 }}
   URL_BASE: ${{ inputs.url-base || '' }}
   RETENCION_DIAS: ${{ inputs.retencion-dias || 7 }}
-  IMAGEN_PLAYWRIGHT: mcr.microsoft.com/playwright:v1.62.1-noble
-  IMAGEN_SDK: mcr.microsoft.com/dotnet/sdk:10.0
   ARTEFACTO_APLICACION: aplicacion-publicada
 
 jobs:
@@ -91,8 +94,6 @@ jobs:
     if: ${{ inputs.url-base == '' }}
     runs-on: [self-hosted, i7infra-dev]
     timeout-minutes: 20
-    container:
-      image: mcr.microsoft.com/dotnet/sdk:10.0
     steps:
       - name: Descargar el código
         uses: actions/checkout@v7
@@ -109,8 +110,8 @@ jobs:
           test "$framework" = "$sdk"
 
       - name: Publicar autocontenido para linux-x64
-        # Autocontenido: el contenedor de Playwright trae los navegadores pero no el runtime
-        # de .NET, y así el mismo binario corre en las dos imágenes sin instalar nada.
+        # Autocontenido: el binario no depende del runtime que tenga instalado quien lo ejecute,
+        # y es exactamente el mismo artefacto que se prueba en la máquina de desarrollo.
         run: >-
           dotnet publish src/MovilidadUrbana.Web/MovilidadUrbana.Web.csproj
           --configuration Release
@@ -157,11 +158,6 @@ jobs:
     if: ${{ !cancelled() && needs.preparar.result == 'success' && needs.publicar.result != 'failure' }}
     runs-on: [self-hosted, i7infra-dev]
     timeout-minutes: 30
-    # El contenedor oficial trae Node y los navegadores ya instalados: el runner self-hosted
-    # no necesita mantener esas dependencias.
-    container:
-      image: mcr.microsoft.com/playwright:v1.62.1-noble
-      options: --ipc=host
     strategy:
       fail-fast: false
       matrix:
@@ -176,13 +172,18 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Verificar que la versión de Playwright coincide con la imagen
+      - name: Instalar el navegador y sus dependencias del sistema
+        # `playwright install` baja la build que corresponde a la versión de `@playwright/test`
+        # del package.json, así que la biblioteca y el navegador no se pueden desincronizar.
+        # El runner conserva la caché entre corridas: a partir de la segunda es casi instantáneo.
+        shell: bash
         run: |
           set -euo pipefail
-          esperada="$(node -p "require('./package.json').devDependencies['@playwright/test'].replace(/^[^0-9]*/, '')")"
-          instalada="$(npx playwright --version | awk '{print $2}')"
-          echo "package.json: $esperada — contenedor: $instalada"
-          test "$esperada" = "$instalada"
+          case "${{ matrix.navegador }}" in
+            mobile-chrome) navegador=chromium ;;
+            *) navegador="${{ matrix.navegador }}" ;;
+          esac
+          npx playwright install --with-deps "$navegador"
 
       - name: Traer la aplicación publicada
         if: ${{ inputs.url-base == '' }}
@@ -228,8 +229,6 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: [self-hosted, i7infra-dev]
     timeout-minutes: 15
-    container:
-      image: mcr.microsoft.com/playwright:v1.62.1-noble
     outputs:
       resultado: ${{ needs.pruebas.result }}
     steps:

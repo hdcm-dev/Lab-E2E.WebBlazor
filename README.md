@@ -185,12 +185,11 @@ Entradas: `navegadores`, `cantidad-shards`, `url-base`, `referencia` y `retencio
 
 Cómo trabaja:
 
-1. `publicar` compila la aplicación autocontenida dentro de `mcr.microsoft.com/dotnet/sdk:10.0` y
-   la sube como artefacto. Se saltea cuando se prueba contra un entorno ya desplegado.
+1. `publicar` compila la aplicación autocontenida y la sube como artefacto. Se saltea cuando se
+   prueba contra un entorno ya desplegado.
 2. `preparar` traduce las entradas en la matriz `navegadores × shards`.
-3. `pruebas` corre cada combinación en paralelo dentro del contenedor
-   `mcr.microsoft.com/playwright:v1.62.1-noble`, baja el artefacto de la aplicación y sube su
-   reporte parcial (`blob`) y, si falla, las trazas y capturas.
+3. `pruebas` corre cada combinación en paralelo, instala el navegador que le toca, baja el
+   artefacto de la aplicación y sube su reporte parcial (`blob`) y, si falla, las trazas y capturas.
 4. `reporte` une los parciales con `playwright merge-reports` en un único reporte HTML, escribe el
    resumen de la corrida y refleja el resultado de las pruebas.
 
@@ -233,12 +232,10 @@ Prueba de humo a pedido contra un entorno ya desplegado, reutilizando `e2e.yml` 
   job que comenta.
 - El comentario en el PR se limita a ramas del propio repositorio: un fork no recibe permisos de
   escritura, y así el job no falla.
-- **Ejecución en contenedor**, para que el runner autoalojado no tenga que mantener ni el SDK de
-  .NET ni los navegadores, y para que ambas versiones queden fijadas junto al código.
-- Dos pasos comprueban que las versiones **coincidan con las imágenes**: el `TargetFramework` del
-  `.csproj` contra el SDK del contenedor, y `@playwright/test` del `package.json` contra el
-  Playwright de la imagen. Si divergen, la corrida falla con un mensaje claro en lugar de un error
-  raro de protocolo.
+- **Un paso comprueba que el SDK del runner coincida** con el `TargetFramework` del `.csproj`. Si
+  divergen, la corrida falla con un mensaje claro en lugar de un error de compilación confuso.
+- Los navegadores los instala `playwright install`, que baja la build correspondiente a la versión
+  de `@playwright/test` del `package.json`: biblioteca y navegador no se pueden desincronizar.
 - **Compilar una vez, probar muchas**: la aplicación se publica en un job y se reutiliza como
   artefacto en toda la matriz.
 - **`paths-ignore`** para no disparar la CI por cambios de documentación.
@@ -247,7 +244,18 @@ Prueba de humo a pedido contra un entorno ya desplegado, reutilizando `e2e.yml` 
 
 ### Runner
 
-Los jobs corren en el runner autoalojado `runs-on: [self-hosted, i7infra-dev]`.
+Los jobs corren en el runner autoalojado `runs-on: [self-hosted, i7infra-dev]`, **directamente y no
+dentro de un contenedor**. El motivo es concreto: ese runner es él mismo un contenedor y no tiene
+montado el socket de Docker, así que un job con `container:` ni siquiera llega a arrancar —falla en
+*Initialize containers* con `failed to connect to the docker API at unix:///var/run/docker.sock`—.
+
+No hace falta: el runner corre Ubuntu 24.04 y ya trae el SDK de .NET 10.0.400 y Node 24, que es
+todo lo que necesita la compilación. Los navegadores los instala Playwright en el propio job y
+quedan cacheados para las corridas siguientes.
+
+El único ajuste que exige ese entorno está en `playwright.config.js`: dentro de un contenedor
+`/dev/shm` queda en 64 MB, Chromium lo agota y muere a mitad de la corrida, así que los proyectos
+basados en Chromium se lanzan con `--disable-dev-shm-usage`.
 
 ## Evidencia
 

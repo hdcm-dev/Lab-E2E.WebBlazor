@@ -37,8 +37,6 @@ jobs:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: [self-hosted, i7infra-dev]
     timeout-minutes: 15
-    container:
-      image: mcr.microsoft.com/dotnet/sdk:10.0
     steps:
       - uses: actions/checkout@v7
 
@@ -55,8 +53,6 @@ jobs:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: [self-hosted, i7infra-dev]
     timeout-minutes: 10
-    container:
-      image: mcr.microsoft.com/playwright:v1.62.1-noble
     steps:
       - uses: actions/checkout@v7
 
