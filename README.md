@@ -80,6 +80,7 @@ npx playwright install --with-deps               # navegadores, solo la primera 
 dotnet publish src/MovilidadUrbana.Web -c Release -r linux-x64 --self-contained -o publicacion
 
 npm test                                         # las 4 configuraciones de navegador
+npm run test:e2e                                 # alias, la convención de dotnet/eShop
 npm run test:chromium                            # solo chromium, más rápido
 npm run reporte                                  # abre el reporte HTML de la última corrida
 ```

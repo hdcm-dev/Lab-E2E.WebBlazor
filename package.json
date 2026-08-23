@@ -6,6 +6,9 @@
   "scripts": {
     "publicar": "scripts/publicar.sh",
     "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report",
     "test:chromium": "playwright test --project=chromium",
     "test:ui": "playwright test --ui",
     "test:depurar": "playwright test --debug",
