@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuración de las pruebas E2E.
+
+  El navegador se puede pisar desde la línea de comandos pasando
+  `Playwright.BrowserName=firefox` después del separador de argumentos de `dotnet test`.
+
+  Es el reemplazo del bloque `projects` de un playwright.config.js: en el binding de .NET el
+  navegador es una opción de la corrida, no un proyecto dentro del archivo de configuración.
+-->
+<RunSettings>
+  <Playwright>
+    <BrowserName>chromium</BrowserName>
+    <ExpectTimeout>5000</ExpectTimeout>
+    <LaunchOptions>
+      <Headless>true</Headless>
+    </LaunchOptions>
+  </Playwright>
+
+  <NUnit>
+    <NumberOfTestWorkers>4</NumberOfTestWorkers>
+  </NUnit>
+
+  <RunConfiguration>
+    <ResultsDirectory>resultados</ResultsDirectory>
+  </RunConfiguration>
+</RunSettings>

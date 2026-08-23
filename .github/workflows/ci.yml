@@ -31,7 +31,7 @@ permissions:
   contents: read
 
 jobs:
-  # Compilación con los avisos tratados como error: es la comprobación más barata sobre el código C#.
+  # Comprobaciones baratas: fallan en segundos y evitan gastar un runner con navegadores.
   compilacion:
     name: Compilación
     if: ${{ github.event.pull_request.draft != true }}
@@ -43,41 +43,23 @@ jobs:
       - name: Restaurar
         run: dotnet restore Lab-E2E.WebBlazor.sln
 
-      - name: Compilar
+      - name: Compilar con los avisos tratados como error
         run: dotnet build Lab-E2E.WebBlazor.sln --configuration Release --no-restore -warnaserror
 
-  # Comprobaciones baratas del lado de las pruebas: fallan en segundos y evitan gastar un runner
-  # con navegadores por una spec rota o un `test.only` olvidado.
-  verificacion-rapida:
-    name: Verificación rápida
-    if: ${{ github.event.pull_request.draft != true }}
-    runs-on: [self-hosted, i7infra-dev]
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Instalar dependencias
-        run: npm ci
-
-      - name: Sintaxis del JavaScript de las pruebas
-        run: |
-          set -euo pipefail
-          for archivo in e2e/*.js playwright.config.js; do
-            node --check "$archivo"
-            echo "ok  $archivo"
-          done
-
-      - name: Listar las pruebas (detecta specs rotas y `test.only`)
-        run: npx playwright test --list
+      - name: Listar las pruebas (detecta que el descubrimiento funciona)
+        # Equivale al `playwright test --list` del runner de JavaScript: no levanta navegadores
+        # ni la aplicación, solo comprueba que NUnit encuentre los casos.
+        run: >-
+          dotnet test tests/MovilidadUrbana.E2ETests
+          --configuration Release --no-build --list-tests
 
   e2e:
     name: E2E
-    needs: [compilacion, verificacion-rapida]
+    needs: [compilacion]
     # Un PR se valida rápido con un solo navegador; `main` y la cola de merge, con todos.
     uses: ./.github/workflows/e2e.yml
     with:
       navegadores: ${{ github.event_name == 'pull_request' && 'chromium' || 'chromium,firefox,webkit,mobile-chrome' }}
-      cantidad-shards: ${{ github.event_name == 'pull_request' && 2 || 4 }}
       referencia: ${{ github.event.pull_request.head.sha || github.sha }}
 
   # Deja el resultado a la vista en el propio pull request.
@@ -131,7 +113,7 @@ jobs:
   # Único job que las reglas de protección de rama necesitan exigir: resume a todos los demás.
   ci-ok:
     name: CI aprobada
-    needs: [compilacion, verificacion-rapida, e2e]
+    needs: [compilacion, e2e]
     if: always()
     runs-on: [self-hosted, i7infra-dev]
     steps:
@@ -140,9 +122,8 @@ jobs:
         run: |
           set -euo pipefail
           echo "compilacion: ${{ needs.compilacion.result }}"
-          echo "verificacion-rapida: ${{ needs.verificacion-rapida.result }}"
           echo "e2e: ${{ needs.e2e.result }}"
-          for resultado in "${{ needs.compilacion.result }}" "${{ needs.verificacion-rapida.result }}" "${{ needs.e2e.result }}"; do
+          for resultado in "${{ needs.compilacion.result }}" "${{ needs.e2e.result }}"; do
             case "$resultado" in
               success|skipped) ;;
               *) echo "::error::La CI no está en verde."; exit 1 ;;

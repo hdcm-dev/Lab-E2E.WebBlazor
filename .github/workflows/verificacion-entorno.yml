@@ -28,6 +28,5 @@ jobs:
     uses: ./.github/workflows/e2e.yml
     with:
       navegadores: chromium
-      cantidad-shards: 1
       url-base: ${{ inputs.url-base }}
       retencion-dias: 30
