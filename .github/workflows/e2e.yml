@@ -5,27 +5,22 @@
 #   2. `workflow_dispatch` — a mano desde la pestaña Actions, eligiendo navegador y entorno.
 #   3. `schedule` — corrida nocturna de regresión sobre `main`.
 #
-# A diferencia de un sitio estático, acá hay una aplicación que compilar. El workflow la publica
-# una sola vez como binario autocontenido y todos los shards reutilizan ese artefacto: se compila
-# una vez y se prueba muchas, que es lo que evita que el tiempo de CI crezca con la matriz.
+# La aplicación se publica una sola vez como binario autocontenido y todas las configuraciones de
+# navegador reutilizan ese artefacto: se compila una vez y se prueba muchas.
 #
 # Los jobs corren directamente sobre el runner y no dentro de un contenedor: el runner
 # `i7infra-dev` es él mismo un contenedor y no tiene acceso al demonio de Docker, así que
-# `container:` no es una opción. Ya trae el SDK de .NET 10 y Node sobre Ubuntu 24.04; los
-# navegadores los pone Playwright.
+# `container:` no es una opción. Ya trae el SDK de .NET 10 sobre Ubuntu 24.04; los navegadores los
+# pone Playwright.
 name: E2E
 
 on:
   workflow_call:
     inputs:
       navegadores:
-        description: Proyectos de Playwright a ejecutar, separados por coma.
+        description: Configuraciones a ejecutar, separadas por coma (chromium, firefox, webkit, mobile-chrome).
         type: string
         default: chromium
-      cantidad-shards:
-        description: En cuántos shards se reparte la corrida.
-        type: number
-        default: 1
       url-base:
         description: URL ya desplegada contra la que probar. Vacío = se publica y se levanta localmente.
         type: string
@@ -46,7 +41,7 @@ on:
   workflow_dispatch:
     inputs:
       navegadores:
-        description: Proyectos de Playwright a ejecutar, separados por coma.
+        description: Configuraciones a ejecutar.
         type: choice
         default: chromium
         options:
@@ -54,11 +49,6 @@ on:
           - chromium,firefox
           - chromium,firefox,webkit
           - chromium,firefox,webkit,mobile-chrome
-      cantidad-shards:
-        description: En cuántos shards se reparte la corrida.
-        type: choice
-        default: '1'
-        options: ['1', '2', '4']
       url-base:
         description: URL ya desplegada contra la que probar. Vacío = se publica y se levanta localmente.
         type: string
@@ -77,17 +67,16 @@ permissions:
   contents: read
 
 env:
-  # Las variables de nivel workflow llegan a todos los jobs y pasos.
   # `inputs` está vacío en `schedule`, de ahí los valores por defecto explícitos.
   CI: 'true'
   NAVEGADORES: ${{ inputs.navegadores || 'chromium,firefox,webkit,mobile-chrome' }}
-  CANTIDAD_SHARDS: ${{ inputs.cantidad-shards || 2 }}
   URL_BASE: ${{ inputs.url-base || '' }}
   RETENCION_DIAS: ${{ inputs.retencion-dias || 7 }}
   ARTEFACTO_APLICACION: aplicacion-publicada
+  PROYECTO_PRUEBAS: tests/MovilidadUrbana.E2ETests
 
 jobs:
-  # Compila una única vez la aplicación que van a ejercitar todos los shards.
+  # Compila una única vez la aplicación que van a ejercitar todas las configuraciones.
   publicar:
     name: Publicar la aplicación
     # Contra un entorno ya desplegado no hay nada que compilar.
@@ -106,7 +95,7 @@ jobs:
           set -euo pipefail
           framework="$(grep -oP '(?<=<TargetFramework>)[^<]+' src/MovilidadUrbana.Web/MovilidadUrbana.Web.csproj)"
           sdk="net$(dotnet --version | cut -d. -f1).0"
-          echo "csproj: $framework — contenedor: $sdk"
+          echo "csproj: $framework — runner: $sdk"
           test "$framework" = "$sdk"
 
       - name: Publicar autocontenido para linux-x64
@@ -126,33 +115,26 @@ jobs:
           path: publicacion
           retention-days: ${{ env.RETENCION_DIAS }}
 
-  # Convierte "cantidad de shards" y "lista de navegadores" en la matriz del job siguiente.
+  # Convierte la lista de configuraciones en la matriz del job siguiente.
   preparar:
     name: Preparar matriz
     runs-on: [self-hosted, i7infra-dev]
     timeout-minutes: 5
     outputs:
-      shards: ${{ steps.matriz.outputs.shards }}
-      navegadores: ${{ steps.matriz.outputs.navegadores }}
-      cantidad-shards: ${{ steps.matriz.outputs.cantidad-shards }}
+      configuraciones: ${{ steps.matriz.outputs.configuraciones }}
     steps:
       - id: matriz
         shell: bash
         env:
-          ENTRADA_SHARDS: ${{ env.CANTIDAD_SHARDS }}
-          ENTRADA_NAVEGADORES: ${{ env.NAVEGADORES }}
+          ENTRADA: ${{ env.NAVEGADORES }}
         run: |
           set -euo pipefail
-          total="${ENTRADA_SHARDS}"
-          shards="$(seq 1 "$total" | paste -sd, -)"
-          echo "shards=[${shards}]" >> "$GITHUB_OUTPUT"
-          navegadores="$(echo "$ENTRADA_NAVEGADORES" | tr -d ' ' | awk -F, '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i<NF?",":"")}')"
-          echo "navegadores=[${navegadores}]" >> "$GITHUB_OUTPUT"
-          echo "cantidad-shards=${total}" >> "$GITHUB_OUTPUT"
-          echo "Matriz: [${shards}] x [${navegadores}]" >> "$GITHUB_STEP_SUMMARY"
+          lista="$(echo "$ENTRADA" | tr -d ' ' | awk -F, '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i<NF?",":"")}')"
+          echo "configuraciones=[${lista}]" >> "$GITHUB_OUTPUT"
+          echo "Configuraciones: [${lista}]" >> "$GITHUB_STEP_SUMMARY"
 
   pruebas:
-    name: Pruebas (${{ matrix.navegador }} · shard ${{ matrix.shard }})
+    name: Pruebas (${{ matrix.configuracion }})
     needs: [publicar, preparar]
     # `publicar` se saltea cuando se prueba un entorno ya desplegado; eso no debe arrastrar a este job.
     if: ${{ !cancelled() && needs.preparar.result == 'success' && needs.publicar.result != 'failure' }}
@@ -161,29 +143,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        navegador: ${{ fromJSON(needs.preparar.outputs.navegadores) }}
-        shard: ${{ fromJSON(needs.preparar.outputs.shards) }}
+        configuracion: ${{ fromJSON(needs.preparar.outputs.configuraciones) }}
     steps:
       - name: Descargar el código
         uses: actions/checkout@v7
         with:
           ref: ${{ inputs.referencia || github.ref }}
 
-      - name: Instalar dependencias
-        run: npm ci
+      - name: Traducir la configuración a navegador y emulación
+        shell: bash
+        run: |
+          set -euo pipefail
+          # `mobile-chrome` no es un navegador sino chromium con el descriptor de un Pixel 7.
+          case "${{ matrix.configuracion }}" in
+            mobile-chrome) echo "NAVEGADOR=chromium" >> "$GITHUB_ENV"; echo "EMULAR_MOVIL=true" >> "$GITHUB_ENV" ;;
+            *) echo "NAVEGADOR=${{ matrix.configuracion }}" >> "$GITHUB_ENV"; echo "EMULAR_MOVIL=false" >> "$GITHUB_ENV" ;;
+          esac
+
+      - name: Compilar las pruebas
+        run: dotnet build ${{ env.PROYECTO_PRUEBAS }} --configuration Release
 
       - name: Instalar el navegador y sus dependencias del sistema
-        # `playwright install` baja la build que corresponde a la versión de `@playwright/test`
-        # del package.json, así que la biblioteca y el navegador no se pueden desincronizar.
+        # El CLI viene dentro del paquete Microsoft.Playwright y baja la build que corresponde a
+        # su versión, así que la biblioteca y el navegador no se pueden desincronizar.
         # El runner conserva la caché entre corridas: a partir de la segunda es casi instantáneo.
         shell: bash
         run: |
           set -euo pipefail
-          case "${{ matrix.navegador }}" in
-            mobile-chrome) navegador=chromium ;;
-            *) navegador="${{ matrix.navegador }}" ;;
-          esac
-          npx playwright install --with-deps "$navegador"
+          cli="${{ env.PROYECTO_PRUEBAS }}/bin/Release/net10.0/.playwright"
+          "$cli/node/linux-x64/node" "$cli/package/cli.js" install --with-deps "$NAVEGADOR"
 
       - name: Traer la aplicación publicada
         if: ${{ inputs.url-base == '' }}
@@ -197,29 +185,24 @@ jobs:
         if: ${{ inputs.url-base == '' }}
         run: chmod +x publicacion/MovilidadUrbana.Web
 
-      - name: Ejecutar Playwright
+      - name: Ejecutar las pruebas
         env:
           URL_BASE: ${{ inputs.url-base || '' }}
         run: >-
-          npx playwright test
-          --project=${{ matrix.navegador }}
-          --shard=${{ matrix.shard }}/${{ needs.preparar.outputs.cantidad-shards }}
+          dotnet test ${{ env.PROYECTO_PRUEBAS }}
+          --configuration Release
+          --no-build
+          --settings pruebas.runsettings
+          --logger "trx;LogFileName=${{ matrix.configuracion }}.trx"
+          --results-directory resultados
+          -- Playwright.BrowserName=${{ env.NAVEGADOR }}
 
-      - name: Subir reporte parcial
+      - name: Subir los resultados
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: reporte-parcial-${{ matrix.navegador }}-${{ matrix.shard }}
-          path: blob-report
-          retention-days: ${{ env.RETENCION_DIAS }}
-          if-no-files-found: ignore
-
-      - name: Subir trazas y capturas de los fallos
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: fallos-${{ matrix.navegador }}-${{ matrix.shard }}
-          path: test-results
+          name: resultados-${{ matrix.configuracion }}
+          path: resultados
           retention-days: ${{ env.RETENCION_DIAS }}
           if-no-files-found: ignore
 
@@ -232,46 +215,49 @@ jobs:
     outputs:
       resultado: ${{ needs.pruebas.result }}
     steps:
-      - name: Descargar el código
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.referencia || github.ref }}
-
-      - name: Instalar dependencias
-        run: npm ci
-
-      - name: Traer los reportes parciales
+      - name: Traer los resultados de todas las configuraciones
         uses: actions/download-artifact@v8
         with:
-          path: reportes-parciales
-          pattern: reporte-parcial-*
+          path: resultados
+          pattern: resultados-*
           merge-multiple: true
 
-      - name: Unir en un reporte HTML
-        run: npx playwright merge-reports --reporter=html,github reportes-parciales
-
-      - name: Subir el reporte
-        uses: actions/upload-artifact@v7
-        with:
-          name: reporte-e2e
-          path: playwright-report
-          retention-days: ${{ env.RETENCION_DIAS }}
-          if-no-files-found: ignore
-
       - name: Resumen en la corrida
+        # El binding de .NET no tiene `merge-reports`: el reporte de cada configuración es un TRX,
+        # y acá se juntan los contadores en una única tabla.
         shell: bash
         run: |
+          set -euo pipefail
           {
             echo "## Pruebas E2E"
+            echo
+            echo "| Configuración | Total | Pasaron | Fallaron |"
+            echo "| --- | ---: | ---: | ---: |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          node -e '
+            const fs = require("fs"), path = require("path");
+            const dir = "resultados";
+            const archivos = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith(".trx")) : [];
+            for (const archivo of archivos.sort()) {
+              const xml = fs.readFileSync(path.join(dir, archivo), "utf8");
+              const c = xml.match(/<Counters\b[^>]*>/);
+              const leer = (clave) => (c && c[0].match(new RegExp(clave + '"'"'="(\\d+)"'"'"'))?.[1]) ?? "?";
+              const nombre = path.basename(archivo, ".trx");
+              console.log(`| \`${nombre}\` | ${leer("total")} | ${leer("passed")} | ${leer("failed")} |`);
+            }
+            if (archivos.length === 0) console.log("| _sin resultados_ | | | |");
+          ' >> "$GITHUB_STEP_SUMMARY"
+
+          {
             echo
             echo "| Concepto | Valor |"
             echo "| --- | --- |"
             echo "| Resultado | \`${{ needs.pruebas.result }}\` |"
-            echo "| Navegadores | \`${{ env.NAVEGADORES }}\` |"
-            echo "| Shards | \`${{ needs.preparar.outputs.cantidad-shards }}\` |"
+            echo "| Configuraciones | \`${{ env.NAVEGADORES }}\` |"
             echo "| Entorno | \`${URL_BASE:-aplicación publicada en el propio job}\` |"
             echo
-            echo "El reporte HTML queda en el artefacto **reporte-e2e** de esta corrida."
+            echo "Los TRX de cada configuración quedan en los artefactos **resultados-\*** de esta corrida."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Reflejar el resultado de las pruebas

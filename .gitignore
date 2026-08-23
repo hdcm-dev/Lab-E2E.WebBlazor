@@ -437,7 +437,6 @@ datos/
 /publicacion/
 /datos-e2e/
 /.nuget/
-/playwright-report/
-/blob-report/
-/test-results/
-/playwright/.cache/
+/resultados/
+/.dotnet/
+/.navegadores/
