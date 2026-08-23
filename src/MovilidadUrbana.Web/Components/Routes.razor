@@ -1,0 +1,27 @@
+@using MovilidadUrbana.Web.Infraestructura.Sesiones
+
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NoEncontrado)">
+    <Found Context="datosDeRuta">
+        <RouteView RouteData="datosDeRuta" DefaultLayout="typeof(Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="datosDeRuta" Selector="h1" />
+    </Found>
+</Router>
+
+@code {
+    /// <summary>
+    /// Identificador de sesión que `App.razor` leyó de la cookie. Un circuito de Blazor Server no
+    /// tiene acceso a la petición HTTP original, así que este parámetro es el puente entre el
+    /// render estático y el interactivo. Debe ser serializable: por eso es un `string`.
+    /// </summary>
+    [Parameter]
+    public string? SesionId { get; set; }
+
+    [Inject]
+    private ContextoDeSesion Contexto { get; set; } = default!;
+
+    // Antes de que se renderice cualquier página: los servicios del circuito ya ven la sesión correcta.
+    protected override void OnParametersSet()
+    {
+        if (SesionId is not null) Contexto.Establecer(SesionId);
+    }
+}

@@ -1,0 +1,33 @@
+# Segundo consumidor del workflow reutilizable: prueba de humo contra un entorno ya desplegado.
+#
+# Muestra que `e2e.yml` no está atado a la CI de un pull request: la misma definición de pruebas
+# sirve para validar un despliegue, cambiando solamente las entradas. Con `url-base` cargada, el
+# workflow ni siquiera compila la aplicación: prueba la que ya está corriendo.
+name: Verificación de entorno
+
+on:
+  workflow_dispatch:
+    inputs:
+      entorno:
+        description: Entorno a verificar.
+        type: environment
+        required: true
+      url-base:
+        description: URL pública del entorno.
+        type: string
+        required: true
+  # También se puede encadenar después de un despliegue:
+  #   workflow_run: { workflows: [Deploy], types: [completed] }
+
+permissions:
+  contents: read
+
+jobs:
+  humo:
+    name: Prueba de humo
+    uses: ./.github/workflows/e2e.yml
+    with:
+      navegadores: chromium
+      cantidad-shards: 1
+      url-base: ${{ inputs.url-base }}
+      retencion-dias: 30
