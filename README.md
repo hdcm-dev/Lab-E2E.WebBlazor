@@ -82,9 +82,14 @@ TypeScript— es la que eligió la aplicación de referencia de .NET,
 Abrí `Lab-E2E.WebBlazor.sln`. Antes de la primera corrida hacen falta dos cosas:
 
 ```powershell
-dotnet publish src\MovilidadUrbana.Web -c Release -r linux-x64 --self-contained -o publicacion
+dotnet publish src\MovilidadUrbana.Web -c Release -o publicacion
 pwsh tests\MovilidadUrbana.E2ETests\bin\Debug\net10.0\playwright.ps1 install
 ```
+
+> **No le agregues `-r linux-x64 --self-contained` a ese `dotnet publish`.** Esa variante es la que
+> usa CI, y en Windows deja un binario de Linux que no se puede ejecutar. Sin identificador de
+> plataforma, `dotnet publish` genera el ejecutable de la máquina donde corre
+> —`MovilidadUrbana.Web.exe` en Windows— y las pruebas lo encuentran igual.
 
 La primera publica la aplicación que las pruebas van a levantar; la segunda instala los navegadores
 —es el script que el paquete `Microsoft.Playwright` deja junto al binario compilado—. A partir de
@@ -160,9 +165,14 @@ originó, así que la cookie no se puede leer desde una página. El identificado
 
 ### 3. La aplicación hay que compilarla antes de probarla
 
-Se publica **autocontenida** para `linux-x64`, así el binario no depende del runtime que tenga
-instalado quien lo ejecute y es exactamente el mismo artefacto en la máquina de desarrollo y en
-CI. En CI se publica **una sola vez** y todas las configuraciones de navegador la reutilizan.
+En CI se publica **autocontenida** para `linux-x64`, así el binario no depende del runtime que
+tenga instalado quien lo ejecute, y se publica **una sola vez** para que todas las configuraciones
+de navegador la reutilicen. En la máquina de quien desarrolla alcanza con una publicación
+dependiente del framework, que evita tener que elegir un identificador de plataforma.
+
+El fixture admite las dos formas: usa el ejecutable nativo si está —`MovilidadUrbana.Web.exe` en
+Windows, sin extensión en Linux y macOS— y, si no, arranca con `dotnet MovilidadUrbana.Web.dll`.
+El nombre fijo de Linux era justamente lo que hacía fallar el descubrimiento en Windows.
 
 Quien las levanta y las baja es
 [ServidorDeLaAplicacion](tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs),
