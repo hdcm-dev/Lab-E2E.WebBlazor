@@ -18,7 +18,15 @@ namespace MovilidadUrbana.E2ETests;
 [SetUpFixture]
 public class ServidorDeLaAplicacion
 {
-    private const string NombreDelEjecutable = "MovilidadUrbana.Web";
+    private const string NombreDelEnsamblado = "MovilidadUrbana.Web";
+
+    /// <summary>
+    /// El apphost que genera `dotnet publish` lleva `.exe` en Windows y no lleva extensión en
+    /// Linux y macOS. Con el nombre fijo de Linux, la publicación existe pero el fixture no la
+    /// encuentra y el error apunta al lugar equivocado.
+    /// </summary>
+    private static string NombreDelApphost =>
+        OperatingSystem.IsWindows() ? NombreDelEnsamblado + ".exe" : NombreDelEnsamblado;
 
     private static Process? _proceso;
 
@@ -40,7 +48,7 @@ public class ServidorDeLaAplicacion
         UrlBase = $"http://127.0.0.1:{puerto}";
 
         var carpeta = UbicarLaPublicacion();
-        var ejecutable = Path.Combine(carpeta, NombreDelEjecutable);
+        var (ejecutable, argumentos) = ResolverElArranque(carpeta);
 
         var arranque = new ProcessStartInfo(ejecutable)
         {
@@ -49,6 +57,7 @@ public class ServidorDeLaAplicacion
             WorkingDirectory = carpeta,
             UseShellExecute = false
         };
+        foreach (var argumento in argumentos) arranque.ArgumentList.Add(argumento);
         arranque.Environment["ASPNETCORE_URLS"] = UrlBase;
         arranque.Environment["ASPNETCORE_ENVIRONMENT"] = "Production";
         arranque.Environment["ConnectionStrings__BaseDeDatos"] =
@@ -81,19 +90,38 @@ public class ServidorDeLaAplicacion
     private static string UbicarLaPublicacion()
     {
         var indicada = Environment.GetEnvironmentVariable("CARPETA_APLICACION");
-        var carpeta = string.IsNullOrWhiteSpace(indicada)
+        return string.IsNullOrWhiteSpace(indicada)
             ? Path.Combine(UbicarLaRaizDelRepositorio(), "publicacion")
             : Path.GetFullPath(indicada);
-
-        if (!File.Exists(Path.Combine(carpeta, NombreDelEjecutable)))
-        {
-            throw new FileNotFoundException(
-                $"No se encontró {NombreDelEjecutable} en «{carpeta}». " +
-                "Publicá la aplicación antes de correr las pruebas: scripts/publicar.sh");
-        }
-
-        return carpeta;
     }
+
+    /// <summary>
+    /// Decide con qué se lanza la aplicación publicada.
+    ///
+    /// Una publicación autocontenida —la que usa CI— trae el apphost nativo y se ejecuta directo.
+    /// Una publicación dependiente del framework —la más cómoda en la máquina de quien desarrolla,
+    /// porque no hay que elegir un identificador de plataforma— puede no traerlo, y entonces se
+    /// arranca con `dotnet <ensamblado>.dll`. Se admiten las dos para que la misma prueba corra en
+    /// Windows con Visual Studio y en Linux dentro de un contenedor.
+    /// </summary>
+    private static (string Ejecutable, string[] Argumentos) ResolverElArranque(string carpeta)
+    {
+        var apphost = Path.Combine(carpeta, NombreDelApphost);
+        if (File.Exists(apphost)) return (apphost, []);
+
+        var ensamblado = Path.Combine(carpeta, NombreDelEnsamblado + ".dll");
+        if (File.Exists(ensamblado)) return ("dotnet", [ensamblado]);
+
+        throw new FileNotFoundException(
+            $"No se encontró la aplicación publicada en «{carpeta}»: falta {NombreDelApphost} " +
+            $"y también {NombreDelEnsamblado}.dll.{Environment.NewLine}" +
+            $"Publicala antes de correr las pruebas:{Environment.NewLine}" +
+            $"    {ComandoDePublicacionSugerido()}");
+    }
+
+    private static string ComandoDePublicacionSugerido() => OperatingSystem.IsWindows()
+        ? @"dotnet publish src\MovilidadUrbana.Web -c Release -o publicacion"
+        : "scripts/publicar.sh   (o: dotnet publish src/MovilidadUrbana.Web -c Release -o publicacion)";
 
     private static string UbicarLaRaizDelRepositorio()
     {
