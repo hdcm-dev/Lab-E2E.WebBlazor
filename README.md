@@ -54,9 +54,15 @@ scripts/
   dotnet.sh             Ejecuta el SDK de .NET dentro del contenedor oficial
   publicar.sh           Publica el binario autocontenido en `publicacion/`
   pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local)
+Guides/
+  Beginner-Guide.md     Guía de estudio para quien nunca escribió una prueba E2E
 pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
 .github/workflows/      CI, workflow reutilizable de E2E y verificación de entornos
 ```
+
+En la solución, los workflows y la guía están agrupados en dos carpetas virtuales
+—`github-workflow` y `Guides`—, para poder abrirlos desde el Explorador de soluciones sin salir
+de Visual Studio. Son carpetas de solución: no se compilan ni cambian nada del build.
 
 ### Por qué las pruebas E2E son un proyecto de la solución
 
