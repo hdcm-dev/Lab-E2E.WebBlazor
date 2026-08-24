@@ -23,6 +23,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Guides", "Guides", "{E903B2
 		Guides\Beginner-Guide.md = Guides\Beginner-Guide.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{F72DCD18-AD00-4913-86D5-847419217A14}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\dotnet.sh = scripts\dotnet.sh
+		scripts\publicar.sh = scripts\publicar.sh
+		scripts\pruebas.sh = scripts\pruebas.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
