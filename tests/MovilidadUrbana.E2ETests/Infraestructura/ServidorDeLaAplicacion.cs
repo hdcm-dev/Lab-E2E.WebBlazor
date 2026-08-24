@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Sockets;
+using Microsoft.Playwright.TestAdapter;
 
 namespace MovilidadUrbana.E2ETests;
 
@@ -36,6 +37,8 @@ public class ServidorDeLaAplicacion
     [OneTimeSetUp]
     public async Task LevantarAsync()
     {
+        AsegurarElNavegador();
+
         var urlExterna = Environment.GetEnvironmentVariable("URL_BASE");
         if (!string.IsNullOrWhiteSpace(urlExterna))
         {
@@ -78,6 +81,41 @@ public class ServidorDeLaAplicacion
         _proceso.Kill(entireProcessTree: true);
         _proceso.WaitForExit(10_000);
         _proceso.Dispose();
+    }
+
+    /// <summary>
+    /// Los navegadores también son responsabilidad del fixture.
+    ///
+    /// La vía documentada para instalarlos es `pwsh playwright.ps1 install`, que exige tener
+    /// PowerShell 7 —un producto aparte del PowerShell que trae Windows— y acordarse de correrlo.
+    /// El paquete `Microsoft.Playwright` expone el mismo instalador como API, así que se lo llama
+    /// desde acá: es idempotente y, cuando el navegador ya está, tarda un instante.
+    ///
+    /// Se instala solo el navegador de esta corrida, no los tres, para no bajar cientos de
+    /// megabytes que nadie va a usar.
+    /// </summary>
+    private static void AsegurarElNavegador()
+    {
+        if (string.Equals(Environment.GetEnvironmentVariable("INSTALAR_NAVEGADORES"), "false",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        // Es el mismo proveedor que usa Playwright para resolver `Playwright.BrowserName`, así que
+        // respeta tanto pruebas.runsettings como lo que se pase por línea de comandos.
+        var navegador = PlaywrightSettingsProvider.BrowserName;
+        if (string.IsNullOrWhiteSpace(navegador)) navegador = "chromium";
+
+        TestContext.Progress.WriteLine($"Asegurando el navegador «{navegador}»…");
+        var codigo = Microsoft.Playwright.Program.Main(["install", navegador]);
+        if (codigo != 0)
+        {
+            throw new InvalidOperationException(
+                $"La instalación del navegador «{navegador}» terminó con código {codigo}. " +
+                "En Linux puede faltar alguna librería del sistema: en ese caso corré " +
+                "`playwright install --with-deps` con permisos suficientes.");
+        }
     }
 
     /// <summary>

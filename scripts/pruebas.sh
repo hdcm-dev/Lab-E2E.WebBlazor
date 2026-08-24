@@ -48,10 +48,6 @@ fi
 PROYECTO=tests/MovilidadUrbana.E2ETests
 dotnet build "$PROYECTO" --configuration Debug
 
-CLI="$PROYECTO/bin/Debug/net10.0/.playwright"
-echo "== Asegurando el navegador '"$NAVEGADOR"' =="
-"$CLI/node/linux-x64/node" "$CLI/package/cli.js" install '"$NAVEGADOR"'
-
 dotnet test "$PROYECTO" \
   --no-build \
   --settings pruebas.runsettings \

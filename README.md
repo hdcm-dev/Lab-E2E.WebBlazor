@@ -52,7 +52,7 @@ tests/MovilidadUrbana.E2ETests/
   EncuestaTests.cs      Asistente completo
 scripts/
   dotnet.sh             Ejecuta el SDK de .NET dentro del contenedor oficial
-  publicar.sh           Publica el binario autocontenido en `publicacion/`
+  publicar.sh           Publica el binario autocontenido que usa CI, en `publicacion/`
   pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local)
 Guides/
   Beginner-Guide.md     Guía de estudio para quien nunca escribió una prueba E2E
@@ -60,9 +60,10 @@ pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
 .github/workflows/      CI, workflow reutilizable de E2E y verificación de entornos
 ```
 
-En la solución, los workflows y la guía están agrupados en dos carpetas virtuales
-—`github-workflow` y `Guides`—, para poder abrirlos desde el Explorador de soluciones sin salir
-de Visual Studio. Son carpetas de solución: no se compilan ni cambian nada del build.
+En la solución, los archivos que no pertenecen a ningún proyecto están agrupados en tres carpetas
+virtuales —`github-workflow`, `Guides` y `scripts`—, para poder abrirlos desde el Explorador de
+soluciones sin salir de Visual Studio. Son carpetas de solución: no se compilan ni cambian nada del
+build.
 
 ### Por qué las pruebas E2E son un proyecto de la solución
 
@@ -85,25 +86,23 @@ TypeScript— es la que eligió la aplicación de referencia de .NET,
 
 ### Desde Visual Studio
 
-Abrí `Lab-E2E.WebBlazor.sln`. Antes de la primera corrida hay que bajar los navegadores, por
-única vez:
+Abrí `Lab-E2E.WebBlazor.sln` y listo: **Test > Explorador de pruebas** descubre los 22 casos y
+podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de la prueba.
+No hay ningún paso previo.
 
-```powershell
-dotnet build tests\MovilidadUrbana.E2ETests
-pwsh tests\MovilidadUrbana.E2ETests\bin\Debug\net10.0\playwright.ps1 install
-```
-
-El primer comando compila las pruebas, que es lo que deja `playwright.ps1` junto al binario; el
-segundo baja los navegadores. De ahí en adelante, **Test > Explorador de pruebas** descubre los 22
-casos y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de la
-prueba.
+La primera corrida tarda unos minutos porque baja el navegador; las siguientes, segundos.
 
 **No hace falta publicar la aplicación a mano.** Las pruebas ejercitan la aplicación *publicada*
 —no el proyecto compilado—, y publicarla es responsabilidad del propio fixture: antes de la primera
 prueba corre `dotnet publish` sobre `publicacion/`. Eso además garantiza que lo que se prueba está
 al día: si tocás una página de Blazor y volvés a correr las pruebas, se republica sola.
 
-Se hace en el fixture y no en el build a propósito. Atado al build, el paso queda a merced de que
+El navegador corre la misma suerte: el fixture lo instala llamando al instalador que expone el
+paquete `Microsoft.Playwright`, en vez de exigir `pwsh playwright.ps1 install` —que además obliga a
+tener PowerShell 7, un producto aparte del PowerShell que trae Windows—. Se instala solo el
+navegador de la corrida, no los tres. Para desactivarlo: `INSTALAR_NAVEGADORES=false`.
+
+Publicar e instalar se hacen en el fixture y no en el build a propósito. Atado al build, el paso queda a merced de que
 el entorno decida compilar —Visual Studio evalúa por su cuenta si el proyecto está al día y cómo
 invocar targets de otro proyecto—, y cuando esa decisión no sale como se espera no hay publicación
 y todas las pruebas mueren en `OneTimeSetUp`. En el fixture corre siempre y de la misma forma en la
