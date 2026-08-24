@@ -48,6 +48,7 @@ public class ServidorDeLaAplicacion
         UrlBase = $"http://127.0.0.1:{puerto}";
 
         var carpeta = UbicarLaPublicacion();
+        if (HayQuePublicar) await PublicarLaAplicacionAsync(carpeta);
         var (ejecutable, argumentos) = ResolverElArranque(carpeta);
 
         var arranque = new ProcessStartInfo(ejecutable)
@@ -77,6 +78,67 @@ public class ServidorDeLaAplicacion
         _proceso.Kill(entireProcessTree: true);
         _proceso.WaitForExit(10_000);
         _proceso.Dispose();
+    }
+
+    /// <summary>
+    /// Publicar es responsabilidad del fixture y no del build.
+    ///
+    /// Las pruebas ejercitan la aplicación publicada, no el proyecto compilado. Si ese paso vive en
+    /// el build —un target de MSBuild, o peor, un comando que hay que acordarse de correr—, queda
+    /// atado a que el entorno decida compilar: Visual Studio evalúa por su cuenta si el proyecto
+    /// está al día y cómo invocar targets de otro proyecto, y si esa decisión no sale como se
+    /// espera no hay publicación y todas las pruebas mueren en OneTimeSetUp. Acá, en cambio, corre
+    /// siempre y de la misma forma en la consola, en el IDE y en cualquier otro.
+    ///
+    /// `dotnet publish` es incremental: cuando no cambió nada tarda un par de segundos. Se paga ese
+    /// costo una vez por corrida a cambio de no poder ejercitar nunca un binario viejo.
+    /// </summary>
+    private static bool HayQuePublicar => !string.Equals(
+        Environment.GetEnvironmentVariable("PUBLICAR_ANTES_DE_PROBAR"), "false", StringComparison.OrdinalIgnoreCase);
+
+    private static async Task PublicarLaAplicacionAsync(string destino)
+    {
+        var raiz = UbicarLaRaizDelRepositorio();
+        var proyecto = Path.Combine(raiz, "src", "MovilidadUrbana.Web", "MovilidadUrbana.Web.csproj");
+        if (!File.Exists(proyecto))
+        {
+            TestContext.Progress.WriteLine(
+                $"No se encontró {proyecto}: se probará con lo que ya haya en «{destino}».");
+            return;
+        }
+
+        TestContext.Progress.WriteLine($"Publicando la aplicación bajo prueba en «{destino}»…");
+
+        // Sin identificador de plataforma ni autocontención: el apphost que sale es el de esta
+        // máquina —MovilidadUrbana.Web.exe en Windows— y no hay que elegir un RID.
+        var inicio = new ProcessStartInfo("dotnet")
+        {
+            WorkingDirectory = raiz,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        foreach (var argumento in new[] { "publish", proyecto, "--configuration", "Release", "--output", destino })
+        {
+            inicio.ArgumentList.Add(argumento);
+        }
+
+        using var proceso = Process.Start(inicio)
+            ?? throw new InvalidOperationException(
+                "No se pudo ejecutar `dotnet`. Hace falta el SDK de .NET en el PATH para publicar " +
+                "la aplicación bajo prueba.");
+
+        // Se leen las dos salidas en paralelo: esperar a uno con el búfer del otro lleno traba el proceso.
+        var salida = proceso.StandardOutput.ReadToEndAsync();
+        var error = proceso.StandardError.ReadToEndAsync();
+        await proceso.WaitForExitAsync();
+
+        if (proceso.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"`dotnet publish` terminó con código {proceso.ExitCode}.{Environment.NewLine}" +
+                $"{await salida}{Environment.NewLine}{await error}");
+        }
     }
 
     private static string RutaDeLaBaseDeDatos() =>

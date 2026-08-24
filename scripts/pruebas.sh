@@ -31,6 +31,7 @@ exec docker run --rm -i \
   --env EMULAR_MOVIL="${EMULAR_MOVIL:-false}" \
   --env URL_BASE="${URL_BASE:-}" \
   --env CARPETA_APLICACION="${CARPETA_APLICACION:-}" \
+  --env PUBLICAR_ANTES_DE_PROBAR="${PUBLICAR_ANTES_DE_PROBAR:-}" \
   --volume "$RAIZ:/trabajo" \
   --workdir /trabajo \
   "$IMAGEN" bash -lc '

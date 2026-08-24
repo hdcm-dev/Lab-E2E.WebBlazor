@@ -85,22 +85,33 @@ TypeScript— es la que eligió la aplicación de referencia de .NET,
 
 ### Desde Visual Studio
 
-Abrí `Lab-E2E.WebBlazor.sln`. Antes de la primera corrida hace falta una sola cosa, y por única vez:
+Abrí `Lab-E2E.WebBlazor.sln`. Antes de la primera corrida hay que bajar los navegadores, por
+única vez:
 
 ```powershell
 dotnet build tests\MovilidadUrbana.E2ETests
 pwsh tests\MovilidadUrbana.E2ETests\bin\Debug\net10.0\playwright.ps1 install
 ```
 
-El primer comando compila las pruebas —lo que también instala el script de Playwright que usa el
-segundo—; el segundo baja los navegadores. De ahí en adelante, **Test > Explorador de pruebas**
-descubre los 22 casos y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el
-código C# de la prueba.
+El primer comando compila las pruebas, que es lo que deja `playwright.ps1` junto al binario; el
+segundo baja los navegadores. De ahí en adelante, **Test > Explorador de pruebas** descubre los 22
+casos y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de la
+prueba.
 
-**No hace falta publicar la aplicación a mano.** Compilar el proyecto de pruebas la publica en
-`publicacion/`, porque las pruebas ejercitan la aplicación publicada y no el proyecto compilado.
-Eso además garantiza que lo que se prueba está al día: si tocás una página de Blazor y volvés a
-correr las pruebas, se republica sola.
+**No hace falta publicar la aplicación a mano.** Las pruebas ejercitan la aplicación *publicada*
+—no el proyecto compilado—, y publicarla es responsabilidad del propio fixture: antes de la primera
+prueba corre `dotnet publish` sobre `publicacion/`. Eso además garantiza que lo que se prueba está
+al día: si tocás una página de Blazor y volvés a correr las pruebas, se republica sola.
+
+Se hace en el fixture y no en el build a propósito. Atado al build, el paso queda a merced de que
+el entorno decida compilar —Visual Studio evalúa por su cuenta si el proyecto está al día y cómo
+invocar targets de otro proyecto—, y cuando esa decisión no sale como se espera no hay publicación
+y todas las pruebas mueren en `OneTimeSetUp`. En el fixture corre siempre y de la misma forma en la
+consola, en el IDE y en CI. `dotnet publish` es incremental: cuando no cambió nada tarda un par de
+segundos.
+
+Para desactivarlo —CI lo hace, porque allá la aplicación llega como artefacto— se define
+`PUBLICAR_ANTES_DE_PROBAR=false`.
 
 El navegador sale de `pruebas.runsettings` (**Test > Configurar archivo de configuración de
 ejecución**). Para la configuración móvil, definí la variable de entorno `EMULAR_MOVIL=true`.

@@ -44,10 +44,7 @@ jobs:
         run: dotnet restore Lab-E2E.WebBlazor.sln
 
       - name: Compilar con los avisos tratados como error
-        # Sin publicación automática: este job solo compila y descubre pruebas, no las ejecuta.
-        run: >-
-          dotnet build Lab-E2E.WebBlazor.sln --configuration Release --no-restore -warnaserror
-          -p:PublicarAplicacionBajoPrueba=false
+        run: dotnet build Lab-E2E.WebBlazor.sln --configuration Release --no-restore -warnaserror
 
       - name: Listar las pruebas (detecta que el descubrimiento funciona)
         # Equivale al `playwright test --list` del runner de JavaScript: no levanta navegadores

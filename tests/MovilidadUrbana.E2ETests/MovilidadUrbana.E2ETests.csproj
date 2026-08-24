@@ -22,32 +22,4 @@
     <Using Include="System.Text.RegularExpressions" />
   </ItemGroup>
 
-  <!--
-    Las pruebas ejercitan la aplicación PUBLICADA, no el proyecto compilado. Para que «Ejecutar» en
-    el Explorador de pruebas de Visual Studio no exija un paso manual previo, compilar este proyecto
-    publica la aplicación bajo prueba.
-
-    Se publica dependiente del framework y sin identificador de plataforma, así el apphost que sale
-    es el de la máquina donde se compila: `MovilidadUrbana.Web.exe` en Windows, sin extensión en
-    Linux y macOS.
-
-    CI lo desactiva con `-p:PublicarAplicacionBajoPrueba=false`, porque allá la aplicación se publica
-    una sola vez —autocontenida— en un job aparte y llega como artefacto.
-  -->
-  <PropertyGroup>
-    <PublicarAplicacionBajoPrueba Condition="'$(PublicarAplicacionBajoPrueba)' == ''">true</PublicarAplicacionBajoPrueba>
-    <RaizDelRepositorio>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</RaizDelRepositorio>
-    <ProyectoBajoPrueba>$([MSBuild]::NormalizePath('$(RaizDelRepositorio)', 'src', 'MovilidadUrbana.Web', 'MovilidadUrbana.Web.csproj'))</ProyectoBajoPrueba>
-    <CarpetaDePublicacion>$([MSBuild]::NormalizeDirectory('$(RaizDelRepositorio)', 'publicacion'))</CarpetaDePublicacion>
-  </PropertyGroup>
-
-  <Target Name="PublicarLaAplicacionBajoPrueba"
-          BeforeTargets="Build"
-          Condition="'$(PublicarAplicacionBajoPrueba)' == 'true'">
-    <Message Importance="high" Text="Publicando la aplicación bajo prueba en $(CarpetaDePublicacion)" />
-    <MSBuild Projects="$(ProyectoBajoPrueba)"
-             Targets="Publish"
-             Properties="Configuration=$(Configuration);PublishDir=$(CarpetaDePublicacion);SelfContained=false;RuntimeIdentifier=" />
-  </Target>
-
 </Project>

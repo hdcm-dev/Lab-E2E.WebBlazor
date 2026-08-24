@@ -161,12 +161,7 @@ jobs:
           esac
 
       - name: Compilar las pruebas
-        # Se desactiva la publicación automática: acá la aplicación llega como artefacto del job
-        # `publicar`, autocontenida y compilada una sola vez para toda la matriz.
-        run: >-
-          dotnet build ${{ env.PROYECTO_PRUEBAS }}
-          --configuration Release
-          -p:PublicarAplicacionBajoPrueba=false
+        run: dotnet build ${{ env.PROYECTO_PRUEBAS }} --configuration Release
 
       - name: Instalar el navegador y sus dependencias del sistema
         # El CLI viene dentro del paquete Microsoft.Playwright y baja la build que corresponde a
@@ -193,6 +188,9 @@ jobs:
       - name: Ejecutar las pruebas
         env:
           URL_BASE: ${{ inputs.url-base || '' }}
+          # El fixture publica la aplicación antes de probar; acá no hace falta, porque llega como
+          # artefacto del job `publicar`, autocontenida y compilada una sola vez para toda la matriz.
+          PUBLICAR_ANTES_DE_PROBAR: 'false'
         run: >-
           dotnet test ${{ env.PROYECTO_PRUEBAS }}
           --configuration Release
