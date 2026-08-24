@@ -85,22 +85,22 @@ TypeScript— es la que eligió la aplicación de referencia de .NET,
 
 ### Desde Visual Studio
 
-Abrí `Lab-E2E.WebBlazor.sln`. Antes de la primera corrida hacen falta dos cosas:
+Abrí `Lab-E2E.WebBlazor.sln`. Antes de la primera corrida hace falta una sola cosa, y por única vez:
 
 ```powershell
-dotnet publish src\MovilidadUrbana.Web -c Release -o publicacion
+dotnet build tests\MovilidadUrbana.E2ETests
 pwsh tests\MovilidadUrbana.E2ETests\bin\Debug\net10.0\playwright.ps1 install
 ```
 
-> **No le agregues `-r linux-x64 --self-contained` a ese `dotnet publish`.** Esa variante es la que
-> usa CI, y en Windows deja un binario de Linux que no se puede ejecutar. Sin identificador de
-> plataforma, `dotnet publish` genera el ejecutable de la máquina donde corre
-> —`MovilidadUrbana.Web.exe` en Windows— y las pruebas lo encuentran igual.
+El primer comando compila las pruebas —lo que también instala el script de Playwright que usa el
+segundo—; el segundo baja los navegadores. De ahí en adelante, **Test > Explorador de pruebas**
+descubre los 22 casos y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el
+código C# de la prueba.
 
-La primera publica la aplicación que las pruebas van a levantar; la segunda instala los navegadores
-—es el script que el paquete `Microsoft.Playwright` deja junto al binario compilado—. A partir de
-ahí, **Test > Explorador de pruebas** descubre los 22 casos y podés ejecutarlos o depurarlos de a
-uno, con puntos de interrupción en el código C# de la prueba.
+**No hace falta publicar la aplicación a mano.** Compilar el proyecto de pruebas la publica en
+`publicacion/`, porque las pruebas ejercitan la aplicación publicada y no el proyecto compilado.
+Eso además garantiza que lo que se prueba está al día: si tocás una página de Blazor y volvés a
+correr las pruebas, se republica sola.
 
 El navegador sale de `pruebas.runsettings` (**Test > Configurar archivo de configuración de
 ejecución**). Para la configuración móvil, definí la variable de entorno `EMULAR_MOVIL=true`.
@@ -108,10 +108,12 @@ ejecución**). Para la configuración móvil, definí la variable de entorno `EM
 ### Desde la línea de comandos
 
 ```bash
-scripts/publicar.sh                                   # o dotnet publish, ver arriba
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings -- Playwright.BrowserName=firefox
 ```
+
+`scripts/publicar.sh` sigue existiendo para producir la publicación **autocontenida** que usa CI,
+pero para correr las pruebas no hay que invocarlo.
 
 ### Sin nada instalado (con Docker)
 
@@ -121,7 +123,6 @@ navegadores quedan en `.navegadores/`, así que solo se descargan la primera vez
 están ignoradas por git.
 
 ```bash
-scripts/publicar.sh
 scripts/pruebas.sh                     # chromium
 scripts/pruebas.sh firefox
 scripts/pruebas.sh webkit

@@ -10,6 +10,8 @@
 # necesitan, y le agrega el SDK de .NET en `.dotnet/` (ignorado por git). Los navegadores quedan
 # en `.navegadores/`, así que solo se descargan la primera vez.
 #
+# No hace falta publicar antes: compilar el proyecto de pruebas publica la aplicación bajo prueba.
+#
 # En CI no hace falta nada de esto: el runner ya tiene el SDK y Playwright instala los navegadores.
 set -euo pipefail
 
