@@ -35,10 +35,20 @@ jobs:
   compilacion:
     name: Compilación
     if: ${{ github.event.pull_request.draft != true }}
-    runs-on: [self-hosted, i7infra-dev]
+    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
+    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+
+      - name: Preparar el SDK de .NET
+        # En el runner autoalojado el SDK ya estaba instalado; en los runners de GitHub hay que
+        # pedirlo, porque la imagen no garantiza la versión que necesita el proyecto.
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
 
       - name: Restaurar
         run: dotnet restore Lab-E2E.WebBlazor.sln
@@ -70,7 +80,10 @@ jobs:
       ${{ always()
       && github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository }}
-    runs-on: [self-hosted, i7infra-dev]
+    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
+    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
@@ -115,7 +128,10 @@ jobs:
     name: CI aprobada
     needs: [compilacion, e2e]
     if: always()
-    runs-on: [self-hosted, i7infra-dev]
+    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
+    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
     steps:
       - name: Comprobar que ningún job previo falló
         shell: bash

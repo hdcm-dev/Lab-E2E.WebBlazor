@@ -306,14 +306,27 @@ Prueba de humo a pedido contra un entorno ya desplegado, reutilizando `e2e.yml` 
 
 ### Runner
 
-Los jobs corren en el runner autoalojado `runs-on: [self-hosted, i7infra-dev]`, **directamente y no
-dentro de un contenedor**. El motivo es concreto: ese runner es él mismo un contenedor y no tiene
-montado el socket de Docker, así que un job con `container:` ni siquiera llega a arrancar —falla en
+Los jobs corren en los runners alojados por GitHub, `runs-on: ubuntu-latest`. Encima de cada uno
+quedó comentada la línea del runner autoalojado del laboratorio:
+
+```yaml
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
+```
+
+Descomentar una y comentar la otra alcanza para volver al runner propio; la etiqueta `i7infra-dev`
+es la que lo identifica en el repositorio.
+
+Nada corre dentro de un contenedor de job. El motivo viene del runner autoalojado, y conviene
+dejarlo escrito porque no es evidente: ese runner es él mismo un contenedor y no tiene montado el
+socket de Docker, así que un job con `container:` ni siquiera llega a arrancar —falla en
 *Initialize containers* con `failed to connect to the docker API at unix:///var/run/docker.sock`—.
 
-No hace falta: el runner corre Ubuntu 24.04 y ya trae el SDK de .NET 10.0.400 y Node 24, que es
-todo lo que necesita la compilación. Los navegadores los instala Playwright en el propio job y
-quedan cacheados para las corridas siguientes.
+El cambio de runner trajo dos ajustes. **El SDK se pide explícitamente** con `actions/setup-dotnet`:
+el runner autoalojado ya traía .NET 10, pero la imagen de GitHub no garantiza esa versión. **Los
+navegadores se cachean** con `actions/cache`: el runner autoalojado es un contenedor de larga vida
+y conservaba la caché entre corridas, mientras que los de GitHub arrancan limpios y sin caché
+bajarían el navegador en cada job de la matriz.
 
 Sobre `/dev/shm`: dentro de un contenedor queda en 64 MB, y es la causa clásica de que Chromium
 muera a mitad de una corrida. Se midió: con `/dev/shm` limitado a 64 MB las 22 pruebas de chromium

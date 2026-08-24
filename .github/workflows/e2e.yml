@@ -81,13 +81,23 @@ jobs:
     name: Publicar la aplicación
     # Contra un entorno ya desplegado no hay nada que compilar.
     if: ${{ inputs.url-base == '' }}
-    runs-on: [self-hosted, i7infra-dev]
+    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
+    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Descargar el código
         uses: actions/checkout@v7
         with:
           ref: ${{ inputs.referencia || github.ref }}
+
+      - name: Preparar el SDK de .NET
+        # En el runner autoalojado el SDK ya estaba instalado; en los runners de GitHub hay que
+        # pedirlo, porque la imagen no garantiza la versión que necesita el proyecto.
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
 
       - name: Verificar que el SDK coincide con el framework del proyecto
         shell: bash
@@ -118,7 +128,10 @@ jobs:
   # Convierte la lista de configuraciones en la matriz del job siguiente.
   preparar:
     name: Preparar matriz
-    runs-on: [self-hosted, i7infra-dev]
+    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
+    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       configuraciones: ${{ steps.matriz.outputs.configuraciones }}
@@ -138,7 +151,10 @@ jobs:
     needs: [publicar, preparar]
     # `publicar` se saltea cuando se prueba un entorno ya desplegado; eso no debe arrastrar a este job.
     if: ${{ !cancelled() && needs.preparar.result == 'success' && needs.publicar.result != 'failure' }}
-    runs-on: [self-hosted, i7infra-dev]
+    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
+    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -149,6 +165,13 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ inputs.referencia || github.ref }}
+
+      - name: Preparar el SDK de .NET
+        # En el runner autoalojado el SDK ya estaba instalado; en los runners de GitHub hay que
+        # pedirlo, porque la imagen no garantiza la versión que necesita el proyecto.
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
 
       - name: Traducir la configuración a navegador y emulación
         shell: bash
@@ -162,6 +185,16 @@ jobs:
 
       - name: Compilar las pruebas
         run: dotnet build ${{ env.PROYECTO_PRUEBAS }} --configuration Release
+
+      - name: Caché de los navegadores de Playwright
+        # El runner autoalojado conservaba la caché entre corridas por ser un contenedor de larga
+        # vida; los de GitHub arrancan limpios cada vez y sin esto bajarían el navegador en cada
+        # job de la matriz. La clave se apoya en el csproj: cambia cuando cambia la versión de
+        # Playwright, que es cuando cambian las builds de los navegadores.
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ env.NAVEGADOR }}-${{ hashFiles('tests/MovilidadUrbana.E2ETests/MovilidadUrbana.E2ETests.csproj') }}
 
       - name: Instalar el navegador y sus dependencias del sistema
         # El CLI viene dentro del paquete Microsoft.Playwright y baja la build que corresponde a
@@ -213,7 +246,10 @@ jobs:
     name: Reporte unificado
     needs: [preparar, pruebas]
     if: ${{ !cancelled() }}
-    runs-on: [self-hosted, i7infra-dev]
+    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
+    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
       resultado: ${{ needs.pruebas.result }}
