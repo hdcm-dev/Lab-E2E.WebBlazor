@@ -56,6 +56,7 @@ scripts/
   pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local)
 Guides/
   Beginner-Guide.md     Guía de estudio para quien nunca escribió una prueba E2E
+  Quick-Guide-ABM.md    Receta breve para montar el E2E de un ABM, para quien ya conoce el tema
 pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
 .github/workflows/      CI, workflow reutilizable de E2E y verificación de entornos
 ```

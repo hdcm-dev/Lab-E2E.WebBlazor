@@ -21,6 +21,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Guides", "Guides", "{E903B2C1-7088-49D1-9C0D-1BA347FE0A15}"
 	ProjectSection(SolutionItems) = preProject
 		Guides\Beginner-Guide.md = Guides\Beginner-Guide.md
+		Guides\Quick-Guide-ABM.md = Guides\Quick-Guide-ABM.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{F72DCD18-AD00-4913-86D5-847419217A14}"
