@@ -1,0 +1,92 @@
+# Integración continua para el modelo de tronco con ramas de release.
+#
+# Reemplaza al `ci.yml` que trae la aplicación sembrada: aquel solo protege `main`, y este protege
+# además las ramas `release/*`, que es la mitad que faltaba —un cherry-pick que aplica limpio no
+# garantiza que el resultado funcione en el contexto de la release—.
+#
+# No define cómo se corren las pruebas: eso vive en `e2e.yml`, el workflow reutilizable que viene
+# con la aplicación. Acá solo se decide *cuándo* y *con cuánto alcance*.
+name: CI
+
+on:
+  push:
+    branches: [main, 'release/**']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.gitignore'
+  pull_request:
+    branches: [main, 'release/**']
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+
+# Un push nuevo sobre la misma referencia cancela la corrida anterior solo en los pull requests:
+# en `main` y en las releases conviene conservar el historial de verificación.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # Comprobaciones baratas que fallan en segundos y evitan ocupar el runner con navegadores.
+  verificacion-rapida:
+    name: Verificación rápida
+    # Corre también con el pull request en borrador: 08 declara que el pull request se abre en
+    # borrador y que la verificación empieza ahí. Si este job se saltea, `e2e` se saltea por
+    # `needs` y el check obligatorio quedaría en verde sin haber verificado nada.
+    runs-on: [self-hosted, i7infra-dev]
+    timeout-minutes: 10
+    # Sin `container:`: el runner `i7infra-dev` es él mismo un contenedor y no tiene acceso al
+    # demonio de Docker. Ya trae el SDK de .NET 10 sobre Ubuntu 24.04.
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Restaurar las dependencias de la solución
+        run: dotnet restore Lab-E2E.WebBlazor.sln
+
+      - name: Compilar la solución tratando las advertencias como errores
+        run: >-
+          dotnet build Lab-E2E.WebBlazor.sln
+          --configuration Release --no-restore -warnaserror
+
+      - name: Listar las pruebas (detecta pruebas rotas y filtros olvidados)
+        run: >-
+          dotnet test tests/MovilidadUrbana.E2ETests
+          --configuration Release --no-build --list-tests
+
+  e2e:
+    name: E2E
+    needs: verificacion-rapida
+    # Un pull request se valida rápido con un solo navegador; lo ya integrado —`main`, las ramas de
+    # release y la cola de merge—, con la matriz completa.
+    uses: ./.github/workflows/e2e.yml
+    with:
+      # Entradas declaradas por `workflow_call` en e2e.yml: navegadores, url-base, referencia y
+      # retencion-dias. No hay reparto en shards: el alcance se recorta por navegador.
+      navegadores: ${{ github.event_name == 'pull_request' && 'chromium' || 'chromium,firefox,webkit,mobile-chrome' }}
+      referencia: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  # Único check que la regla de protección de rama necesita exigir: resume a todos los demás,
+  # así la regla no hay que actualizarla cada vez que cambia la matriz.
+  ci-ok:
+    name: CI aprobada
+    needs: [verificacion-rapida, e2e]
+    if: always()
+    runs-on: [self-hosted, i7infra-dev]
+    steps:
+      - name: Comprobar que todos los jobs previos terminaron en éxito
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "verificacion-rapida: ${{ needs.verificacion-rapida.result }}"
+          echo "e2e: ${{ needs.e2e.result }}"
+          for resultado in "${{ needs.verificacion-rapida.result }}" "${{ needs.e2e.result }}"; do
+            case "$resultado" in
+              success) ;;
+              # `skipped` NO es aprobación: significa que la verificación no corrió sobre este
+              # commit. El check obligatorio solo da verde con evidencia positiva de ejecución.
+              *) echo "::error::La CI no está en verde (resultado: $resultado)."; exit 1 ;;
+            esac
+          done

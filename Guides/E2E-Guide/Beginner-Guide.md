@@ -19,15 +19,18 @@ Es la única familia de pruebas que responde la pregunta que importa antes de li
 funcionaba sigue funcionando?»— sin que nadie tenga que abrir el navegador a mano.
 
 Esta guía está escrita para quien nunca hizo una. Se apoya en un laboratorio que existe, compila y
-corre: [Lab-E2E.WebBlazor](../../Lab-E2E.WebBlazor), una aplicación Blazor con render *interactive
+corre: [este mismo repositorio](../../README.md), una aplicación Blazor con render *interactive
 server*, SQLite y Clean Architecture, con 22 pruebas E2E escritas con las vinculaciones oficiales de
 Playwright para .NET y tres workflows de GitHub Actions que las ejecutan. Cada afirmación técnica
 remite a un archivo de ese repositorio; nada acá es una descripción abstracta de cómo *podría* ser.
 
 El recorrido va de lo general a lo particular. Los capítulos 1 y 2 fijan el vocabulario y el mapa.
 Los capítulos 3 a 6 son el oficio: cómo se arma el proyecto, qué se prueba, cómo se escribe un caso
-y cómo se lo mantiene estable. El 7 lleva todo eso a la cadena de integración con GitHub Actions.
-Los anexos traen plantillas, listas de verificación y glosario.
+y cómo se lo mantiene estable. El 7 agrega lo que aparece cuando la aplicación tiene servidor
+—interactividad, aislamiento del estado, publicación, paralelismo— y el 8 lleva todo eso a la cadena
+de integración con GitHub Actions. Los anexos traen plantillas, listas de verificación y glosario, y
+el [Anexo F](#anexo-f--ruta-de-lectura-sugerida) propone por dónde entrar según el perfil de quien
+lee: si no vas a leer la guía entera, empezá por ahí.
 
 ## Cómo leer las marcas de evidencia
 
@@ -54,7 +57,7 @@ cuando presenta la preferencia del autor como si fuera un estándar de la indust
 | [7](#7-lo-que-aparece-cuando-la-aplicación-tiene-servidor) | Aplicaciones con servidor | Interactividad, aislamiento de datos, publicación, paralelismo |
 | [8](#8-los-workflows-de-github-actions) | Workflows | Integración continua, control del merge del PR, ejecución a pedido |
 | [9](#9-evidencias-y-observaciones) | Evidencias | Qué se verificó, cómo, y qué quedó sin verificar |
-| [Anexos](#anexo-a--plantilla-comentada-de-la-clase-base) | A–F | Plantillas, listas de verificación, glosario, fuentes |
+| [Anexos](#anexo-a--plantilla-comentada-de-la-clase-base) | A–F | Plantillas, listas de verificación, glosario, fuentes y la ruta de lectura por perfil ([Anexo F](#anexo-f--ruta-de-lectura-sugerida)) |
 
 ## Índice detallado
 
@@ -101,6 +104,7 @@ La tabla de arriba dice de qué trata cada capítulo; esta lista lleva directo a
   - [7.8. Menos JavaScript, menos intermitencia](#78-menos-javascript-menos-intermitencia)
   - [7.9. Cómo se corren, en los cuatro contextos](#79-cómo-se-corren-en-los-cuatro-contextos)
   - [7.10. Diagnosticar una prueba en rojo](#710-diagnosticar-una-prueba-en-rojo)
+  - [7.11. La traza, y por qué hay que escribirla a mano](#711-la-traza-y-por-qué-hay-que-escribirla-a-mano)
 - **[8. Los workflows de GitHub Actions](#8-los-workflows-de-github-actions)**
   - [8.1. El vocabulario mínimo](#81-el-vocabulario-mínimo)
   - [8.2. El principio de diseño](#82-el-principio-de-diseño)
@@ -111,12 +115,11 @@ La tabla de arriba dice de qué trata cada capítulo; esta lista lleva directo a
   - [8.4. Atar las pruebas al merge del pull request](#84-atar-las-pruebas-al-merge-del-pull-request)
   - [8.5. Ejecución a pedido (`workflow_dispatch`)](#85-ejecución-a-pedido-workflow_dispatch)
   - [8.6. Prácticas aplicadas, y el motivo de cada una](#86-prácticas-aplicadas-y-el-motivo-de-cada-una)
-    - [Sobre el runner autoalojado](#sobre-el-runner-autoalojado)
+    - [Sobre el runner](#sobre-el-runner)
 - **[9. Evidencias y observaciones](#9-evidencias-y-observaciones)**
   - [9.1. Qué se verificó](#91-qué-se-verificó)
   - [9.2. Qué no está verificado](#92-qué-no-está-verificado)
-  - [9.3. Observaciones](#93-observaciones)
-    - [Mejoras propuestas](#mejoras-propuestas)
+  - [9.3. Dos errores frecuentes, con su corrección](#93-dos-errores-frecuentes-con-su-corrección)
 - **[Anexo A — Plantilla comentada de la clase base](#anexo-a--plantilla-comentada-de-la-clase-base)**
 - **[Anexo B — Plantilla comentada de un caso](#anexo-b--plantilla-comentada-de-un-caso)**
 - **[Anexo C — Listas de verificación](#anexo-c--listas-de-verificación)**
@@ -260,7 +263,7 @@ Tablas de entrada: se busca la situación en la primera columna y se lee lo que 
 
 | Artefacto | Responsabilidad única | Archivo del laboratorio |
 | --- | --- | --- |
-| Proyecto de pruebas | Contener los casos y su infraestructura | [tests/MovilidadUrbana.E2ETests/](../../Lab-E2E.WebBlazor/tests/MovilidadUrbana.E2ETests/) |
+| Proyecto de pruebas | Contener los casos y su infraestructura | [tests/MovilidadUrbana.E2ETests/](../../tests/MovilidadUrbana.E2ETests/) |
 | Ciclo de vida del servidor | Levantar y bajar la aplicación bajo prueba | `Infraestructura/ServidorDeLaAplicacion.cs` |
 | Clase base | Sesión por prueba, espera de interactividad, navegación por menú | `Infraestructura/PruebaE2E.cs` |
 | Paralelismo | Cuántas clases corren a la vez | `Infraestructura/ParalelismoDelEnsamblado.cs` |
@@ -295,9 +298,9 @@ Hay dos formas de montar E2E sobre una aplicación .NET, y la elección condicio
 El laboratorio eligió la primera **[C]**, con un motivo concreto: el Explorador de pruebas de Visual
 Studio soporta pruebas de JavaScript, pero solo de Mocha, Jasmine, Tape, Jest y Vitest —Playwright no
 está en esa lista—, así que con el runner de JavaScript no hay integración posible con el IDE
-**[E: ../../Lab-E2E.WebBlazor/README.md]**. La segunda opción es igual de defendible: es la que usa
+**[E: ../../README.md]**. La segunda opción es igual de defendible: es la que usa
 la aplicación de referencia de .NET, [dotnet/eShop](https://github.com/dotnet/eShop)
-**[E: ../../Lab-E2E.WebBlazor/README.md]**.
+**[E: ../../README.md]**.
 
 Lo que **no** es defendible es no decidirlo y terminar con las dos.
 
@@ -411,7 +414,7 @@ dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings -- Pla
 ```
 
 Ese mecanismo es el que usa CI para recorrer la matriz de navegadores sin tocar el archivo
-**[E: .github/workflows/e2e.yml, línea 198]**.
+**[E: .github/workflows/e2e.yml, línea 234]**.
 
 ## 4.6. Cómo se ve una corrida completa
 
@@ -470,6 +473,13 @@ Los 22 casos **[V]** se reparten así:
 | `LocalidadesTests` | 9 | Listado sembrado, rechazo de alta inválida, alta con persistencia tras recargar, duplicado dentro de la provincia, edición, baja cancelada, baja confirmada, tabla vacía, aislamiento entre sesiones | Valor de negocio: es el ABM completo |
 | `EncuestaTests` | 9 | Estado inicial, desplegable alimentado por el ABM, validación de cada paso, ida y vuelta conservando datos, barra de progreso, resumen final, contador persistido, reinicio | Valor + integración: el asistente atraviesa toda la pila |
 
+Antes de copiar el reparto conviene una advertencia sobre el ejemplo mismo: el laboratorio no tiene
+ninguna prueba unitaria, así que no ilustra la pirámide que esta guía predica
+([§1.3](#13-dónde-se-ubica)). Sus E2E cargan hoy con verificaciones de reglas —un caso por regla de
+validación— que estarían mejor cubiertas más abajo y más barato. Es una deuda del laboratorio, no un
+modelo a imitar: en un proyecto real las reglas de `ReglasDeLocalidad` y `ReglasDeEncuesta` se
+verifican con unitarias y las E2E se quedan con un caso de validación por pantalla. **[C]**
+
 Tres decisiones de cobertura merecen mirarse de cerca, porque son las que se copian mal:
 
 **Verificar la persistencia recargando.** El caso del alta no termina cuando la fila aparece: recarga
@@ -482,6 +492,13 @@ nunca llegó a la base. Es la diferencia entre verificar la pantalla y verificar
 es una decisión explícita de la aplicación **[E: src/MovilidadUrbana.Web/Program.cs, líneas 12-16]**.
 El contexto del navegador fija `Locale = "es-AR"` para que la prueba no dependa de la máquina
 **[E: tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs, línea 46]**.
+
+**Dejar en unitarias lo que es de unitarias.** Los bordes de cada validación —nombre de dos
+caracteres, código postal de cinco dígitos, edad de 15 años— viven en
+`tests/MovilidadUrbana.UnitTests`, 49 casos que corren en 27 milisegundos **[V]**. Las E2E se quedan
+con un caso de validación por pantalla, el que comprueba que el error efectivamente llega a la
+pantalla **[E: tests/MovilidadUrbana.E2ETests/LocalidadesTests.cs, líneas 21-35]**. La diferencia de
+costo entre los dos niveles es de tres órdenes de magnitud, y esa es toda la razón del reparto.
 
 **Verificar el propio andamiaje.** *«Cada prueba trabaja sobre su propio conjunto de datos»*
 **[E: LocalidadesTests.cs, líneas 148-165]** no prueba una funcionalidad del producto: prueba que el
@@ -622,9 +639,12 @@ como hace el caso de la baja confirmada, que verifica el aviso, el conteo **y** 
 ## 6.4. Datos: sembrar, no depender
 
 Cada caso del laboratorio arranca con las mismas dos localidades —Corrientes y Resistencia— porque la
-aplicación siembra ese juego la primera vez que toca una sesión nueva
-**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/SembradorDeSesion.cs, líneas 13-17]**. La
-prueba no crea los datos ni los borra al terminar: recibe un espacio limpio por construcción.
+aplicación siembra ese juego la primera vez que la sesión pide o toca localidades
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/SembradorDeSesion.cs, líneas 13-17]**. El
+disparo no está en un middleware ni en el arranque: cada operación del repositorio de localidades
+empieza llamando a `AsegurarAsync`, y es esa llamada la que crea la marca de sesión y las dos filas
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/RepositorioDeLocalidades.cs, líneas 20-22]**.
+La prueba no crea los datos ni los borra al terminar: recibe un espacio limpio por construcción.
 
 Es una de las tres estrategias posibles, y conviene conocerlas:
 
@@ -641,11 +661,20 @@ ajeno**. El laboratorio corre la suite completa contra `url-base`
 sesión hace que cada corrida trabaje sobre datos propios. Sin ese aislamiento, contra un entorno
 real solo debería correr un subconjunto de solo lectura. **[C]**
 
+> **Preguntas guía de §6**
+>
+> - Tomá la última pantalla que escribiste: ¿qué `data-testid` publica hoy y cuáles tendrías que
+>   agregar para escribir el primer caso sin depender del CSS?
+> - De las verificaciones que ya hacés, ¿cuántas leen un valor y lo comparan con `Assert` en lugar
+>   de esperarlo con `Expect`?
+> - ¿De dónde salen los datos con los que arranca cada caso: los siembra la aplicación, los crea la
+>   prueba, o dependen de lo que quedó en la base de la corrida anterior?
+
 ---
 
 # 7. Lo que aparece cuando la aplicación tiene servidor
 
-Los seis puntos de esta sección son los que separan un laboratorio de páginas estáticas de una
+Los diez puntos de esta sección son los que separan un laboratorio de páginas estáticas de una
 aplicación real. Ninguno se descubre leyendo la documentación de Playwright: aparecen la primera vez
 que la suite falla en CI y pasa en la máquina propia.
 
@@ -741,22 +770,43 @@ cookie no se puede leer desde una página. El identificador se lee en `App.razor
 renderiza dentro de la petición— y se pasa como parámetro al componente raíz
 **[E: src/MovilidadUrbana.Web/Components/App.razor, línea 21; Components/Routes.razor, líneas 16-26]**.
 
+El aislamiento por sesión es lógico —cada prueba ve solo sus filas—, pero para que varias escriban a
+la vez sobre el único archivo SQLite hay que habilitar además la concurrencia física: la aplicación
+pone la base en `journal_mode=WAL` al preparar el esquema y el fixture le pasa `Default Timeout=30`
+en la cadena de conexión
+**[E: src/MovilidadUrbana.Web/Infraestructura/Persistencia/PreparadorDeBaseDeDatos.cs, línea 28;
+tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs, línea 68]**.
+
 Esta es la técnica que hace que la corrida de chromium termine en 7 segundos con 22 casos **[V]**.
 Sin aislamiento, la única alternativa es correr en serie.
 
 ## 7.4. La aplicación hay que compilarla antes de probarla
 
-Las pruebas ejercitan el binario publicado, no `dotnet run`: se publica **autocontenido** para
-`linux-x64`, así el artefacto es idéntico en la máquina de desarrollo y en CI, y no depende del
-runtime instalado en la máquina que lo ejecuta
-**[E: scripts/publicar.sh]**. En CI se publica una sola vez y toda la matriz de navegadores reutiliza
-el mismo artefacto **[E: .github/workflows/e2e.yml, jobs `publicar` y `pruebas`]**.
+Las pruebas ejercitan el binario publicado, no `dotnet run`. Publicar no es un paso previo que haya
+que acordarse de correr: el fixture publica `src/MovilidadUrbana.Web` al arrancar la corrida, y
+`dotnet publish` es incremental, así que cuando no cambió nada tarda un par de segundos
+**[E: ServidorDeLaAplicacion.cs, líneas 121-162]**. Los navegadores corren la misma suerte: en lugar
+de exigir `pwsh playwright.ps1 install`, el fixture llama al instalador que trae el paquete
+`Microsoft.Playwright`, que es idempotente y baja solo el navegador de esta corrida
+**[E: ServidorDeLaAplicacion.cs, líneas 86-119]**.
+
+Hay dos artefactos posibles y conviene no confundirlos. El fixture publica **dependiente del
+framework**, sin `--runtime` ni `--self-contained`, para no tener que elegir un identificador de
+plataforma en la máquina de quien desarrolla **[E: ServidorDeLaAplicacion.cs, líneas 150-162]**. CI y
+`scripts/publicar.sh` publican **autocontenido para `linux-x64`**, que es lo que hace falta para
+correr dentro del contenedor de Playwright, sin runtime de .NET instalado; en CI se publica una sola
+vez y toda la matriz de navegadores reutiliza el mismo artefacto
+**[E: scripts/publicar.sh; .github/workflows/e2e.yml, jobs `publicar` y `pruebas`]**. El fixture
+acepta los dos: si encuentra el apphost lo ejecuta directo, y si no, arranca con
+`dotnet MovilidadUrbana.Web.dll` **[E: ServidorDeLaAplicacion.cs, líneas 198-220]**. Ojo con
+`scripts/publicar.sh`: no usa el SDK de la máquina sino `scripts/dotnet.sh`, que es un `docker run`
+sobre la imagen oficial del SDK **[E: scripts/dotnet.sh, líneas 11-19]**.
 
 El fixture lo levanta con `Process.Start`, fijando variables de entorno y —esto es lo importante— el
 directorio de trabajo:
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs, líneas 45-56
+// tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs, líneas 57-65
 var arranque = new ProcessStartInfo(ejecutable)
 {
     // ASP.NET Core toma el directorio actual como raíz de contenido: si se lo lanza desde
@@ -771,16 +821,35 @@ El fallo que evita ese `WorkingDirectory` es de los que cuestan una tarde: si el
 desde otra carpeta, `wwwroot` no se encuentra y los recursos estáticos se sirven **vacíos, con `200`
 y `Content-Length: 0`, no con `404`**. El circuito nunca arranca porque `blazor.web.js` llega en
 blanco, y en la consola del navegador no hay ningún error rojo que lo delate
-**[E: ../../Lab-E2E.WebBlazor/README.md]**.
+**[E: ../../README.md]**.
 
 Después de arrancar, el fixture sondea el puerto hasta 90 segundos y aborta con un mensaje claro si
-el proceso muere antes de escuchar **[E: ServidorDeLaAplicacion.cs, líneas 111-136]**. Un servidor
+el proceso muere antes de escuchar **[E: ServidorDeLaAplicacion.cs, líneas 240-264]**. Un servidor
 que no arranca tiene que fallar como «la aplicación terminó sola con código 134», no como 22 pruebas
 en rojo por timeout.
 
 Y si `URL_BASE` está definida, no se levanta nada: se prueba contra ese entorno
-**[E: ServidorDeLaAplicacion.cs, líneas 31-37]**. Un solo `if` convierte la misma suite en prueba de
+**[E: ServidorDeLaAplicacion.cs, líneas 42-48]**. Un solo `if` convierte la misma suite en prueba de
 humo de un despliegue (**ESC-04**).
+
+La base que ejercitan las pruebas es un único archivo SQLite, `datos-e2e/movilidad.db` en la raíz del
+repositorio, y el fixture no la deja librada a la configuración de la aplicación: se la impone por
+entorno con `ConnectionStrings__BaseDeDatos` al lanzar el proceso
+**[E: ServidorDeLaAplicacion.cs, líneas 67-68, 182-184]**. Es una de las siete variables con las que
+se gobierna el fixture sin tocar código:
+
+| Variable | Por defecto | Efecto |
+| --- | --- | --- |
+| `URL_BASE` | *(vacía)* | Con valor, no publica ni levanta nada: prueba contra ese entorno |
+| `PUERTO` | `4173` | Puerto local en el que escucha la aplicación bajo prueba |
+| `PUBLICAR_ANTES_DE_PROBAR` | `true` | En `false` no publica y usa lo que ya haya en la carpeta; es lo que hace CI |
+| `INSTALAR_NAVEGADORES` | `true` | En `false` no llama al instalador de Playwright |
+| `CARPETA_APLICACION` | `publicacion/` en la raíz | Dónde se publica y desde dónde se ejecuta el binario |
+| `BASE_DE_DATOS` | `datos-e2e/movilidad.db` | Archivo SQLite que el fixture le impone a la aplicación |
+| `EMULAR_MOVIL` | `false` | Chromium con el descriptor de un Pixel 7 |
+
+**[E: ServidorDeLaAplicacion.cs, líneas 42, 50, 99, 135, 183-184, 192-195; PruebaE2E.cs, línea 22;
+.github/workflows/e2e.yml, línea 226]**
 
 ## 7.5. El enlace de datos tiene que escuchar el evento correcto
 
@@ -814,7 +883,8 @@ prueba que falla siempre: entrena al equipo a reintentar la corrida en lugar de 
 | Click durante una animación | Falla al azar en modales y desplegables | Estado del componente en vez de JavaScript de terceros ([§7.8](#78-menos-javascript-menos-intermitencia)) |
 | Cultura o zona horaria de la máquina | Falla en un runner y pasa en otro | Fijar `Locale` y `TimezoneId` en el contexto **[E: PruebaE2E.cs, líneas 46-47]** |
 | Emulación móvil que cae en silencio a escritorio | La prueba pasa, pero no probó lo que decía | Fallar explícitamente si falta el descriptor **[E: PruebaE2E.cs, líneas 31-35]** |
-| `/dev/shm` chico dentro de un contenedor | Chromium muere a mitad de la corrida | `--disable-dev-shm-usage` o más `--shm-size`; medido innecesario a esta escala **[E: ../../Lab-E2E.WebBlazor/README.md]** |
+| Causa desconocida, y solo ocurre en CI | Falla una vez cada tantas corridas, nunca en la máquina propia | Abrir la traza del caso fallido ([§7.11](#711-la-traza-y-por-qué-hay-que-escribirla-a-mano)) |
+| `/dev/shm` chico dentro de un contenedor | Chromium muere a mitad de la corrida | `--disable-dev-shm-usage` o más `--shm-size`; medido innecesario a esta escala **[E: ../../README.md]** |
 
 El caso de la emulación móvil es instructivo porque el error es del tipo peor: la prueba en verde
 que no probó nada. Si el descriptor `Pixel 7` no estuviera disponible, la configuración caería a
@@ -826,16 +896,21 @@ escritorio. El laboratorio prefiere que reviente **[E: PruebaE2E.cs, líneas 31-
 NUnit no paraleliza por defecto; hay que pedirlo con atributos de ensamblado:
 
 ```csharp
-// tests/MovilidadUrbana.E2ETests/Infraestructura/ParalelismoDelEnsamblado.cs
+// tests/MovilidadUrbana.E2ETests/Infraestructura/ParalelismoDelEnsamblado.cs, línea 12
 [assembly: Parallelizable(ParallelScope.Fixtures)]
-[assembly: LevelOfParallelism(3)]
 ```
+
+El **alcance** del paralelismo va en el código, porque es una decisión de diseño de la suite. La
+**cantidad** de workers va en `pruebas.runsettings` y en ningún otro lado
+**[E: pruebas.runsettings, líneas 20-26]**: NUnit también admite declararla por atributo con
+`[assembly: LevelOfParallelism(n)]`, y tener el número en los dos lugares deja dos valores que
+pueden divergir sin que nada avise. **[C]**
 
 `ParallelScope.Fixtures` significa **clases en paralelo entre sí, casos de cada clase en secuencia**.
 Subirlo a `ParallelScope.Children` rompe la integración de Playwright con NUnit, que lleva un
 registro de servicios por worker: la corrida falla con `The given key 'Browser' was not present in
 the dictionary` y `Collection was modified; enumeration operation may not execute`
-**[E: ParalelismoDelEnsamblado.cs; ../../Lab-E2E.WebBlazor/README.md]**.
+**[E: ParalelismoDelEnsamblado.cs; ../../README.md]**.
 
 Es una diferencia real con `fullyParallel: true` del runner de JavaScript, que reparte caso por caso.
 Con tres clases de prueba, el límite práctico es que la corrida dura lo que dura la clase más lenta.
@@ -849,7 +924,7 @@ estado del componente, sin el bundle de JavaScript de Bootstrap
 **[E: src/MovilidadUrbana.Web/Components/Layout/MainLayout.razor, líneas 5-8]**. La consecuencia para
 las pruebas es que desaparece una clase entera de carreras: el click que llega durante la animación
 de apertura de un modal, y el orden de los manejadores de `data-bs-dismiss`, que en la versión
-estática del laboratorio hubo que corregir **[E: ../../Lab-E2E.WebBlazor/README.md]**.
+estática del laboratorio hubo que corregir **[E: ../../README.md]**.
 
 Aparece a cambio otra obligación, y es la que resuelve `IrPorMenuAsync`: en viewport chico el menú
 viene colapsado, así que hay que desplegarlo antes de navegar
@@ -860,9 +935,10 @@ viene colapsado, así que hay que desplegarlo antes de navegar
 
 | Contexto | Comando | Requisitos |
 | --- | --- | --- |
-| **CTX-01** Visual Studio | *Test > Explorador de pruebas*, tras publicar y ejecutar `playwright.ps1 install` | SDK y Visual Studio; el navegador sale del `.runsettings` **[E: ../../Lab-E2E.WebBlazor/README.md]** |
-| **CTX-01** Línea de comandos | `scripts/publicar.sh` y luego `dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings` | SDK de .NET y navegadores instalados |
-| **CTX-01** Sin nada instalado | `scripts/publicar.sh` y luego `scripts/pruebas.sh firefox` | Solo Docker: la imagen oficial de Playwright trae las librerías del sistema y el script instala el SDK en `.dotnet/` **[E: scripts/pruebas.sh]** |
+| **CTX-01** Visual Studio | *Test > Explorador de pruebas*, sin pasos previos | SDK y Visual Studio; el fixture publica e instala el navegador, que sale del `.runsettings` **[E: ServidorDeLaAplicacion.cs, líneas 37-54]** |
+| **CTX-01** Línea de comandos | `dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings` | Solo el SDK de .NET: publicar e instalar el navegador los hace el fixture ([§7.4](#74-la-aplicación-hay-que-compilarla-antes-de-probarla)) |
+| **CTX-01** Unitarias | `dotnet test tests/MovilidadUrbana.UnitTests` | Solo el SDK: ni navegador ni aplicación, 49 casos en milisegundos |
+| **CTX-01** Sin nada instalado | `scripts/pruebas.sh firefox` | Solo Docker: la imagen oficial de Playwright trae las librerías del sistema y el script instala el SDK en `.dotnet/` **[E: scripts/pruebas.sh]** |
 | **CTX-03** Entorno desplegado | `URL_BASE=https://ejemplo.test scripts/pruebas.sh chromium` | Nada local: no se publica ni se levanta la aplicación |
 | **CTX-04** Móvil | `EMULAR_MOVIL=true scripts/pruebas.sh` | Chromium con el descriptor de un Pixel 7 |
 
@@ -884,16 +960,54 @@ En orden, del más barato al más caro **[C]**:
    la máquina propia muestra en segundos lo que el log no dice.
 4. **Depurar con puntos de interrupción** desde el IDE, que es exactamente la razón por la que este
    laboratorio eligió el binding de .NET ([§4.1](#41-la-primera-decisión-dónde-vive-el-proyecto)).
-5. **Leer el TRX de CI**, que queda como artefacto de la corrida
-   **[E: .github/workflows/e2e.yml, líneas 200-207]**.
+5. **Abrir la traza del caso fallido**, que es lo más cerca que se llega de haber estado mirando
+   la pantalla: `playwright show-trace resultados/trazas/<caso>.zip` reproduce el DOM paso a paso,
+   con captura en cada acción, la red y la consola. En CI viaja dentro del artefacto de resultados
+   **[E: .github/workflows/e2e.yml, líneas 236-243]**.
+6. **Leer el TRX**, que resume qué casos fallaron y con qué mensaje.
 
-Sobre trazas y video: el runner de JavaScript los captura por configuración
-(`trace: 'on-first-retry'`). El adaptador de .NET **no** expone esas opciones en el `.runsettings`
-—solo reconoce `BrowserName`, `ExpectTimeout` y `LaunchOptions`
-**[E: .nuget/microsoft.playwright.testadapter/1.62.0/lib/netstandard2.0/Microsoft.Playwright.TestAdapter.dll]**—,
-así que capturarlas requiere código propio en la clase base: `Context.Tracing.StartAsync` en el
-`[SetUp]` y `StopAsync` en el `[TearDown]`. **[C]** El laboratorio no lo implementa, y es una mejora
-razonable si la suite crece ([§9.3](#mejoras-propuestas)).
+## 7.11. La traza, y por qué hay que escribirla a mano
+
+El runner de JavaScript captura trazas por configuración, con `trace: 'on-first-retry'`. El
+adaptador de .NET no ofrece nada equivalente: solo reconoce `BrowserName`, `ExpectTimeout` y
+`LaunchOptions` en el `.runsettings`
+**[E: .nuget/microsoft.playwright.testadapter/1.62.0/lib/netstandard2.0/Microsoft.Playwright.TestAdapter.dll]**.
+El ciclo de vida de la traza queda entonces en la clase base, igual que el del servidor
+([§7.4](#74-la-aplicación-hay-que-compilarla-antes-de-probarla)).
+
+```csharp
+// tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs, líneas 95-118 (extracto)
+[TearDown]
+public async Task GuardarLaTrazaSiFalloAsync()
+{
+    if (!_trazando) return;
+    _trazando = false;
+
+    var fallo = TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed;
+    if (!fallo)
+    {
+        await Context.Tracing.StopAsync();   // pasó: se descarta
+        return;
+    }
+
+    await Context.Tracing.StopAsync(new() { Path = archivo });
+}
+```
+
+La grabación arranca en el `[SetUp]`, después de la cookie de sesión, y **se hace en todos los
+casos**. No hay alternativa: sin reintentos no existe el `on-first-retry`, y una traza que empieza
+cuando el caso ya falló llega tarde. Lo que se decide al final es si se conserva. En el laboratorio
+esa grabación permanente cuesta unos 2 segundos sobre los 22 casos de chromium **[V]**, y se apaga
+con `TRAZAR=false` **[E: PruebaE2E.cs, líneas 24-29]**.
+
+El archivo queda en `resultados/trazas/<nombre completo del caso>.zip`, la misma carpeta donde el
+`.runsettings` deja los TRX, para que CI suba todo con un único paso
+**[E: pruebas.runsettings; .github/workflows/e2e.yml, líneas 236-243]**. Una corrida en verde no
+crea siquiera la carpeta.
+
+Vale la pena mirar el archivo de traza como lo que es: **el estado del navegador reconstruible fuera
+de la máquina donde falló**. Es la respuesta al caso clásico —la prueba que solo falla en CI— que
+antes obligaba a agregar capturas de pantalla a mano y adivinar el resto.
 
 > **Preguntas guía de §7**
 >
@@ -935,7 +1049,12 @@ flowchart TD
     CRON["schedule<br/>03:15 UTC"] --> E2E
     CI -->|workflow_call| E2E["e2e.yml<br/>CÓMO se corren las E2E<br/>(única definición)"]
     VE -->|workflow_call con url-base| E2E
-    E2E --> J1["publicar"] --> J2["preparar matriz"] --> J3["pruebas × navegador"] --> J4["reporte unificado"]
+    E2E --> J1["publicar<br/>sin needs; se saltea con url-base"]
+    E2E --> J2["preparar matriz<br/>sin needs: arranca junto con publicar"]
+    J1 --> J3["pruebas × navegador<br/>needs: publicar, preparar"]
+    J2 --> J3
+    J2 --> J4["reporte unificado<br/>needs: preparar, pruebas"]
+    J3 --> J4
 ```
 
 ## 8.3. Los tres workflows del laboratorio
@@ -952,7 +1071,9 @@ Es el único lugar donde está escrito cómo se corren las pruebas
 | `referencia` | Rama, tag o SHA a probar | el del evento |
 | `retencion-dias` | Días de retención de los artefactos | `7` |
 
-La salida es `resultado`, que el workflow que lo invoca puede leer. Los cuatro jobs, en orden:
+La salida es `resultado`, que el workflow que lo invoca puede leer. Los cuatro jobs —`publicar` y
+`preparar` no declaran `needs` y arrancan a la vez; los otros dos esperan lo que su `needs` enumera
+**[E: .github/workflows/e2e.yml, líneas 151 y 247]**—:
 
 1. **`publicar`** compila la aplicación autocontenida y la sube como artefacto. Se saltea cuando hay
    `url-base`: contra un entorno desplegado no hay nada que compilar.
@@ -966,7 +1087,7 @@ Dos pasos de `pruebas` valen por sí solos. El primero traduce la configuración
 emulación, porque `mobile-chrome` no es un navegador sino chromium con un descriptor de dispositivo:
 
 ```yaml
-# .github/workflows/e2e.yml, líneas 153-161
+# .github/workflows/e2e.yml, líneas 176-184
 - name: Traducir la configuración a navegador y emulación
   shell: bash
   run: |
@@ -978,7 +1099,7 @@ emulación, porque `mobile-chrome` no es un navegador sino chromium con un descr
 ```
 
 El segundo devuelve el permiso de ejecución al binario, porque los artefactos de Actions se
-empaquetan en zip y pierden el bit de ejecución **[E: e2e.yml, líneas 183-186]**. Es el tipo de
+empaquetan en zip y pierden el bit de ejecución **[E: e2e.yml, líneas 216-219]**. Es el tipo de
 detalle que solo se aprende fallando.
 
 ### `ci.yml` — la política de integración
@@ -989,12 +1110,14 @@ detalle que solo se aprende fallando.
 | `push` a `main` | Las 4 configuraciones | Verificación completa de lo ya integrado |
 | `merge_group` | Las 4 configuraciones | Verificación al entrar en la cola de merge |
 
-Esa asimetría es una decisión de costo/beneficio explícita **[C]**: el 95 % de los defectos que
-detecta la suite los detecta chromium, y los específicos de motor —que existen— se pagan al integrar
-y en la corrida nocturna, no en cada push de cada rama.
+Esa asimetría es una decisión de costo/beneficio explícita **[C]**: la mayor parte de lo que la suite
+detecta ya aparece en chromium, y los defectos específicos de motor —que existen— se pagan al
+integrar y en la corrida nocturna, no en cada push de cada rama. La proporción no está medida en el
+laboratorio y no hace falta medirla para decidir: lo que sostiene el criterio es el costo de correr
+cuatro configuraciones por cada empujón a una rama de trabajo.
 
 ```yaml
-# .github/workflows/ci.yml, líneas 56-63
+# .github/workflows/ci.yml, líneas 66-73
 e2e:
   name: E2E
   needs: [compilacion]
@@ -1004,11 +1127,16 @@ e2e:
     referencia: ${{ github.event.pull_request.head.sha || github.sha }}
 ```
 
-Antes de gastar un runner con navegadores corre `compilacion`, que construye la solución con
-`-warnaserror` y lista las pruebas con `dotnet test --list-tests`. Ese segundo paso es el
+Antes de gastar un runner con navegadores corre `compilacion`, que hace tres cosas baratas: compila
+la solución con `-warnaserror`, ejecuta las **pruebas unitarias** sobre las reglas de dominio, y
+lista las E2E con `dotnet test --list-tests` **[E: ci.yml, líneas 59-79]**. El último paso es el
 equivalente del `playwright test --list` del runner de JavaScript: comprueba que el descubrimiento
-funcione sin levantar navegadores ni la aplicación **[E: ci.yml, líneas 49-55]**. Un error de
-compilación que hoy falla en 40 segundos, sin ese job fallaría después de instalar Chromium.
+funcione sin levantar navegadores ni la aplicación. Un error de compilación —o una regla de dominio
+rota— falla acá en menos de un minuto; sin este job fallaría después de instalar Chromium.
+
+El orden importa y no es casual: **lo barato primero, y que lo caro dependa de lo barato**. Es el
+mismo criterio con el que se decide qué probar en cada nivel ([§5.1](#51-el-criterio-de-selección)),
+aplicado al pipeline.
 
 ### `verificacion-entorno.yml` — el mismo motor, otro objetivo
 
@@ -1030,23 +1158,28 @@ flowchart TD
     B -->|pasa| C["ci.yml: e2e → e2e.yml (chromium)"]
     C -->|falla| X
     C -->|pasa| D["comentario-en-pr<br/>deja o actualiza el resultado en el PR"]
-    C --> E["ci-ok<br/>resume todos los jobs"]
+    C --> E["ci-ok<br/>needs: compilacion, e2e"]
+    B --> E
     E -->|rojo| X
     E -->|verde| F["✅ merge habilitado"]
     F --> G["merge_group / push a main<br/>→ las 4 configuraciones"]
 ```
 
 El detalle que hace mantenible este esquema es `ci-ok`
-**[E: .github/workflows/ci.yml, líneas 113-131]**: un job final que depende de todos los demás,
-comprueba que ninguno falló y no hace nada más.
+**[E: .github/workflows/ci.yml, líneas 127-147]**: un job final que declara
+`needs: [compilacion, e2e]`, comprueba que ninguno de esos dos falló y no hace nada más. Cubre los
+jobs que verifican el cambio, no todos los del workflow: `comentario-en-pr` queda afuera a propósito
+—que no se pueda comentar el PR no dice nada sobre el código—. El precio de esta forma es explícito:
+un job nuevo que deba bloquear el merge hay que sumarlo a mano al `needs` y al bucle de
+comprobación, porque `ci-ok` no descubre jobs solo.
 
 ```yaml
-# .github/workflows/ci.yml, líneas 114-131 (extracto)
+# .github/workflows/ci.yml, líneas 127-147 (extracto)
 ci-ok:
   name: CI aprobada
   needs: [compilacion, e2e]
   if: always()
-  runs-on: [self-hosted, i7infra-dev]
+  runs-on: ubuntu-latest
   steps:
     - name: Comprobar que ningún job previo falló
       shell: bash
@@ -1073,9 +1206,9 @@ Tres cuidados más, todos visibles en el archivo:
 - **`skipped` cuenta como aceptable** en la comprobación, porque hay jobs que legítimamente no
   corren —por ejemplo con un PR en borrador, gracias al `if` de `compilacion`—.
 - **El comentario en el PR se limita a ramas del propio repositorio**
-  **[E: ci.yml, líneas 69-72]**: un pull request desde un fork no recibe permisos de escritura, así
+  **[E: ci.yml, líneas 79-82]**: un pull request desde un fork no recibe permisos de escritura, así
   que sin esa condición el job fallaría por permisos en cada contribución externa. El comentario
-  además se actualiza en lugar de acumular uno por corrida **[E: ci.yml, líneas 106-111]**.
+  además se actualiza en lugar de acumular uno por corrida **[E: ci.yml, líneas 119-124]**.
 
 ## 8.5. Ejecución a pedido (`workflow_dispatch`)
 
@@ -1143,7 +1276,7 @@ gh run watch
 ```
 
 Y desde otro repositorio, invocando la definición reutilizable como una dependencia
-**[E: ../../Lab-E2E.WebBlazor/README.md]**:
+**[E: ../../README.md]**:
 
 ```yaml
 jobs:
@@ -1163,28 +1296,63 @@ cuatro configuraciones sin que nadie espere el resultado.
 | --- | --- | --- |
 | `concurrency` por rama, cancelando en PR y conservando en `main` | `ci.yml` 26-28, `e2e.yml` 62-64 | Un push nuevo vuelve obsoleta la corrida anterior; en `main` el historial de verificación se conserva |
 | `permissions` mínimos | `ci.yml` 30-31, y `pull-requests: write` solo en el job que comenta | El token del workflow no necesita escribir en el repositorio para correr pruebas |
-| Verificar que el SDK del runner coincida con el `TargetFramework` | `e2e.yml` 92-99 | Falla con un mensaje claro en lugar de un error de compilación confuso |
-| Navegadores instalados por el CLI del propio paquete | `e2e.yml` 166-174 | Baja la build que corresponde a la versión de la biblioteca: no se pueden desincronizar |
+| Verificar que el SDK del runner coincida con el `TargetFramework` | `e2e.yml` 102-109 | Falla con un mensaje claro en lugar de un error de compilación confuso |
+| Navegadores instalados por el CLI del propio paquete | `e2e.yml` 199-207 | Baja la build que corresponde a la versión de la biblioteca: no se pueden desincronizar |
 | Compilar una vez, probar muchas | jobs `publicar` + `pruebas` | La matriz reutiliza el artefacto; además garantiza que todas prueban el mismo binario |
 | `paths-ignore` para documentación | `ci.yml` 15-18 | Un cambio en un `.md` no justifica una corrida de navegadores |
 | `timeout-minutes` en todos los jobs | todo `e2e.yml` | Un job colgado no ocupa el runner indefinidamente |
-| `fail-fast: false` en la matriz | `e2e.yml` 143-146 | Se ven todas las configuraciones que fallan, no solo la primera |
-| Job final que resume (`ci-ok`) | `ci.yml` 113-131 | Un único check obligatorio, estable frente a cambios de la matriz |
+| `fail-fast: false` en la matriz | `e2e.yml` 159-162 | Se ven todas las configuraciones que fallan, no solo la primera |
+| Job final que resume (`ci-ok`) | `ci.yml` 127-147 | Un único check obligatorio, estable frente a cambios de la matriz |
 
-### Sobre el runner autoalojado
+### Sobre el runner
 
-Los jobs corren en `runs-on: [self-hosted, i7infra-dev]`, **directamente y no dentro de un
-contenedor**. El motivo está documentado y es concreto: ese runner es él mismo un contenedor y no
-tiene montado el socket de Docker, así que un job con `container:` ni siquiera llega a arrancar
-—falla en *Initialize containers* con `failed to connect to the docker API at
-unix:///var/run/docker.sock`— **[E: .github/workflows/e2e.yml, líneas 11-14; ../../Lab-E2E.WebBlazor/README.md]**.
+Los jobs corren en los runners alojados por GitHub —`runs-on: ubuntu-latest`— y encima de cada uno
+quedó comentada la línea del runner autoalojado del laboratorio
+**[E: .github/workflows/ci.yml, líneas 38-41]**:
 
-Tampoco hace falta: el runner corre Ubuntu 24.04 con el SDK de .NET y Node ya instalados, y los
-navegadores los instala Playwright en el propio job, quedando cacheados para las corridas siguientes
-**[E: ../../Lab-E2E.WebBlazor/README.md]**.
+```yaml
+    # runs-on: [self-hosted, i7infra-dev]
+    runs-on: ubuntu-latest
+```
 
-Quien adapte estos workflows a runners de GitHub tiene que cambiar `runs-on` por `ubuntu-latest` y
-agregar `actions/setup-dotnet`, porque el SDK ya no viene puesto. **[C]**
+Descomentar una y comentar la otra alcanza para volver al runner propio. Vale la pena entender qué
+cambia con cada opción, porque es la decisión que más condiciona los tiempos de una suite E2E:
+
+| | Runner de GitHub | Runner autoalojado |
+| --- | --- | --- |
+| SDK de .NET | Hay que pedirlo con `actions/setup-dotnet` **[E: e2e.yml, líneas 169-174]** | Puede venir instalado en la máquina |
+| Navegadores | Se bajan en cada job salvo que se cachee | La caché sobrevive entre corridas si la máquina es de larga vida |
+| Aislamiento | Máquina limpia por job | Estado compartido: ventaja para la caché, riesgo para la reproducibilidad |
+| Costo | Minutos facturados o cuota del plan | Infraestructura propia |
+
+El cambio de runner obligó a agregar dos pasos que no hacían falta antes. El SDK se pide
+explícitamente, porque la imagen de GitHub no garantiza la versión que necesita el proyecto. Y los
+navegadores se cachean con `actions/cache`, con una clave apoyada en el `.csproj`
+**[E: e2e.yml, líneas 190-197]**:
+
+```yaml
+# .github/workflows/e2e.yml, líneas 195-197
+uses: actions/cache@v6
+with:
+  path: ~/.cache/ms-playwright
+  key: playwright-${{ runner.os }}-${{ env.NAVEGADOR }}-${{ hashFiles('tests/MovilidadUrbana.E2ETests/MovilidadUrbana.E2ETests.csproj') }}
+```
+
+Esa clave es lo que hace correcta a la caché: cambia cuando cambia la versión de Playwright en el
+`.csproj`, que es exactamente cuando cambian las builds de los navegadores. Una clave fija
+—`playwright-cache` a secas— serviría navegadores viejos a una biblioteca nueva, y el fallo
+aparecería como un error de protocolo difícil de leer. **[C]**
+
+Nada corre dentro de un contenedor de job, y el motivo viene del runner autoalojado: esa máquina es
+ella misma un contenedor y no tiene montado el socket de Docker, así que un job con `container:` ni
+siquiera llega a arrancar —falla en *Initialize containers* con `failed to connect to the docker API
+at unix:///var/run/docker.sock`— **[E: ../../README.md, sección «Runner»]**.
+
+Sobre `/dev/shm`: dentro de un contenedor queda en 64 MB, y es la causa clásica de que Chromium
+muera a mitad de una corrida. En el laboratorio se midió —con `/dev/shm` limitado a 64 MB las 22
+pruebas de chromium pasan igual—, así que a esta escala no hace falta `--disable-dev-shm-usage`
+**[E: ../../README.md]**. Si esa intermitencia aparece, las dos salidas son ese
+argumento de lanzamiento o más `--shm-size` para el contenedor.
 
 > **Preguntas guía de §8**
 >
@@ -1201,7 +1369,7 @@ agregar `actions/setup-dotnet`, porque el SDK ya no viene puesto. **[C]**
 
 Estado registrado en el repositorio del laboratorio el 2026-08-23, con las imágenes
 `mcr.microsoft.com/dotnet/sdk:10.0` (SDK 10.0.400) y `mcr.microsoft.com/playwright:v1.62.1-noble`
-**[E: ../../Lab-E2E.WebBlazor/README.md, sección «Evidencia»]**:
+**[E: ../../README.md, sección «Evidencia»]**:
 
 | Comando | Resultado |
 | --- | --- |
@@ -1215,50 +1383,64 @@ Son 22 casos por cada una de las 4 configuraciones: 88 ejecuciones. El conteo de
 usa esta guía (4 + 9 + 9 = 22) se comprobó contra los archivos de prueba en la elaboración del
 documento.
 
+El 2026-08-24, tras unificar la declaración de paralelismo, incorporar la captura de traza y sumar
+el proyecto de unitarias, se repitió la comprobación en la misma máquina y con las mismas imágenes
+**[V]**:
+
+| Comando | Resultado |
+| --- | --- |
+| `scripts/dotnet.sh dotnet build Lab-E2E.WebBlazor.sln --configuration Release -warnaserror` | Build succeeded, 0 warnings, 0 errors — los 3 proyectos |
+| `scripts/dotnet.sh dotnet test tests/MovilidadUrbana.UnitTests --configuration Release` | Passed! — Failed: 0, Passed: 49, Duration: 27 ms |
+| `scripts/pruebas.sh chromium` | Passed! — Failed: 0, Passed: 22, Duration: 9 s |
+
+La captura de traza se verificó con un caso que falla a propósito, agregado y quitado para la
+comprobación: dejó `resultados/trazas/…FallaAProposito.zip` de 138 KB, con `trace.trace`,
+`trace.network`, `trace.stacks` y los recursos de pantalla. Una corrida en verde no crea la carpeta.
+La diferencia de 7 a 9 segundos en chromium es el costo de grabar siempre.
+
 ## 9.2. Qué no está verificado
 
 | Ítem | Estado |
 | --- | --- |
-| Ejecución desde el Explorador de pruebas de Visual Studio | **No verificado**: no hay Windows ni Visual Studio en la máquina donde se construyó el laboratorio **[E: ../../Lab-E2E.WebBlazor/README.md]** |
-| Comportamiento real de los tres workflows en GitHub Actions | **No verificado**: solo se validó la sintaxis YAML **[E: ../../Lab-E2E.WebBlazor/README.md]** |
+| Ejecución desde el Explorador de pruebas de Visual Studio | **No verificado**: no hay Windows ni Visual Studio en la máquina donde se construyó el laboratorio **[E: ../../README.md]** |
+| Apertura de la traza con `playwright show-trace` | **No verificado**: se comprobó el contenido del `.zip` —entradas y tamaño—, no el visor |
+| Comportamiento real de los tres workflows en GitHub Actions | **No verificado**: solo se validó la sintaxis YAML **[V]** |
+| Efecto de `NumberOfTestWorkers` sin el `.runsettings` | **No verificado**: sin `--settings`, la cantidad de workers la decide el valor por defecto de NUnit. Con tres clases de prueba no cambia nada observable |
 | Invocación de `e2e.yml` desde otro repositorio | **No verificado**: el ejemplo del README documenta la forma, no una corrida observada |
 | Referencias externas del [Anexo E](#anexo-e--fuentes) | **No consultadas en esta ejecución** (sin acceso a red). Se citan por su ubicación oficial, no por una lectura fechada |
 
-## 9.3. Observaciones
+## 9.3. Dos errores frecuentes, con su corrección
 
-Tres puntos detectados al construir esta guía, presentados como hechos separados de su
-interpretación:
+Los dos casos que siguen aparecieron en este laboratorio y valen como estudio porque no son errores
+de programación: son formas de deriva entre lo que la documentación dice y lo que el sistema hace.
+Ninguno rompía una prueba, y por eso pudieron durar.
 
-**Hecho.** El comentario que `ci.yml` deja en el pull request dice, cuando hay pruebas en rojo: *«El
-reporte HTML y las trazas están en los artefactos de la corrida»*
-**[E: .github/workflows/ci.yml, línea 96]**. Los artefactos que la corrida sube son TRX
-**[E: .github/workflows/e2e.yml, líneas 200-207]**, y el propio README aclara que con el binding de
-.NET no hay reporte HTML **[E: ../../Lab-E2E.WebBlazor/README.md]**.
-*Interpretación:* es un texto heredado de la versión con el runner de JavaScript; conviene corregirlo
-para que no mande a buscar artefactos que no existen.
+**La documentación promete un artefacto que no existe.** El comentario que `ci.yml` dejaba en el
+pull request decía, cuando había pruebas en rojo, que «el reporte HTML y las trazas» estaban en los
+artefactos de la corrida. Lo que la corrida subía eran TRX, y con el binding de .NET no hay reporte
+HTML: el texto venía heredado de la versión con el runner de JavaScript. Quien leyera ese comentario
+buscaría media hora un archivo inexistente. La corrección fue nombrar lo que sí se sube
+**[E: .github/workflows/ci.yml, línea 109]** —y, ya que estaba, implementar la traza que el mensaje
+prometía ([§7.11](#711-la-traza-y-por-qué-hay-que-escribirla-a-mano))—. La lección: **un mensaje de
+error es documentación, y envejece igual que el resto**.
 
-**Hecho.** El paralelismo está declarado en dos lugares con valores distintos:
-`<NumberOfTestWorkers>4</NumberOfTestWorkers>` en `pruebas.runsettings` y
-`[assembly: LevelOfParallelism(3)]` en `ParalelismoDelEnsamblado.cs`.
-*Interpretación:* cuál gana no se verificó. Con tres clases de prueba, ninguno de los dos valores
-limita hoy la corrida, así que la divergencia no tiene efecto observable; conviene igualarlos o
-dejar uno solo antes de que aparezca una cuarta clase.
-
-**Hecho.** No hay captura de trazas ni de video: el adaptador de .NET no expone esas opciones en el
-`.runsettings` y la clase base no las implementa.
-*Interpretación:* mientras la suite se diagnostique bien con el TRX y la reproducción local, no hace
-falta. Si aparece una intermitencia que solo ocurre en CI, capturar la traza en el `[TearDown]` de
-los casos fallidos es la mejora de mayor rendimiento.
+**El mismo parámetro declarado en dos lugares.** Convivían `<NumberOfTestWorkers>4</NumberOfTestWorkers>`
+en `pruebas.runsettings` y `[assembly: LevelOfParallelism(3)]` en `ParalelismoDelEnsamblado.cs`. Con
+tres clases de prueba ninguno de los dos limitaba nada, así que la divergencia no tenía efecto
+observable —y cuál de los dos gana nunca se verificó—. Habría empezado a importar con la cuarta
+clase, en el peor momento: cuando alguien estuviera buscando por qué la suite tarda de más. La
+corrección fue dejar el número en un solo archivo ([§7.7](#77-paralelismo-hasta-dónde-llega)). La
+lección: **una configuración duplicada no es redundancia, es una contradicción esperando fecha**.
 
 ### Mejoras propuestas
 
-Fuera del alcance de esta guía, ordenadas por relación entre costo y beneficio **[C]**:
+Fuera del alcance de esta guía **[C]**:
 
-1. Corregir el texto del comentario del PR (costo: una línea).
-2. Unificar la declaración de paralelismo.
-3. Capturar traza de Playwright en el `[TearDown]` cuando el caso falló, y subirla como artefacto.
-4. Agregar pruebas unitarias sobre `ReglasDeLocalidad` y `ReglasDeEncuesta`, para que las E2E puedan
-   quedarse con un caso de validación por pantalla en lugar de uno por regla.
+1. Publicar el TRX como *check* del pull request, para ver el caso fallido sin bajar artefactos.
+2. Subir la traza como artefacto **separado**, para poder descargarla sin traerse los TRX de todas
+   las configuraciones.
+3. Cubrir con unitarias también los servicios de aplicación (`ServicioDeLocalidades`,
+   `ServicioDeEncuestas`), hoy alcanzados solo por las E2E.
 
 ---
 
@@ -1270,6 +1452,10 @@ completarlo.
 ```csharp
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
+// Los casos usan `Regex` en las aserciones (§6.1) y acá no aparece su `using`: el laboratorio lo
+// declara una sola vez en el `.csproj`, con <Using Include="System.Text.RegularExpressions" /> en
+// el ItemGroup de usings globales (el extracto de §4.2 muestra solo el ItemGroup de paquetes).
+// Si tu proyecto no lo declara así, agregá `using System.Text.RegularExpressions;` donde lo uses.
 
 namespace MiApp.E2ETests;   // ¿Es el mismo namespace donde viven los casos y el [SetUpFixture]?
 
@@ -1300,18 +1486,36 @@ public abstract class PruebaE2E : PageTest
             Value = Guid.NewGuid().ToString("n"),
             Url = ServidorDeLaAplicacion.UrlBase
         }]);
+
+        // Se graba en todos los casos; abajo se decide cuáles se conservan.
+        await Context.Tracing.StartAsync(new() { Screenshots = true, Snapshots = true, Sources = true });
+    }
+
+    [TearDown]
+    public async Task GuardarLaTrazaSiFalloAsync()
+    {
+        var fallo = TestContext.CurrentContext.Result.Outcome.Status
+                    == NUnit.Framework.Interfaces.TestStatus.Failed;
+        if (!fallo)
+        {
+            await Context.Tracing.StopAsync();   // pasó: se descarta sin escribir nada
+            return;
+        }
+
+        // ¿Dónde la dejás? Conviene la misma carpeta que los TRX, para que CI suba todo junto.
+        await Context.Tracing.StopAsync(new() { Path = RutaDeLaTraza() });
     }
 
     protected async Task IrAAsync(string ruta)
     {
         await Page.GotoAsync(ruta);
-        await EsperarListaAsync();
+        await EsperarInteractivoAsync();
     }
 
     // ¿Qué señal observable dice que TU pantalla ya responde a la interacción?
     // Blazor interactive server: RendererInfo.IsInteractive publicado como atributo.
     // SPA: un atributo que el framework marca al hidratar. Server-side puro: no hace falta.
-    protected async Task EsperarListaAsync() =>
+    protected async Task EsperarInteractivoAsync() =>
         await Expect(Page.GetByTestId("estado-app")).ToHaveAttributeAsync("data-interactivo", "true");
 }
 ```
@@ -1351,7 +1555,9 @@ public class MiPantallaTests : PruebaE2E
 ## C.1. Antes de dar por terminado un caso nuevo (**ACT-01**)
 
 - [ ] El nombre del método es la frase del caso y el `[Description]` la explica sin jerga técnica.
-- [ ] Todos los localizadores son `data-testid` o roles accesibles; ninguno depende de una clase de CSS.
+- [ ] Todos los localizadores son `data-testid` o roles accesibles. Única excepción: el marcado de una
+      biblioteca de terceros que no controlamos, donde vale un selector CSS
+      ([§6.2](#62-localizadores-el-contrato-con-la-interfaz)).
 - [ ] Toda verificación usa `Expect`; no hay `Thread.Sleep` ni `WaitForTimeoutAsync`.
 - [ ] Hay al menos una aserción positiva, no solo negaciones.
 - [ ] Si el caso afirma persistencia, recarga la página y lo verifica.
@@ -1388,7 +1594,7 @@ public class MiPantallaTests : PruebaE2E
 | **Contexto de navegador** | Sesión aislada dentro de un mismo proceso de navegador: cookies y almacenamiento propios | *browser context* |
 | **Descriptor de dispositivo** | Conjunto de parámetros —viewport, user agent, touch— que emula un dispositivo concreto | *device descriptor* |
 | **E2E** | Prueba que ejercita un recorrido completo por la interfaz real sobre el sistema ensamblado | de extremo a extremo |
-| **Fixture** | En NUnit, la clase que agrupa casos (`[TestFixture]`); en Playwright JS, el recurso que el runner inyecta | — |
+| **Fixture** | En NUnit, la clase que agrupa casos (`[TestFixture]`) y también la clase de arranque del ensamblado (`[SetUpFixture]`); cuando esta guía dice «el fixture» a secas se refiere a la segunda, la que levanta y baja el servidor. En Playwright JS, el recurso que el runner inyecta | — |
 | **Headless** | Navegador que corre sin ventana visible | sin cabeza |
 | **Intermitente** | Prueba que pasa y falla sin cambios en el código | *flaky* |
 | **Localizador** | Descripción de cómo encontrar un elemento, resuelta en el momento de usarla | *locator* |
@@ -1412,13 +1618,13 @@ oficial y no por una lectura fechada ([§9.2](#92-qué-no-está-verificado)).
 | **GHA-4** | GitHub CLI — `gh workflow run`, `gh run watch`, en `https://cli.github.com/manual` | §8.5 |
 
 Las fuentes internas —archivos del laboratorio— se citan en línea con la marca **[E: ruta]** y son
-verificables abriendo el repositorio [Lab-E2E.WebBlazor](../../Lab-E2E.WebBlazor).
+verificables abriendo el repositorio [este mismo repositorio](../../README.md).
 
 # Anexo F — Ruta de lectura sugerida
 
 | Lector | Recorrido |
 | --- | --- |
-| Nunca escribió una E2E | [§1](#1-qué-es-una-prueba-e2e) → [§4](#4-anatomía-de-un-proyecto-e2e-en-net) → [§6](#6-cómo-se-escribe-un-caso) → [Anexo B](#anexo-b--plantilla-comentada-de-un-caso) → [§5](#5-qué-testear-y-qué-no) |
+| Nunca escribió una E2E | [§1](#1-qué-es-una-prueba-e2e) → [§4](#4-anatomía-de-un-proyecto-e2e-en-net) → [§7.1](#71-el-circuito-de-blazor-en-dos-frases) → [§7.2](#72-esperar-a-que-la-página-sea-interactiva) → [Anexo A](#anexo-a--plantilla-comentada-de-la-clase-base) → [§6](#6-cómo-se-escribe-un-caso) → [Anexo B](#anexo-b--plantilla-comentada-de-un-caso) → [§5](#5-qué-testear-y-qué-no) |
 | Viene de `@playwright/test` en JavaScript | [§4.1](#41-la-primera-decisión-dónde-vive-el-proyecto) → [§4.5](#45-el-archivo-de-configuración-de-corrida) → [§7.7](#77-paralelismo-hasta-dónde-llega) → [§7.10](#710-diagnosticar-una-prueba-en-rojo) |
 | Trabaja sobre Blazor Server | [§7](#7-lo-que-aparece-cuando-la-aplicación-tiene-servidor) completo, después [§5.2](#52-qué-cubre-el-laboratorio-y-por-qué) |
 | QA / analista de pruebas | [§1](#1-qué-es-una-prueba-e2e) → [§2](#2-marco-de-referencia) → [§5](#5-qué-testear-y-qué-no) → [Anexo C](#anexo-c--listas-de-verificación) |

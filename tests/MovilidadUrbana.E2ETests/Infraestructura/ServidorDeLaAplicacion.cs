@@ -34,6 +34,9 @@ public class ServidorDeLaAplicacion
     /// <summary>URL contra la que corren todas las pruebas.</summary>
     public static string UrlBase { get; private set; } = string.Empty;
 
+    /// <summary>Raíz del repositorio: la usan la publicación, la base de datos y las trazas.</summary>
+    public static string RaizDelRepositorio => UbicarLaRaizDelRepositorio();
+
     [OneTimeSetUp]
     public async Task LevantarAsync()
     {

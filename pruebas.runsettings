@@ -17,6 +17,11 @@
     </LaunchOptions>
   </Playwright>
 
+  <!--
+    Cantidad de clases de prueba que corren a la vez. Es el único lugar donde se declara: el
+    alcance del paralelismo (`ParallelScope.Fixtures`) vive en ParalelismoDelEnsamblado.cs, pero
+    el número no se repite ahí para que no puedan divergir.
+  -->
   <NUnit>
     <NumberOfTestWorkers>4</NumberOfTestWorkers>
   </NUnit>

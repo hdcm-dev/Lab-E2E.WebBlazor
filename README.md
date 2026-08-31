@@ -45,26 +45,95 @@ src/MovilidadUrbana.Web/
 tests/MovilidadUrbana.E2ETests/
   Infraestructura/
     ServidorDeLaAplicacion.cs   Levanta y baja la aplicación bajo prueba
-    PruebaE2E.cs                Base: sesión por prueba, espera de interactividad, menú
-    ParalelismoDelEnsamblado.cs Configuración de paralelismo de NUnit
+    PruebaE2E.cs                Base: sesión por prueba, espera de interactividad, menú, traza
+    ParalelismoDelEnsamblado.cs Alcance del paralelismo de NUnit
   NavegacionTests.cs    Portada, menú y ruta inexistente
   LocalidadesTests.cs   ABM completo y aislamiento entre sesiones
   EncuestaTests.cs      Asistente completo
+tests/MovilidadUrbana.UnitTests/
+  ReglasDeLocalidadTests.cs   Bordes de cada validación del ABM, sin navegador
+  ReglasDeEncuestaTests.cs    Rangos de la encuesta, paso por paso
 scripts/
   dotnet.sh             Ejecuta el SDK de .NET dentro del contenedor oficial
   publicar.sh           Publica el binario autocontenido que usa CI, en `publicacion/`
   pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local)
 Guides/
-  Beginner-Guide.md     Guía de estudio para quien nunca escribió una prueba E2E
-  Quick-Guide-ABM.md    Receta breve para montar el E2E de un ABM, para quien ya conoce el tema
+  E2E-Guide/                      Pruebas de extremo a extremo: guía de estudio y receta de ABM
+  Estandares-Modelo-Ramas-Guide/  Modelos de ramas, integración y releases, con sus anexos
+  GitFlow-Practice-Guide/         Ocho escenarios del modelo adoptado, sobre un repositorio real
+  GitHubFlow-Practice-Guide/      Los mismos ocho, sobre el modelo que no se adoptó
 pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
 .github/workflows/      CI, workflow reutilizable de E2E y verificación de entornos
 ```
 
-En la solución, los archivos que no pertenecen a ningún proyecto están agrupados en tres carpetas
-virtuales —`github-workflow`, `Guides` y `scripts`—, para poder abrirlos desde el Explorador de
-soluciones sin salir de Visual Studio. Son carpetas de solución: no se compilan ni cambian nada del
-build.
+Son tres proyectos: la aplicación, las pruebas de extremo a extremo y las unitarias sobre las
+reglas de dominio. La aplicación sigue siendo **un solo proyecto** con las capas en carpetas; lo que
+se sumó son proyectos de prueba.
+
+Los archivos que no pertenecen a ningún proyecto están agrupados en carpetas de solución
+—`github-workflow`, `Guides` y `scripts`—, para poder abrirlos desde el Explorador de soluciones sin
+salir de Visual Studio. `Guides` reproduce el árbol del disco: una carpeta por guía, y los anexos
+de la guía de estudio colgando de ella. Son carpetas de solución: no se compilan ni cambian nada
+del build.
+
+## Guías
+
+La documentación de estudio vive en [Guides/](Guides/) y se lee desde el repositorio o desde el
+Explorador de soluciones. Son dos familias en cuatro carpetas: una sobre pruebas de extremo a
+extremo, y otra sobre el modelo de ramas —una guía de estudio y dos guías prácticas—.
+
+### [Guides/E2E-Guide/](Guides/E2E-Guide/) — pruebas de extremo a extremo
+
+| Documento | Para quién | Qué deja |
+| --- | --- | --- |
+| [Beginner-Guide.md](Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Nueve capítulos y seis anexos: qué es una E2E, marco de escenarios y actores, anatomía del proyecto en .NET, qué testear, cómo se escribe y estabiliza un caso, lo propio de una aplicación con servidor, y la integración con GitHub Actions |
+| [Quick-Guide-ABM.md](Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E | La receta corta para montar las de un ABM: siete pasos, las trampas de Blazor *interactive server* y una lista de verificación |
+
+### [Guides/Estandares-Modelo-Ramas-Guide/](Guides/Estandares-Modelo-Ramas-Guide/) — ramas, integración y releases
+
+Cómo se organiza el trabajo alrededor del código que estas pruebas verifican: qué rama recibe qué
+cambio, cuándo se corta una versión y qué tiene que estar en verde para que un merge ocurra.
+
+La carpeta se llama *Estandares-Modelo-Ramas* y no *GitFlow* a propósito: lo que documenta es la
+**elección** entre modelos. GitFlow es uno de los comparados —y tiene su [capítulo
+propio](Guides/Estandares-Modelo-Ramas-Guide/04-GitFlow.md)—, pero el modelo adoptado es otro:
+tronco con ramas de release.
+
+| # | Documento | De qué trata |
+| --- | --- | --- |
+| 01 | [Marco de referencia](Guides/Estandares-Modelo-Ramas-Guide/01-Marco-De-Referencia.md) | Escenarios, contextos y actores: el vocabulario que usa todo lo demás |
+| 02 | [Mapa conceptual](Guides/Estandares-Modelo-Ramas-Guide/02-Mapa-Conceptual.md) | Entradas por escenario, por rol y por artefacto |
+| 03 | [Fundamentos de Git](Guides/Estandares-Modelo-Ramas-Guide/03-Fundamentos-De-Git.md) | Merge, squash, rebase, cherry-pick y tags |
+| 04 | [GitFlow](Guides/Estandares-Modelo-Ramas-Guide/04-GitFlow.md) | El modelo original, sus reglas y la nota de 2020 de su autor |
+| 05 | [Cómo elegir el modelo](Guides/Estandares-Modelo-Ramas-Guide/05-Como-Elegir-El-Modelo.md) | GitHub Flow, GitFlow, GitLab Flow y tronco: comparación y criterio |
+| 06 | [Modelo adoptado](Guides/Estandares-Modelo-Ramas-Guide/06-Modelo-Adoptado.md) | Las siete reglas, guardarraíles y antipatrones |
+| 07 | [Integración y versionado](Guides/Estandares-Modelo-Ramas-Guide/07-Integracion-Y-Versionado.md) | Ambientes, promoción, versionado semántico y releases |
+| 08 | [Pull requests y pruebas](Guides/Estandares-Modelo-Ramas-Guide/08-Pull-Requests-Y-Pruebas.md) | Ciclo del pull request, protección de rama y qué verifica el pipeline |
+
+Los [anexos](Guides/Estandares-Modelo-Ramas-Guide/Anexos/) suman
+[glosario](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Glosario.md),
+[plantillas](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Plantillas.md),
+[listas de verificación](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Listas-De-Verificacion.md),
+[preguntas que forman criterio](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Preguntas-Frecuentes.md),
+[fuentes](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Fuentes.md) y tres
+[workflows de ejemplo](Guides/Estandares-Modelo-Ramas-Guide/Anexos/workflows/) listos para copiar.
+
+### Las dos guías prácticas
+
+Cada una es un recorrido de ocho escenarios ejecutables sobre un repositorio real, para un equipo
+de tres personas que rotan por los roles. Se practican sobre
+[`Lab-GitFlow`](https://github.com/hdcm-dev/Lab-GitFlow), con la aplicación de este laboratorio como
+sistema bajo prueba.
+
+| Guía | Qué ejercita |
+| --- | --- |
+| [GitFlow-Practice-Guide/](Guides/GitFlow-Practice-Guide/README.md) | El modelo adoptado, de la [preparación](Guides/GitFlow-Practice-Guide/00-Preparacion.md) al [cierre y auditoría](Guides/GitFlow-Practice-Guide/07-Cierre-Y-Auditoria.md), incluido el [PR que rompe la regresión](Guides/GitFlow-Practice-Guide/04-PR-Que-Rompe-La-Regresion.md), que es donde las E2E de este laboratorio entran en la historia |
+| [GitHubFlow-Practice-Guide/](Guides/GitHubFlow-Practice-Guide/README.md) | El modelo que **no** se adoptó, como línea de base: una sola rama de vida larga, [corrección hacia adelante](Guides/GitHubFlow-Practice-Guide/02-Correccion-Hacia-Adelante.md), [feature flag](Guides/GitHubFlow-Practice-Guide/04-Cambio-Grande-Con-Feature-Flag.md) y [reversión](Guides/GitHubFlow-Practice-Guide/05-Reversion.md) en lugar de releases. Sirve para medir qué agrega cada pieza del modelo adoptado |
+
+Las dos familias se leen bien juntas, y el punto de contacto es concreto: la [guía de estudio
+E2E](Guides/E2E-Guide/Beginner-Guide.md) explica qué verifica cada prueba y cómo se ata al pipeline;
+[pull requests y pruebas](Guides/Estandares-Modelo-Ramas-Guide/08-Pull-Requests-Y-Pruebas.md)
+explica cuándo esa verificación bloquea un merge y quién decide.
 
 ### Por qué las pruebas E2E son un proyecto de la solución
 
@@ -119,12 +188,18 @@ ejecución**). Para la configuración móvil, definí la variable de entorno `EM
 ### Desde la línea de comandos
 
 ```bash
+dotnet test tests/MovilidadUrbana.UnitTests                    # reglas de dominio, sin navegador
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings -- Playwright.BrowserName=firefox
 ```
 
 `scripts/publicar.sh` sigue existiendo para producir la publicación **autocontenida** que usa CI,
 pero para correr las pruebas no hay que invocarlo.
+
+Cuando un caso E2E falla queda su **traza de Playwright** en `resultados/trazas/<caso>.zip`, con el
+DOM paso a paso, la red y la consola. Se abre con `playwright show-trace <archivo>` o subiéndola a
+[trace.playwright.dev](https://trace.playwright.dev). Los casos que pasan no dejan nada, y la
+grabación se apaga con `TRAZAR=false`.
 
 ### Sin nada instalado (con Docker)
 
@@ -275,9 +350,9 @@ jobs:
 | `merge_group` | Igual que `push`, al entrar en la cola de merge |
 
 Antes de gastar un runner con navegadores corre `compilacion`, que construye la solución con
-`-warnaserror` y lista las pruebas con `dotnet test --list-tests` —el equivalente del
-`playwright test --list` del runner de JavaScript: comprueba que el descubrimiento funcione sin
-levantar navegadores ni la aplicación—. Al terminar, `comentario-en-pr` deja (o actualiza, no duplica) un comentario con el
+`-warnaserror`, ejecuta las **pruebas unitarias** —las reglas de dominio, en milisegundos— y lista
+las E2E con `dotnet test --list-tests` —el equivalente del `playwright test --list` del runner de
+JavaScript: comprueba que el descubrimiento funcione sin levantar navegadores ni la aplicación—. Al terminar, `comentario-en-pr` deja (o actualiza, no duplica) un comentario con el
 resultado y el enlace a la corrida, y `ci-ok` resume todos los jobs en un único check —que es el
 que conviene exigir en la regla de protección de rama, para no tener que actualizarla cada vez que
 cambia la matriz—.
@@ -362,6 +437,21 @@ $ EMULAR_MOVIL=true scripts/pruebas.sh chromium
 Son 22 pruebas por cada una de las 4 configuraciones: 88 en total, las mismas que cubría la versión
 con el runner de JavaScript. El descubrimiento que usa la CI también se comprobó
 (`dotnet test --list-tests`).
+
+El 2026-08-24, con las pruebas unitarias y la captura de traza ya incorporadas:
+
+```
+$ scripts/dotnet.sh dotnet test tests/MovilidadUrbana.UnitTests --configuration Release
+  Passed! - Failed: 0, Passed: 49, Skipped: 0, Total: 49, Duration: 27 ms
+
+$ scripts/pruebas.sh chromium
+  Passed! - Failed: 0, Passed: 22, Skipped: 0, Total: 22, Duration: 9 s
+```
+
+La traza se comprobó con un caso que falla a propósito, agregado y quitado para la prueba: dejó
+`resultados/trazas/…FallaAProposito.zip` de 138 KB con `trace.trace`, `trace.network` y los
+recursos de pantalla. Una corrida en verde no crea la carpeta. La grabación permanente cuesta unos
+2 segundos sobre los 22 casos de chromium.
 
 Lo que **no** se verificó desde acá: la ejecución desde el Explorador de pruebas de Visual Studio
 —no hay Windows ni Visual Studio en esta máquina— y el comportamiento real de los workflows, del

@@ -33,7 +33,7 @@ permissions:
 jobs:
   # Comprobaciones baratas: fallan en segundos y evitan gastar un runner con navegadores.
   compilacion:
-    name: Compilación
+    name: Compilación y unitarias
     if: ${{ github.event.pull_request.draft != true }}
     # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
     # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
@@ -56,7 +56,24 @@ jobs:
       - name: Compilar con los avisos tratados como error
         run: dotnet build Lab-E2E.WebBlazor.sln --configuration Release --no-restore -warnaserror
 
-      - name: Listar las pruebas (detecta que el descubrimiento funciona)
+      - name: Pruebas unitarias
+        # Las reglas de dominio se verifican acá, en milisegundos y sin navegador. Si una regla
+        # está rota, la corrida termina antes de gastar un runner con las E2E.
+        run: >-
+          dotnet test tests/MovilidadUrbana.UnitTests
+          --configuration Release --no-build
+          --logger "trx;LogFileName=unitarias.trx" --results-directory resultados
+
+      - name: Subir los resultados de las unitarias
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-unitarias
+          path: resultados
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Listar las pruebas E2E (detecta que el descubrimiento funciona)
         # Equivale al `playwright test --list` del runner de JavaScript: no levanta navegadores
         # ni la aplicación, solo comprueba que NUnit encuentre los casos.
         run: >-
@@ -106,7 +123,7 @@ jobs:
               '',
               ok
                 ? 'Todas las pruebas de extremo a extremo pasaron.'
-                : 'Hay pruebas en rojo. El reporte HTML y las trazas están en los artefactos de la corrida.',
+                : 'Hay pruebas en rojo. Los TRX y las trazas de los casos fallidos están en los artefactos **resultados-\*** de la corrida.',
             ].join('\n');
 
             const { owner, repo } = context.repo;

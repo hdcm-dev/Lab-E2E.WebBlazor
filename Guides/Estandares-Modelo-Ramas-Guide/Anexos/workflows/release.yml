@@ -1,0 +1,74 @@
+# Publicación de una versión.
+#
+# Se dispara al empujar un tag `v*`, que es el acto que numera una candidata o una versión. El
+# artefacto se construye **una sola vez** acá y se sube a la publicación de GitHub: los ambientes
+# promocionan ese binario, no lo recompilan. Recompilar por ambiente libera un binario distinto del
+# que se probó.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  # Verifica la referencia etiquetada con la matriz completa antes de publicar nada.
+  verificacion:
+    name: Verificación de la referencia etiquetada
+    uses: ./.github/workflows/e2e.yml
+    with:
+      navegadores: chromium,firefox,webkit,mobile-chrome
+      referencia: ${{ github.ref_name }}
+      retencion-dias: 30
+
+  publicar:
+    name: Construir y publicar el artefacto
+    needs: verificacion
+    runs-on: [self-hosted, i7infra-dev]
+    timeout-minutes: 30
+    # Sin `container:`: el runner `i7infra-dev` es él mismo un contenedor y no tiene montado el
+    # socket de Docker, así que un job con `container:` falla en *Initialize containers* antes de
+    # ejecutar un solo paso. No hace falta: el runner ya trae el SDK de .NET 10 sobre Ubuntu 24.04.
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Publicar el binario autocontenido
+        run: >-
+          dotnet publish src/MovilidadUrbana.Web
+          -c Release -r linux-x64 --self-contained
+          -o publicacion
+
+      - name: Empaquetar
+        shell: bash
+        run: tar -czf "movilidad-urbana-${{ github.ref_name }}-linux-x64.tar.gz" -C publicacion .
+
+      - name: Subir el artefacto a la corrida
+        uses: actions/upload-artifact@v7
+        with:
+          name: artefacto-${{ github.ref_name }}
+          path: movilidad-urbana-${{ github.ref_name }}-linux-x64.tar.gz
+          retention-days: 90
+
+      - name: Publicar la versión en GitHub
+        uses: actions/github-script@v9
+        env:
+          TAG: ${{ github.ref_name }}
+        with:
+          script: |
+            const tag = process.env.TAG;
+            // Toda versión con sufijo —`-rc1`, `-demo.1`— es una preliberación: en versionado
+            // semántico tiene menor precedencia que la versión limpia.
+            const preliberacion = tag.includes('-');
+            const { owner, repo } = context.repo;
+            await github.rest.repos.createRelease({
+              owner, repo,
+              tag_name: tag,
+              name: tag,
+              prerelease: preliberacion,
+              generate_release_notes: true,
+            });

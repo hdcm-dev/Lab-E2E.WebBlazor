@@ -8,10 +8,13 @@
 # La aplicación se publica una sola vez como binario autocontenido y todas las configuraciones de
 # navegador reutilizan ese artefacto: se compila una vez y se prueba muchas.
 #
-# Los jobs corren directamente sobre el runner y no dentro de un contenedor: el runner
-# `i7infra-dev` es él mismo un contenedor y no tiene acceso al demonio de Docker, así que
-# `container:` no es una opción. Ya trae el SDK de .NET 10 sobre Ubuntu 24.04; los navegadores los
-# pone Playwright.
+# Los jobs corren en los runners alojados por GitHub (`ubuntu-latest`), con la línea del runner
+# autoalojado del laboratorio comentada encima de cada uno. Por eso el SDK se pide con
+# `actions/setup-dotnet` y los navegadores se cachean: los runners de GitHub arrancan limpios.
+#
+# Nada corre dentro de un contenedor de job. El motivo viene del runner autoalojado: esa máquina es
+# ella misma un contenedor y no tiene montado el socket de Docker, así que un job con `container:`
+# ni siquiera llega a arrancar.
 name: E2E
 
 on:
@@ -234,6 +237,8 @@ jobs:
           -- Playwright.BrowserName=${{ env.NAVEGADOR }}
 
       - name: Subir los resultados
+        # Sube la carpeta entera: el TRX de la configuración y, si algún caso falló, su traza de
+        # Playwright en `trazas/*.zip` —que se abre con `playwright show-trace`—.
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
