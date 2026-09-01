@@ -71,6 +71,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\release.yml = Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\release.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub-Action-Guide", "GitHub-Action-Guide", "{9A5C7E14-6B23-4D98-B10F-3E7A4C85D2F6}"
+	ProjectSection(SolutionItems) = preProject
+		Guides\GitHub-Action-Guide\GitHub-Action-Guide.md = Guides\GitHub-Action-Guide\GitHub-Action-Guide.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHubFlow-Practice-Guide", "GitHubFlow-Practice-Guide", "{7C4E1F2A-9B65-4D30-8E71-2A5C0D9F4B18}"
 	ProjectSection(SolutionItems) = preProject
 		Guides\GitHubFlow-Practice-Guide\00-Preparacion.md = Guides\GitHubFlow-Practice-Guide\00-Preparacion.md
@@ -151,5 +156,6 @@ Global
 		{919497A5-466C-4F76-A422-ABDB5A85BBBC} = {0B59F1F9-B484-4C75-B971-118688D85FF7}
 		{28FBFA94-A1C7-4F6C-9D6C-52F3452BE849} = {919497A5-466C-4F76-A422-ABDB5A85BBBC}
 		{7C4E1F2A-9B65-4D30-8E71-2A5C0D9F4B18} = {E903B2C1-7088-49D1-9C0D-1BA347FE0A15}
+		{9A5C7E14-6B23-4D98-B10F-3E7A4C85D2F6} = {E903B2C1-7088-49D1-9C0D-1BA347FE0A15}
 	EndGlobalSection
 EndGlobal

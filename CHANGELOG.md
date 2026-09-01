@@ -9,6 +9,20 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-08-31
+
+### Añadido
+
+- **Guía de GitHub Actions** en `Guides/GitHub-Action-Guide/GitHub-Action-Guide.md`: guía de estudio
+  que va del marco conceptual —qué es un pipeline, una puerta y qué significa «continuo»— a la
+  anatomía de un workflow sección por sección, y de ahí a escenarios completos (compilar y probar,
+  E2E, publicar un paquete, subir un sitio, imagen de contenedor, app móvil). Los ejemplos salen de
+  workflows que existen y corren en este workspace —los de `.github/workflows/` de este laboratorio
+  entre ellos—; lo ilustrativo se marca como tal con su fuente. Queda al lado de las guías del
+  modelo de ramas porque explica la maquinaria que ejecuta las puertas que aquéllas describen.
+- **Carpeta de solución `GitHub-Action-Guide`**, colgando de `Guides` igual que el resto, para
+  abrir la guía desde el Explorador de soluciones sin salir del IDE.
+
 ## [Sin publicar] - 2026-08-30
 
 ### Añadido
