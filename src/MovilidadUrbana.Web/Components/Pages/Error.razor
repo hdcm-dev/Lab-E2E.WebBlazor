@@ -4,15 +4,21 @@
 
 <PageTitle>Movilidad Urbana — Error</PageTitle>
 
-<h1 class="text-danger" data-testid="titulo">Error</h1>
-<p class="lead">Se produjo un error al procesar la solicitud.</p>
+<div class="mq-encabezado">
+    <div>
+        <h1 data-testid="titulo">Error</h1>
+        <p class="mq-caption">La operación no se completó. Volvé a intentar en unos segundos.</p>
+    </div>
+</div>
 
+@* El identificador no es información del sistema: es lo que permite encontrar el episodio en el
+   diagnóstico sin exponer la traza. *@
 @if (HayIdentificador)
 {
-    <p><strong>Identificador de la petición:</strong> <code>@Identificador</code></p>
+    <p class="mq-caption mq-mb-6">Identificador de la petición: <code>@Identificador</code></p>
 }
 
-<a class="btn btn-primary" href="">Volver al inicio</a>
+<a class="mq-btn mq-btn--primario" href="">Volver al inicio</a>
 
 @code {
     [CascadingParameter]

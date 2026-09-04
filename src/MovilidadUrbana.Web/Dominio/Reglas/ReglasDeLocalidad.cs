@@ -12,6 +12,9 @@ public static partial class ReglasDeLocalidad
     public const int LargoMaximoDelNombre = 60;
     public const int HabitantesMinimos = 1;
 
+    /// <summary>Dígitos exactos del código postal. El patrón de <see cref="CodigoPostal" /> lo espeja.</summary>
+    public const int DigitosDelCodigoPostal = 4;
+
     public static bool NombreValido(string? nombre) =>
         (nombre ?? string.Empty).Trim().Length >= LargoMinimoDelNombre;
 

@@ -8,6 +8,17 @@ public class LocalidadesTests : PruebaE2E
     [SetUp]
     public async Task AbrirElAbmAsync() => await IrAAsync("/localidades");
 
+    /// <summary>
+    /// La presentación visible de una localidad. La grilla lleva la tabla y las tarjetas apiladas
+    /// las dos siempre en el marcado —las conmuta el único punto de quiebre del CSS—, así que las
+    /// acciones se buscan sobre la que está a la vista y el mismo caso sirve en escritorio y en
+    /// móvil.
+    /// </summary>
+    private ILocator PresentacionDe(string nombre) =>
+        Page.Locator("[data-testid=fila], [data-testid=tarjeta]")
+            .Filter(new() { HasText = nombre })
+            .Filter(new() { Visible = true });
+
     [Test]
     [Description("Muestra el listado sembrado")]
     public async Task MuestraElListadoSembrado()
@@ -81,8 +92,7 @@ public class LocalidadesTests : PruebaE2E
     [Description("Modifica una localidad existente")]
     public async Task ModificaUnaLocalidadExistente()
     {
-        var fila = Page.GetByTestId("fila").Filter(new() { HasText = "Resistencia" });
-        await fila.GetByTestId("boton-editar").ClickAsync();
+        await PresentacionDe("Resistencia").GetByTestId("boton-editar").ClickAsync();
 
         await Expect(Page.GetByTestId("titulo-formulario")).ToHaveTextAsync("Editar localidad");
         await Expect(Page.GetByTestId("boton-guardar")).ToHaveTextAsync("Actualizar");
@@ -101,13 +111,12 @@ public class LocalidadesTests : PruebaE2E
     [Description("Cancelar la baja deja la tabla intacta")]
     public async Task CancelarLaBajaDejaLaTablaIntacta()
     {
-        await Page.GetByTestId("fila").Filter(new() { HasText = "Corrientes" })
-            .GetByTestId("boton-eliminar").ClickAsync();
+        await PresentacionDe("Corrientes").GetByTestId("boton-eliminar").ClickAsync();
 
-        await Expect(Page.GetByTestId("modal-nombre")).ToHaveTextAsync("Corrientes");
-        await Page.GetByTestId("boton-cancelar-baja").ClickAsync();
+        await Expect(Page.GetByTestId("dialogo-titulo")).ToContainTextAsync("Corrientes");
+        await Page.GetByTestId("boton-cancelar-dialogo").ClickAsync();
 
-        await Expect(Page.GetByTestId("modal-nombre")).ToBeHiddenAsync();
+        await Expect(Page.GetByTestId("dialogo")).ToBeHiddenAsync();
         await Expect(Page.GetByTestId("fila")).ToHaveCountAsync(2);
     }
 
@@ -115,9 +124,8 @@ public class LocalidadesTests : PruebaE2E
     [Description("Confirmar la baja elimina la fila")]
     public async Task ConfirmarLaBajaEliminaLaFila()
     {
-        await Page.GetByTestId("fila").Filter(new() { HasText = "Corrientes" })
-            .GetByTestId("boton-eliminar").ClickAsync();
-        await Page.GetByTestId("boton-confirmar-baja").ClickAsync();
+        await PresentacionDe("Corrientes").GetByTestId("boton-eliminar").ClickAsync();
+        await Page.GetByTestId("boton-confirmar-dialogo").ClickAsync();
 
         await Expect(Page.GetByTestId("aviso")).ToHaveTextAsync("Se eliminó la localidad Corrientes.");
         await Expect(Page.GetByTestId("fila")).ToHaveCountAsync(1);
@@ -128,15 +136,16 @@ public class LocalidadesTests : PruebaE2E
     [Description("Al borrar todas las localidades avisa que no hay datos")]
     public async Task AlBorrarTodasLasLocalidadesAvisaQueNoHayDatos()
     {
+        // Al quedar la colección vacía la tabla deja de estar: en su lugar se dibuja el estado
+        // vacío, así que lo que se cuenta son las filas y no el texto del cuerpo de la tabla.
+        var restantes = 2;
         foreach (var nombre in new[] { "Corrientes", "Resistencia" })
         {
-            await Page.GetByTestId("fila").Filter(new() { HasText = nombre })
-                .GetByTestId("boton-eliminar").ClickAsync();
-            await Page.GetByTestId("boton-confirmar-baja").ClickAsync();
-            await Expect(Page.GetByTestId("cuerpo-tabla")).Not.ToContainTextAsync(nombre);
+            await PresentacionDe(nombre).GetByTestId("boton-eliminar").ClickAsync();
+            await Page.GetByTestId("boton-confirmar-dialogo").ClickAsync();
+            restantes -= 1;
+            await Expect(Page.GetByTestId("fila")).ToHaveCountAsync(restantes);
         }
-
-        await Expect(Page.GetByTestId("fila")).ToHaveCountAsync(0);
         await Expect(Page.GetByTestId("sin-datos")).ToBeVisibleAsync();
         await Expect(Page.GetByTestId("contador")).ToHaveTextAsync("0");
 

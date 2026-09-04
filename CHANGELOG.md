@@ -9,6 +9,68 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-09-04
+
+### Cambiado
+
+- **La interfaz pasa a ser el template del Framework SDD.** Se aplica
+  `Knowledge-Template-HTML-SDD-Default` y su realización
+  `Knowledge-Template-Blazor-Interactive-Server-SDD-Default`: se retira **Bootstrap** —la hoja
+  vendorizada y `estilos.css`— y en su lugar quedan `wwwroot/css/Tokens.css`, con los tokens del
+  catálogo `Design-Rules-Web-Generico.md` §2 copiados sin cambios, y `wwwroot/css/Componentes.css`
+  con los patrones. Ningún `.razor`, `.razor.css` ni `.cs` escribe un color, una tipografía o un
+  espaciado, y no queda un solo `style=` en línea.
+- **Un componente propio por patrón del catálogo**, en `Components/Componentes/`: `Grilla<T>` con
+  `ColumnaDeGrilla<T>`, `Campo`, `Asistente` con `PasoDeAsistente`, `Dialogo` con `DialogoHost`,
+  `Insignia`, `Banda`, `EstadoVacio`, `EstadoIndisponible`, `Esqueleto`, `Icono`, `BarraLateral`,
+  `SelloDeVersion` y `AvisoDeReconexion`. Las páginas no reimplementan ninguno en línea: el ABM y
+  la encuesta quedaron en marcado de superficie más su code-behind.
+- **El shell es el de trabajo del template**: barra lateral con el chrome oscuro de marca y el ítem
+  activo marcado, contenido con `#mq-main`, enlace «Ir al contenido» y sello de identidad de
+  versión al pie, resuelto en el punto de composición por `IIdentidadDeVersion`.
+- **Cada superficie declara y resuelve sus estados** con `EstadoDeSuperficie` —el vocabulario del
+  template— y un bloque por estado. `Vacio` y `FiltradoSinResultados` son estados distintos, con
+  acciones distintas; para que el segundo signifique algo, el ABM suma **barra de filtros** con
+  búsqueda por nombre o código postal y filtro por provincia, sobre lo ya traído.
+- **La colección se presenta de dos formas, las dos siempre en el marcado**: tabla con `caption`
+  accesible y `scope` en todos los encabezados, y tarjetas apiladas debajo de los 768px. Las
+  conmuta el único punto de quiebre del CSS.
+- **El diálogo de confirmación es el `<dialog>` nativo**, con host único en el layout y
+  `IServicioDeDialogos`: confinamiento de foco y cierre por Escape los trae el navegador, y la
+  interoperabilidad se reduce a `mq-dialogo.js`. El foco vuelve al control que lo abrió.
+- **El asistente de la encuesta pasa al indicador de pasos normado** —círculo, conector, rótulo y
+  los tres estados de paso, con contador y anuncio en región activa— y **el paso vigente está en la
+  dirección** (`/encuesta/2`), sin permitir saltear los anteriores. Se retira la barra de progreso:
+  era un segundo canal que decía lo mismo.
+- **Los requisitos de cada campo se muestran antes del intento y se derivan de la política**, con
+  `PoliticaDeLocalidades` y `PoliticaDeEncuestas` sobre las constantes de `Dominio/Reglas`; los
+  errores siguen decidiéndose en el servicio de aplicación y ahora se asocian al control por
+  `aria-describedby`. Los límites que estaban escritos a mano en la vista y en los mensajes
+  —60 caracteres, 4 dígitos, 3 caracteres— pasan a constantes de las reglas.
+- **La interfaz de reconexión se estiliza acorde a la marca**: `AvisoDeReconexion` reemplaza el
+  modal por defecto del template de .NET por una banda de atención con `role="status"`, en español,
+  que no bloquea la interacción.
+- **La suite E2E se adapta a la interfaz nueva sin aflojar ninguna verificación**: siguen siendo 22
+  casos. `IrPorMenuAsync` ya no despliega un menú colapsable; el diálogo se verifica por sus
+  identificadores propios; el avance del asistente se verifica sobre el indicador de pasos; y las
+  acciones de fila se buscan sobre la presentación visible, con lo que el mismo caso corre en
+  escritorio y en móvil. El detalle y su motivo, en la tabla del `README.md`.
+
+### Añadido
+
+- **`README.md` gana una sección [Diseño](README.md#diseño)** con el mapa patrón → componente, lo
+  que del template **no aplica** a este laboratorio y por qué —no hay credenciales, así que no hay
+  shell de acceso ni endpoints de identidad ni guard en tres capas—, y las cuatro **desviaciones
+  declaradas**: render mode en la raíz por el puente de la cookie de sesión, `EditForm` sin
+  anotaciones porque la política vive en el dominio, la revisión del asistente como estado de éxito
+  en lugar de cuarto paso, y los anchos de contenido en `ch` por no promover tokens al catálogo.
+
+### Pendiente
+
+- **El índice del `README.md` y las carpetas de solución del `.sln` siguen apuntando a los archivos
+  borrados** en la consolidación de las guías. Es lo mismo que quedó anotado el 2026-09-03 y no lo
+  toca este cambio.
+
 ## [Sin publicar] - 2026-09-03
 
 ### Cambiado

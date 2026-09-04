@@ -6,6 +6,7 @@ using MovilidadUrbana.Web.Aplicacion.Localidades;
 using MovilidadUrbana.Web.Components;
 using MovilidadUrbana.Web.Infraestructura.Persistencia;
 using MovilidadUrbana.Web.Infraestructura.Sesiones;
+using MovilidadUrbana.Web.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,16 @@ builder.Services.AddScoped<IRepositorioDeEncuestas, RepositorioDeEncuestas>();
 // --- Aplicación ------------------------------------------------------------------------------
 builder.Services.AddScoped<ServicioDeLocalidades>();
 builder.Services.AddScoped<ServicioDeEncuestas>();
+
+// --- Presentación ----------------------------------------------------------------------------
+// La identidad de versión se resuelve una sola vez, acá: la cadena que ve la persona en el sello
+// es la misma que queda registrada en el diagnóstico.
+builder.Services.AddSingleton<IIdentidadDeVersion>(
+    IdentidadDeVersion.DelEnsamblado(System.Reflection.Assembly.GetEntryAssembly()));
+
+// Estado de interfaz del circuito: ni un almacenamiento de navegador improvisado.
+builder.Services.AddScoped<IServicioDeDialogos, ServicioDeDialogos>();
+builder.Services.AddScoped<IServicioDeFoco, ServicioDeFoco>();
 
 var app = builder.Build();
 

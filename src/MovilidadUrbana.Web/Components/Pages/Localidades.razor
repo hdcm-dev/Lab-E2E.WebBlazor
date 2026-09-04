@@ -1,217 +1,204 @@
 @page "/localidades"
-@inject ServicioDeLocalidades Servicio
+@* ABM clásico, en el orden canónico de la superficie: encabezado, banda de resultado, bloque de
+   indisponible, formulario de edición y colección con sus estados. El alta no está en un modal:
+   es el panel de edición de la propia superficie, con su título, su acción de retorno y su
+   estado de envío. *@
 
 <PageTitle>Movilidad Urbana — Localidades</PageTitle>
 
-<h1 class="mb-4" data-testid="titulo">Localidades</h1>
-
-<div class="alert @(_aviso is null ? "d-none" : $"alert-{_aviso.Value.Tipo}")" role="alert" data-testid="aviso">
-    @_aviso?.Mensaje
+<div class="mq-encabezado">
+    <div>
+        <h1 data-testid="titulo">Localidades</h1>
+        <p class="mq-caption">Cada fila se edita en el panel de la izquierda.</p>
+    </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="card shadow-sm">
-            <div class="card-header" data-testid="titulo-formulario">
+@* Región activa: lo que cambia sin que la persona lo mire, se anuncia. *@
+<p class="mq-sr-only" role="status" aria-live="polite">@_anuncio</p>
+
+@if (_aviso is { } aviso)
+{
+    <div class="mq-mb-6">
+        <Banda Tono="aviso.Tono" Testid="aviso">@aviso.Mensaje</Banda>
+    </div>
+}
+
+@if (_estado is EstadoDeSuperficie.Indisponible)
+{
+    <EstadoIndisponible Titulo="No pudimos traer las localidades"
+                        Cuerpo="El servicio no respondió. Lo que ves puede estar desactualizado."
+                        AccionRotulo="Reintentar traer las localidades"
+                        AlReintentar="CargarAsync"
+                        Testid="indisponible" TestidAccion="boton-reintentar" />
+}
+else
+{
+    <div class="mq-columnas-abm">
+        <div class="mq-panel">
+            <div class="mq-panel__cabecera" data-testid="titulo-formulario">
                 @(_modelo.EsEdicion ? "Editar localidad" : "Alta de localidad")
             </div>
-            <div class="card-body">
+            <div class="mq-panel__cuerpo">
                 <EditForm Model="_modelo" OnSubmit="GuardarAsync" data-testid="formulario">
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control @Marca("nombre")" id="nombre"
-                               data-testid="campo-nombre" autocomplete="off" maxlength="60"
-                               value="@_modelo.Nombre" @oninput="e => _modelo.Nombre = e.Value?.ToString() ?? string.Empty" />
-                        <div class="invalid-feedback" data-testid="error-nombre">@Error("nombre")</div>
+                    <div class="mq-grilla-campos">
+                        <Campo Id="nombre" Rotulo="Nombre" TestidError="error-nombre"
+                               Requisito="@PoliticaDeLocalidades.RequisitoDelNombre" Error="@Error("nombre")">
+                            <Control Context="campo">
+                                <input class="@campo.ClaseDeInput" id="@campo.Id" type="text"
+                                       data-testid="campo-nombre" autocomplete="off"
+                                       maxlength="@ReglasDeLocalidad.LargoMaximoDelNombre"
+                                       aria-describedby="@campo.Descriptores" @ref="_campoDelNombre"
+                                       value="@_modelo.Nombre"
+                                       @oninput="argumentos => _modelo.Nombre = argumentos.Value?.ToString() ?? string.Empty" />
+                            </Control>
+                        </Campo>
+
+                        <Campo Id="provincia" Rotulo="Provincia" TestidError="error-provincia"
+                               Requisito="@PoliticaDeLocalidades.RequisitoDeLaProvincia" Error="@Error("provincia")">
+                            <Control Context="campo">
+                                <select class="@campo.ClaseDeSelect" id="@campo.Id"
+                                        data-testid="campo-provincia"
+                                        aria-describedby="@campo.Descriptores" @bind="_modelo.Provincia">
+                                    <option value="">Seleccione…</option>
+                                    @foreach (var provincia in Catalogos.Provincias)
+                                    {
+                                        <option value="@provincia">@provincia</option>
+                                    }
+                                </select>
+                            </Control>
+                        </Campo>
+
+                        <Campo Id="codigoPostal" Rotulo="Código postal" TestidError="error-codigo-postal"
+                               Requisito="@PoliticaDeLocalidades.RequisitoDelCodigoPostal" Error="@Error("codigoPostal")">
+                            <Control Context="campo">
+                                <input class="@campo.ClaseDeInput" id="@campo.Id" type="text"
+                                       data-testid="campo-codigo-postal" autocomplete="postal-code"
+                                       inputmode="numeric" placeholder="3400"
+                                       aria-describedby="@campo.Descriptores"
+                                       value="@_modelo.CodigoPostal"
+                                       @oninput="argumentos => _modelo.CodigoPostal = argumentos.Value?.ToString() ?? string.Empty" />
+                            </Control>
+                        </Campo>
+
+                        <Campo Id="habitantes" Rotulo="Habitantes" TestidError="error-habitantes"
+                               Requisito="@PoliticaDeLocalidades.RequisitoDeLosHabitantes" Error="@Error("habitantes")">
+                            <Control Context="campo">
+                                @* `oninput` y no `onchange`: `fill()` de Playwright dispara `input`, y con el
+                                   enlace por defecto el valor no llegaría al servidor hasta perder el foco. *@
+                                <input class="@campo.ClaseDeInput" id="@campo.Id" type="number"
+                                       data-testid="campo-habitantes" min="@ReglasDeLocalidad.HabitantesMinimos"
+                                       step="1" aria-describedby="@campo.Descriptores"
+                                       @bind="_modelo.Habitantes" @bind:event="oninput" />
+                            </Control>
+                        </Campo>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="provincia" class="form-label">Provincia</label>
-                        <select class="form-select @Marca("provincia")" id="provincia"
-                                data-testid="campo-provincia" @bind="_modelo.Provincia">
-                            <option value="">Seleccione…</option>
+                    <div class="mq-acciones-pie mq-mt-6">
+                        <button type="button" class="mq-btn mq-btn--secundario" data-testid="boton-cancelar"
+                                @onclick="Cancelar">Cancelar</button>
+                        <button type="submit" class="mq-btn mq-btn--primario" data-testid="boton-guardar"
+                                disabled="@_procesando">
+                            @if (_procesando)
+                            {
+                                <span class="mq-spinner"></span><text>Guardando…</text>
+                            }
+                            else
+                            {
+                                <Icono Nombre="@Iconos.Tilde" Tamanio="RolesDeIcono.Fila" />
+                                <text>@(_modelo.EsEdicion ? "Actualizar" : "Guardar")</text>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+
+        <div class="mq-panel">
+            <div class="mq-panel__cabecera">
+                <span>Listado</span>
+                <Insignia Testid="contador">@_visibles.Count</Insignia>
+                @if (HayFiltro)
+                {
+                    <span class="mq-caption">de @_todas.Count</span>
+                }
+            </div>
+
+            <div class="mq-panel__cuerpo">
+                <div class="mq-filtros">
+                    <div class="mq-campo mq-campo-busqueda">
+                        <label for="buscar">Buscar por nombre o código postal</label>
+                        <span class="mq-campo-busqueda__icono">
+                            <Icono Nombre="@Iconos.Buscar" />
+                        </span>
+                        <input class="mq-input" id="buscar" type="search" data-testid="campo-buscar"
+                               placeholder="nombre o código postal" value="@_texto" @oninput="AlBuscar" />
+                    </div>
+                    <div class="mq-campo">
+                        <label for="filtro-provincia">Provincia</label>
+                        <select class="mq-select mq-ancho-38" id="filtro-provincia"
+                                data-testid="filtro-provincia" @bind="_provincia" @bind:after="Refiltrar">
+                            <option value="">todas</option>
                             @foreach (var provincia in Catalogos.Provincias)
                             {
                                 <option value="@provincia">@provincia</option>
                             }
                         </select>
-                        <div class="invalid-feedback" data-testid="error-provincia">@Error("provincia")</div>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="codigoPostal" class="form-label">Código postal</label>
-                        <input type="text" class="form-control @Marca("codigoPostal")" id="codigoPostal"
-                               data-testid="campo-codigo-postal" autocomplete="off"
-                               placeholder="4 dígitos, p. ej. 3400"
-                               value="@_modelo.CodigoPostal" @oninput="e => _modelo.CodigoPostal = e.Value?.ToString() ?? string.Empty" />
-                        <div class="invalid-feedback" data-testid="error-codigo-postal">@Error("codigoPostal")</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="habitantes" class="form-label">Habitantes</label>
-                        @* `oninput` y no `onchange`: `fill()` de Playwright dispara `input`, y con el
-                           enlace por defecto el valor no llegaría al servidor hasta perder el foco. *@
-                        <input type="number" class="form-control @Marca("habitantes")" id="habitantes"
-                               data-testid="campo-habitantes" min="1" step="1"
-                               @bind="_modelo.Habitantes" @bind:event="oninput" />
-                        <div class="invalid-feedback" data-testid="error-habitantes">@Error("habitantes")</div>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary" data-testid="boton-guardar">
-                            @(_modelo.EsEdicion ? "Actualizar" : "Guardar")
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary"
-                                data-testid="boton-cancelar" @onclick="Cancelar">Cancelar</button>
-                    </div>
-                </EditForm>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-7">
-        <div class="card shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Listado</span>
-                <span class="badge text-bg-secondary" data-testid="contador">@_localidades.Count</span>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover mb-0 align-middle" data-testid="tabla">
-                    <thead>
-                        <tr>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Provincia</th>
-                            <th scope="col">CP</th>
-                            <th scope="col" class="text-end">Habitantes</th>
-                            <th scope="col" class="text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody data-testid="cuerpo-tabla">
-                        @foreach (var localidad in _localidades)
-                        {
-                            <tr @key="localidad.Id" data-testid="fila" data-id="@localidad.Id">
-                                <td data-testid="celda-nombre">@localidad.Nombre</td>
-                                <td data-testid="celda-provincia">@localidad.Provincia</td>
-                                <td data-testid="celda-codigo-postal">@localidad.CodigoPostal</td>
-                                <td class="text-end" data-testid="celda-habitantes">@localidad.Habitantes.ToString("N0")</td>
-                                <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-primary me-2"
-                                            data-testid="boton-editar" aria-label="Editar @localidad.Nombre"
-                                            @onclick="() => Editar(localidad)">Editar</button>
-                                    <button type="button" class="btn btn-sm btn-outline-danger"
-                                            data-testid="boton-eliminar" aria-label="Eliminar @localidad.Nombre"
-                                            @onclick="() => PedirBaja(localidad)">Eliminar</button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            @if (_localidades.Count == 0)
-            {
-                <div class="card-body" data-testid="sin-datos">No hay localidades cargadas.</div>
-            }
-        </div>
-    </div>
-</div>
-
-@if (_pendienteDeBaja is not null)
-{
-    @* Diálogo propio: sin el JavaScript de Bootstrap no hay animación de apertura, y por lo tanto
-       tampoco la ventana en la que un click sobre «Eliminar» se pierde. *@
-    <div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="tituloModalBorrar">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title h5" id="tituloModalBorrar">Confirmar baja</h2>
-                    <button type="button" class="btn-close" aria-label="Cerrar" @onclick="CancelarBaja"></button>
-                </div>
-                <div class="modal-body">
-                    ¿Eliminar la localidad <strong data-testid="modal-nombre">@_pendienteDeBaja.Nombre</strong>?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary"
-                            data-testid="boton-cancelar-baja" @onclick="CancelarBaja">Cancelar</button>
-                    <button type="button" class="btn btn-danger"
-                            data-testid="boton-confirmar-baja" @onclick="ConfirmarBajaAsync">Eliminar</button>
                 </div>
             </div>
+
+            <Grilla TItem="Localidad" Items="_visibles" Estado="_estado"
+                    TituloAccesible="Localidades cargadas, con su provincia, su código postal y sus habitantes"
+                    Clave="localidad => localidad.Id"
+                    TestidCuerpo="cuerpo-tabla" TestidFila="fila" TestidTarjeta="tarjeta">
+                <Columnas>
+                    <ColumnaDeGrilla TItem="Localidad" Titulo="Nombre" EsEncabezadoDeFila="true"
+                                     Testid="celda-nombre">
+                        <Plantilla Context="localidad">
+                            <span class="mq-iniciales" aria-hidden="true">@Iniciales(localidad.Nombre)</span>@localidad.Nombre
+                        </Plantilla>
+                    </ColumnaDeGrilla>
+                    <ColumnaDeGrilla TItem="Localidad" Titulo="Provincia" Testid="celda-provincia">
+                        <Plantilla Context="localidad">@localidad.Provincia</Plantilla>
+                    </ColumnaDeGrilla>
+                    <ColumnaDeGrilla TItem="Localidad" Titulo="CP" Testid="celda-codigo-postal">
+                        <Plantilla Context="localidad">@localidad.CodigoPostal</Plantilla>
+                    </ColumnaDeGrilla>
+                    <ColumnaDeGrilla TItem="Localidad" Titulo="Habitantes" EsNumerica="true"
+                                     Testid="celda-habitantes">
+                        <Plantilla Context="localidad">@localidad.Habitantes.ToString("N0")</Plantilla>
+                    </ColumnaDeGrilla>
+                </Columnas>
+                <Acciones Context="localidad">
+                    <button type="button" class="mq-btn mq-btn--fila mq-btn--marca" data-testid="boton-editar"
+                            aria-label="@($"Editar la localidad {localidad.Nombre}")"
+                            @onclick="() => Editar(localidad)">
+                        <Icono Nombre="@Iconos.Editar" Tamanio="RolesDeIcono.Fila" />Editar
+                    </button>
+                    <button type="button" class="mq-btn mq-btn--fila mq-btn--destructivo"
+                            data-testid="boton-eliminar"
+                            aria-label="@($"Eliminar la localidad {localidad.Nombre}")"
+                            @onclick="() => PedirBajaAsync(localidad)">
+                        <Icono Nombre="@Iconos.Eliminar" Tamanio="RolesDeIcono.Fila" />Eliminar
+                    </button>
+                </Acciones>
+                <Vacio>
+                    @* Vacío de colección: la acción que corresponde es cargar la primera. *@
+                    <EstadoVacio Titulo="Todavía no hay localidades"
+                                 Cuerpo="Cuando cargues la primera, va a aparecer acá con su provincia y sus habitantes."
+                                 AccionRotulo="Cargar la primera localidad"
+                                 AlAccionar="EnfocarElNombreAsync"
+                                 Testid="sin-datos" TestidAccion="boton-cargar-la-primera" />
+                </Vacio>
+                <SinResultados>
+                    @* Vacío de filtrado: hay localidades y ninguna coincide. Otra acción. *@
+                    <EstadoVacio Titulo="Ninguna localidad coincide con el filtro"
+                                 Cuerpo="Hay localidades cargadas; ninguna cumple lo que buscaste."
+                                 AccionRotulo="Limpiar el filtro"
+                                 AlAccionar="LimpiarElFiltro"
+                                 Testid="sin-resultados" TestidAccion="boton-limpiar-filtro" />
+                </SinResultados>
+            </Grilla>
         </div>
     </div>
-    <div class="modal-backdrop show"></div>
-}
-
-@code {
-    private IReadOnlyList<Localidad> _localidades = [];
-    private ModeloDeLocalidad _modelo = new();
-    private IReadOnlyDictionary<string, string> _errores = new Dictionary<string, string>();
-    private (string Mensaje, string Tipo)? _aviso;
-    private Localidad? _pendienteDeBaja;
-
-    protected override async Task OnInitializedAsync() => await RecargarAsync();
-
-    private async Task RecargarAsync() => _localidades = await Servicio.ListarAsync();
-
-    private string? Error(string campo) => _errores.TryGetValue(campo, out var mensaje) ? mensaje : null;
-
-    private string? Marca(string campo) => _errores.ContainsKey(campo) ? "is-invalid" : null;
-
-    private async Task GuardarAsync()
-    {
-        var resultado = await Servicio.GuardarAsync(_modelo);
-        _errores = resultado.Errores;
-
-        if (!resultado.EsCorrecto)
-        {
-            _aviso = (resultado.Mensaje, "danger");
-            return;
-        }
-
-        _aviso = (resultado.Mensaje, "success");
-        _modelo = new ModeloDeLocalidad();
-        await RecargarAsync();
-    }
-
-    private void Editar(Localidad localidad)
-    {
-        _modelo = new ModeloDeLocalidad
-        {
-            Id = localidad.Id,
-            Nombre = localidad.Nombre,
-            Provincia = localidad.Provincia,
-            CodigoPostal = localidad.CodigoPostal,
-            Habitantes = localidad.Habitantes
-        };
-        _errores = new Dictionary<string, string>();
-        _aviso = null;
-    }
-
-    private void Cancelar()
-    {
-        _modelo = new ModeloDeLocalidad();
-        _errores = new Dictionary<string, string>();
-        _aviso = null;
-    }
-
-    private void PedirBaja(Localidad localidad) => _pendienteDeBaja = localidad;
-
-    private void CancelarBaja() => _pendienteDeBaja = null;
-
-    private async Task ConfirmarBajaAsync()
-    {
-        var id = _pendienteDeBaja!.Id;
-        _pendienteDeBaja = null;
-
-        // Si se estaba editando justo la localidad dada de baja, el formulario vuelve a modo alta.
-        if (_modelo.Id == id)
-        {
-            _modelo = new ModeloDeLocalidad();
-            _errores = new Dictionary<string, string>();
-        }
-
-        var resultado = await Servicio.EliminarAsync(id);
-        _aviso = (resultado.Mensaje, resultado.EsCorrecto ? "warning" : "danger");
-
-        await RecargarAsync();
-    }
 }

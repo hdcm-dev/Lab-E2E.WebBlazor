@@ -1,0 +1,20 @@
+@* Sello de identidad de versión. El valor lo resuelve el host: el componente no lo compone ni lo
+   lee de una constante de la vista. *@
+@inject IIdentidadDeVersion Version
+
+<span class="mq-sello-version mq-meta" data-testid="sello-version">
+    <Icono Nombre="@Iconos.Marca" Tamanio="RolesDeIcono.Fila" />
+    <span>@Rotulo — @Version.VersionLegible</span>
+    @if (Version.EsPreliminar)
+    {
+        <Insignia Tono="TonoDeInsignia.Atencion">preliminar</Insignia>
+    }
+    @if (Version.OrigenIndeterminado)
+    {
+        <span class="mq-meta">origen indeterminado</span>
+    }
+</span>
+
+@code {
+    [Parameter] public string Rotulo { get; set; } = "Movilidad Urbana";
+}

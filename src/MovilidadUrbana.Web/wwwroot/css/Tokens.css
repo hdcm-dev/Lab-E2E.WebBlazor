@@ -1,0 +1,113 @@
+/* =============================================================================================
+   Tokens del catálogo de diseño.
+
+   Es la fuente única de todo valor visual del producto: ningún `.razor`, `.razor.css` ni `.cs`
+   escribe un color, una tipografía o un espaciado. Los nombres son los del catálogo y no se
+   cambian: son los que sostienen la trazabilidad entre el diseño y la implementación.
+
+   Procedencia de los valores: `Design-Rules-Web-Generico.md` §2.1 (color), §2.2 (tipografía) y
+   §2.3 (espaciado, radios y bordes), y §3.1 (ancho de la barra lateral).
+   ============================================================================================= */
+
+:root {
+    /* --- Superficies --------------------------------------------------------------------- */
+    --color-background-primary: #FFFFFF;
+    --color-background-secondary: #F1F1EF;
+    --color-background-tertiary: #F7F6F4;
+
+    /* --- Texto -------------------------------------------------------------------------- */
+    --color-text-primary: #1A1A18;
+    --color-text-secondary: #5C5C57;
+    --color-text-tertiary: #8A8A82;
+    --color-text-danger: #A03030;
+    --color-text-on-brand: #FFFFFF;
+
+    /* --- Bordes ------------------------------------------------------------------------- */
+    --color-border-secondary: #D9D9D4;
+    --color-border-tertiary: #E6E6E1;
+    --color-border-danger: #E0B4B4;
+
+    /* --- Marca -------------------------------------------------------------------------- */
+    --color-brand-primary: #0F6E56;
+    --color-brand-primary-dark: #04342C;
+    --color-brand-primary-tint: #E1F5EE;
+
+    /* --- Acento por módulo. Codifican pertenencia, no estética. ------------------------- */
+    --color-accent-module-a: #0F6E56;
+    --color-accent-module-b: #534AB7;
+    --color-accent-module-c: #854F0B;
+    --color-accent-module-d: #185FA5;
+
+    /* --- Semánticos, siempre en par texto + tint ---------------------------------------- */
+    --color-text-success: #0F6E56;
+    --color-background-success: #E1F5EE;
+    --color-text-warning: #854F0B;
+    --color-background-warning: #FAEEDA;
+    --color-text-error: #A03030;
+    --color-background-error: #FBEAF0;
+    --color-text-info: #185FA5;
+    --color-background-info: #E7F0F9;
+    --color-border-info: #BBD4EA;
+
+    /* --- Velo ---------------------------------------------------------------------------
+       El catálogo nombra el token pero no fija su valor. Se deriva de `color.text.primary`
+       (#1A1A18) con la opacidad del velo, para no introducir un hue nuevo. */
+    --color-backdrop: rgba(26, 26, 24, 0.45);
+
+    /* --- Tipografía: cinco escalones, cada uno con su par tamaño + peso ----------------- */
+    --font-sans: "Segoe UI", system-ui, -apple-system, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Mono", "Consolas", "Liberation Mono", monospace;
+
+    --font-size-title: 17px;
+    --font-weight-title: 500;
+    --font-size-body-strong: 14px;
+    --font-weight-body-strong: 500;
+    --font-size-body: 13px;
+    --font-weight-body: 400;
+    --font-size-caption: 12px;
+    --font-weight-caption: 400;
+    --font-size-meta: 11px;
+    --font-weight-meta: 500;
+
+    --line-height-prosa: 1.45;
+    --line-height-titulo: 1.2;
+
+    /* --- Espaciado: escala base 4 -------------------------------------------------------- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 14px;
+    --space-5: 16px;
+    --space-6: 18px;
+    --space-7: 20px;
+    --space-8: 22px;
+    --space-9: 28px;
+
+    /* --- Radios y bordes ---------------------------------------------------------------- */
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-pill: 20px;
+    --radius-icon: 12px;
+    --border-hairline: 0.5px solid var(--color-border-tertiary);
+    --border-control: 1px solid var(--color-border-secondary);
+
+    /* --- Movimiento --------------------------------------------------------------------- */
+    --motion-fast: 150ms;
+    --motion-base: 200ms;
+    --motion-ease: ease;
+
+    /* --- Layout ------------------------------------------------------------------------- */
+    --shell-sidebar-width: 168px;
+}
+
+/* La animación no esencial se desactiva: WCAG 2.2 AA y §7 del catálogo. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

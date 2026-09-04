@@ -1,0 +1,12 @@
+@* Insignia de estado. Siempre imprime el texto: el color nunca es el único canal. *@
+
+<span class="mq-insignia mq-insignia--@Tono.ToString().ToLowerInvariant()" data-testid="@Testid">@ChildContent</span>
+
+@code {
+    /// <summary>Par texto + tint del catálogo que le corresponde al valor que se muestra.</summary>
+    [Parameter] public TonoDeInsignia Tono { get; set; } = TonoDeInsignia.Neutro;
+
+    [Parameter] public string? Testid { get; set; }
+
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+}

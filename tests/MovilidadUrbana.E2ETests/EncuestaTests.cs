@@ -39,7 +39,7 @@ public class EncuestaTests : PruebaE2E
         await Expect(Page.GetByTestId("paso-1")).ToBeVisibleAsync();
         await Expect(Page.GetByTestId("paso-2")).ToBeHiddenAsync();
         await Expect(Page.GetByTestId("paso-3")).ToBeHiddenAsync();
-        await Expect(Page.GetByTestId("indicador-paso")).ToHaveTextAsync("1/3");
+        await Expect(Page.GetByTestId("etiqueta-paso")).ToHaveTextAsync("Paso 1 de 3");
         await Expect(Page.GetByTestId("boton-anterior")).ToBeDisabledAsync();
         await Expect(Page.GetByTestId("boton-finalizar")).ToBeHiddenAsync();
         await Expect(Page.GetByTestId("contador-encuestas")).ToHaveTextAsync("Registradas: 0");
@@ -66,7 +66,7 @@ public class EncuestaTests : PruebaE2E
         await Expect(Page.GetByTestId("error-edad")).ToHaveTextAsync(new Regex("entre 16 y 110"));
         await Expect(Page.GetByTestId("error-localidad")).ToHaveTextAsync(new Regex("Seleccione una localidad"));
         await Expect(Page.GetByTestId("paso-1")).ToBeVisibleAsync();
-        await Expect(Page.GetByTestId("indicador-paso")).ToHaveTextAsync("1/3");
+        await Expect(Page.GetByTestId("etiqueta-paso")).ToHaveTextAsync("Paso 1 de 3");
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class EncuestaTests : PruebaE2E
         await SiguienteAsync();
         await Expect(Page.GetByTestId("error-medios")).ToHaveTextAsync("Seleccione al menos un medio de transporte.");
         await Expect(Page.GetByTestId("error-frecuencia")).ToHaveTextAsync(new Regex("Seleccione la frecuencia"));
-        await Expect(Page.GetByTestId("indicador-paso")).ToHaveTextAsync("2/3");
+        await Expect(Page.GetByTestId("etiqueta-paso")).ToHaveTextAsync("Paso 2 de 3");
     }
 
     [Test]
@@ -107,19 +107,24 @@ public class EncuestaTests : PruebaE2E
     }
 
     [Test]
-    [Description("La barra de progreso acompaña el avance")]
-    public async Task LaBarraDeProgresoAcompanaElAvance()
+    [Description("El indicador de pasos acompaña el avance")]
+    public async Task ElIndicadorDePasosAcompanaElAvance()
     {
-        var progreso = Page.GetByTestId("progreso-contenedor");
-        await Expect(progreso).ToHaveAttributeAsync("aria-valuenow", "33");
+        // Los tres estados de paso del catálogo: pendiente, actual y completado.
+        var pasos = Page.Locator("[data-paso]");
+        await Expect(pasos).ToHaveCountAsync(3);
+        await Expect(pasos.Nth(0)).ToHaveAttributeAsync("aria-current", "step");
+        await Expect(pasos.Nth(1)).ToHaveClassAsync(new Regex("mq-paso--pendiente"));
 
         await CompletarPaso1Async();
         await SiguienteAsync();
-        await Expect(progreso).ToHaveAttributeAsync("aria-valuenow", "67");
+        await Expect(pasos.Nth(1)).ToHaveAttributeAsync("aria-current", "step");
+        await Expect(pasos.Nth(0)).ToHaveClassAsync(new Regex("mq-paso--completado"));
 
         await CompletarPaso2Async();
         await SiguienteAsync();
-        await Expect(progreso).ToHaveAttributeAsync("aria-valuenow", "100");
+        await Expect(pasos.Nth(2)).ToHaveAttributeAsync("aria-current", "step");
+        await Expect(pasos.Nth(1)).ToHaveClassAsync(new Regex("mq-paso--completado"));
     }
 
     [Test]
@@ -183,7 +188,7 @@ public class EncuestaTests : PruebaE2E
         await Page.GetByTestId("boton-reiniciar").ClickAsync();
 
         await Expect(Page.GetByTestId("paso-1")).ToBeVisibleAsync();
-        await Expect(Page.GetByTestId("indicador-paso")).ToHaveTextAsync("1/3");
+        await Expect(Page.GetByTestId("etiqueta-paso")).ToHaveTextAsync("Paso 1 de 3");
         await Expect(Page.GetByTestId("campo-nombre")).ToHaveValueAsync("");
         await Expect(Page.GetByTestId("contador-encuestas")).ToHaveTextAsync("Registradas: 1");
     }

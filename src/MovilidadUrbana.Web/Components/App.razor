@@ -1,25 +1,28 @@
 @inject MovilidadUrbana.Web.Infraestructura.Sesiones.ContextoDeSesion Sesion
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-AR">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
     <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["vendor/bootstrap/bootstrap.min.css"]" />
-    <link rel="stylesheet" href="@Assets["css/estilos.css"]" />
+    @* Los tokens primero y los componentes después: el orden de las dos hojas es contractual. *@
+    <link rel="stylesheet" href="@Assets["css/Tokens.css"]" />
+    <link rel="stylesheet" href="@Assets["css/Componentes.css"]" />
     <link rel="stylesheet" href="@Assets["MovilidadUrbana.Web.styles.css"]" />
     <ImportMap />
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-<body class="bg-body-tertiary">
+<body class="mq-body">
+    <a class="mq-skip" href="#mq-main">Ir al contenido</a>
     @* `App.razor` se renderiza en el servidor con la petición HTTP a mano, así que es el único
        lugar donde se puede leer la cookie de sesión. De acá en adelante el identificador viaja
        como parámetro del componente raíz hasta el circuito interactivo. *@
     <Routes @rendermode="InteractiveServer" SesionId="@Sesion.Id" />
-    <ReconnectModal />
+    <script src="@Assets["js/mq-dialogo.js"]"></script>
+    <script src="@Assets["js/mq-foco.js"]"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 

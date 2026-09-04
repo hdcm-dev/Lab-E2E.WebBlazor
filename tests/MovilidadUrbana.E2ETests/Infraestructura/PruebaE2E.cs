@@ -157,18 +157,9 @@ public abstract class PruebaE2E : PageTest
         await Expect(Page.GetByTestId("estado-app")).ToHaveAttributeAsync("data-interactivo", "true");
 
     /// <summary>
-    /// Navega usando la barra superior. En viewport chico el menú viene colapsado, así que primero
-    /// hay que desplegarlo: sin esto la misma prueba pasa en escritorio y falla en móvil.
+    /// Navega usando la barra lateral del shell. Debajo del punto de quiebre la barra pasa a
+    /// navegación superior con los mismos enlaces a la vista: no hay menú que desplegar, así que
+    /// la misma llamada sirve en escritorio y en móvil.
     /// </summary>
-    protected async Task IrPorMenuAsync(string testid)
-    {
-        var alternador = Page.Locator(".navbar-toggler");
-        if (await alternador.IsVisibleAsync())
-        {
-            await alternador.ClickAsync();
-            await Expect(Page.Locator("#menu")).ToHaveClassAsync(new Regex("show"));
-        }
-
-        await Page.GetByTestId(testid).ClickAsync();
-    }
+    protected Task IrPorMenuAsync(string testid) => Page.GetByTestId(testid).ClickAsync();
 }

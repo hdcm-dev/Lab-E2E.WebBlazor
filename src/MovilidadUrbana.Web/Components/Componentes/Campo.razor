@@ -1,0 +1,49 @@
+@* Campo de formulario: rótulo visible arriba, control debajo, requisito antes del intento y
+   error asociado. El placeholder nunca sustituye al rótulo, y el requisito no espera el fallo
+   para aparecer. *@
+
+<div class="mq-campo">
+    <label for="@Id">@Rotulo</label>
+    @Control(Contexto)
+    @if (!string.IsNullOrEmpty(Requisito))
+    {
+        <span class="mq-requisito" id="@IdDelRequisito">@Requisito</span>
+    }
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <span class="mq-error-inline" id="@IdDelError" data-testid="@TestidError">@Error</span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = default!;
+
+    [Parameter, EditorRequired] public string Rotulo { get; set; } = default!;
+
+    /// <summary>Control que el campo envuelve. Recibe el contexto con el identificador,
+    /// los descriptores para <c>aria-describedby</c> y la clase que le corresponde.</summary>
+    [Parameter, EditorRequired] public RenderFragment<ContextoDeCampo> Control { get; set; } = default!;
+
+    /// <summary>Requisito derivado de la política. Se muestra antes de que la persona intente.</summary>
+    [Parameter] public string? Requisito { get; set; }
+
+    /// <summary>Error que decidió el servicio de aplicación. Nulo mientras no haya.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public string? TestidError { get; set; }
+
+    private string IdDelRequisito => $"{Id}-requisito";
+
+    private string IdDelError => $"{Id}-error";
+
+    private ContextoDeCampo Contexto => new(
+        Id,
+        string.Join(' ', Descriptores()),
+        Invalido: !string.IsNullOrEmpty(Error));
+
+    private IEnumerable<string> Descriptores()
+    {
+        if (!string.IsNullOrEmpty(Requisito)) yield return IdDelRequisito;
+        if (!string.IsNullOrEmpty(Error)) yield return IdDelError;
+    }
+}

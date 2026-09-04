@@ -1,0 +1,920 @@
+/* =============================================================================================
+   Patrones de componente del catálogo, materializados sobre los tokens de `Tokens.css`.
+
+   Orden interno fijo:
+     1. Reset acotado, utilidades de accesibilidad y foco visible.
+     2. Shell de trabajo y barra lateral.
+     3. Shell de acceso.  (No aplica en este producto: no hay superficies sin sesión. Se declara
+        para que la ausencia se lea deliberada y no como olvido.)
+     4. Componentes: encabezado, botones, campos, insignias, bandas, paneles, tablas, tarjetas
+        apiladas, esqueletos, vacíos, diálogos, pasos, clave/valor.
+     5. Utilitarias de composición con nombre.
+     6. El único punto de quiebre.
+
+   Ningún valor visual se escribe acá: todos salen de una variable de `:root`.
+   ============================================================================================= */
+
+/* == 1. Reset acotado, accesibilidad y foco ================================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body.mq-body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--color-background-tertiary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-body);
+    line-height: var(--line-height-prosa);
+}
+
+h1, h2, h3 {
+    margin: 0;
+    line-height: var(--line-height-titulo);
+    color: var(--color-text-primary);
+}
+
+h1 {
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+}
+
+h2 {
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-body-strong);
+}
+
+h3 {
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-body-strong);
+}
+
+p {
+    margin: 0;
+}
+
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+dl, dd, dt {
+    margin: 0;
+}
+
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+legend {
+    padding: 0;
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-body-strong);
+}
+
+a {
+    color: var(--color-brand-primary);
+}
+
+code {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-caption);
+}
+
+.mq-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.mq-skip {
+    position: absolute;
+    left: var(--space-2);
+    top: calc(var(--space-2) * -6);
+    z-index: 20;
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-background-primary);
+    color: var(--color-brand-primary);
+    border: var(--border-control);
+    border-radius: var(--radius-md);
+    transition: top var(--motion-fast) var(--motion-ease);
+}
+
+.mq-skip:focus {
+    top: var(--space-2);
+}
+
+/* Anillo de 2px con desplazamiento: no depende solo del color y nunca se suprime. */
+:focus-visible {
+    outline: 2px solid var(--color-brand-primary);
+    outline-offset: 2px;
+}
+
+main:focus-visible {
+    outline: none;
+}
+
+/* == 2. Shell de trabajo y barra lateral ===================================================== */
+
+.mq-shell {
+    display: grid;
+    grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.mq-shell-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-3);
+    background-color: var(--color-brand-primary-dark);
+    color: var(--color-text-on-brand);
+}
+
+.mq-identidad {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-body-strong);
+    color: var(--color-text-on-brand);
+    text-decoration: none;
+    padding: 0 var(--space-2);
+}
+
+.mq-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.mq-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-on-brand);
+    opacity: 0.72;
+    text-decoration: none;
+    font-size: var(--font-size-body);
+    transition: background-color var(--motion-fast) var(--motion-ease);
+}
+
+.mq-nav-item:hover {
+    opacity: 1;
+}
+
+.mq-nav-item--activo {
+    background-color: var(--color-brand-primary);
+    opacity: 1;
+}
+
+.mq-shell-contenido {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background-color: var(--color-background-tertiary);
+}
+
+.mq-shell-contenido > main {
+    flex: 1 0 auto;
+    padding: var(--space-7);
+    min-width: 0;
+}
+
+.mq-sello-version {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-7);
+    border-top: var(--border-hairline);
+    color: var(--color-text-tertiary);
+}
+
+/* == 3. Shell de acceso ======================================================================
+   No aplica. Este producto no tiene superficies sin sesión ni acto de aprovisionamiento: la
+   sesión la reparte un middleware por cookie, sin credencial. Se declara para que la ausencia
+   del shell de acceso sea deliberada. */
+
+/* == 4. Componentes ========================================================================== */
+
+/* --- Encabezado de superficie ---------------------------------------------------------- */
+.mq-encabezado {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.mq-title {
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+}
+
+.mq-body-strong {
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-body-strong);
+}
+
+.mq-caption {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-caption);
+    color: var(--color-text-secondary);
+}
+
+.mq-meta {
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-meta);
+}
+
+.mq-prosa {
+    max-width: 68ch;
+    color: var(--color-text-secondary);
+}
+
+/* --- Botones ---------------------------------------------------------------------------- */
+.mq-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 32px;
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-control);
+    border-radius: var(--radius-md);
+    background-color: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-body-strong);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--motion-fast) var(--motion-ease);
+}
+
+.mq-btn--primario {
+    background-color: var(--color-brand-primary);
+    border-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+}
+
+.mq-btn--secundario {
+    background-color: var(--color-background-primary);
+    color: var(--color-text-secondary);
+}
+
+.mq-btn--destructivo {
+    background-color: var(--color-background-primary);
+    border-color: var(--color-border-danger);
+    color: var(--color-text-danger);
+}
+
+.mq-btn--marca {
+    background-color: var(--color-background-primary);
+    border-color: var(--color-border-secondary);
+    color: var(--color-brand-primary);
+}
+
+.mq-btn--ancho {
+    width: 100%;
+}
+
+.mq-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Objetivo de toque de 24px como piso (WCAG 2.2 §2.5.8), también en las acciones de fila. */
+.mq-btn--fila {
+    min-height: 26px;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-caption);
+}
+
+.mq-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: var(--radius-pill);
+    animation: mq-giro 700ms linear infinite;
+}
+
+@keyframes mq-giro {
+    to { transform: rotate(360deg); }
+}
+
+/* --- Campos ----------------------------------------------------------------------------- */
+.mq-campo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.mq-campo label {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-caption);
+    color: var(--color-text-secondary);
+}
+
+.mq-input,
+.mq-select {
+    min-height: 32px;
+    width: 100%;
+    padding: var(--space-1) var(--space-2);
+    border: var(--border-control);
+    border-radius: var(--radius-md);
+    background-color: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+}
+
+.mq-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.mq-input--invalido,
+.mq-select--invalido {
+    border-color: var(--color-border-danger);
+}
+
+/* El requisito se declara antes del intento; el error aparece al fallar. */
+.mq-requisito {
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-caption);
+    color: var(--color-text-tertiary);
+}
+
+.mq-error-inline {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-danger);
+}
+
+.mq-campo-busqueda {
+    position: relative;
+}
+
+.mq-campo-busqueda .mq-input {
+    padding-left: var(--space-9);
+}
+
+.mq-campo-busqueda__icono {
+    position: absolute;
+    left: var(--space-2);
+    bottom: var(--space-2);
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+}
+
+.mq-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.mq-opciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.mq-opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 26px;
+}
+
+.mq-opcion label {
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+}
+
+.mq-opcion input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-brand-primary);
+}
+
+/* --- Insignias -------------------------------------------------------------------------- */
+.mq-insignia {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-meta);
+    white-space: nowrap;
+}
+
+.mq-insignia--neutro {
+    background-color: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+}
+
+.mq-insignia--marca {
+    background-color: var(--color-brand-primary-tint);
+    color: var(--color-brand-primary);
+}
+
+.mq-insignia--exito {
+    background-color: var(--color-background-success);
+    color: var(--color-text-success);
+}
+
+.mq-insignia--atencion {
+    background-color: var(--color-background-warning);
+    color: var(--color-text-warning);
+}
+
+.mq-insignia--peligro {
+    background-color: var(--color-background-error);
+    color: var(--color-text-error);
+}
+
+.mq-insignia--info {
+    background-color: var(--color-background-info);
+    color: var(--color-text-info);
+}
+
+/* --- Bandas de resultado ---------------------------------------------------------------- */
+.mq-banda {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border: var(--border-hairline);
+    font-size: var(--font-size-body);
+}
+
+.mq-banda--exito {
+    background-color: var(--color-background-success);
+    border-color: var(--color-background-success);
+    color: var(--color-text-success);
+}
+
+.mq-banda--atencion {
+    background-color: var(--color-background-warning);
+    border-color: var(--color-background-warning);
+    color: var(--color-text-warning);
+}
+
+.mq-banda--error {
+    background-color: var(--color-background-error);
+    border-color: var(--color-border-danger);
+    color: var(--color-text-error);
+}
+
+.mq-banda--info {
+    background-color: var(--color-background-info);
+    border-color: var(--color-border-info);
+    color: var(--color-text-info);
+}
+
+/* --- Paneles y tarjetas de acceso a superficie ------------------------------------------ */
+.mq-panel {
+    background-color: var(--color-background-primary);
+    border: var(--border-hairline);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.mq-panel__cabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-5);
+    border-bottom: var(--border-hairline);
+    background-color: var(--color-background-tertiary);
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-body-strong);
+}
+
+.mq-panel__cuerpo {
+    padding: var(--space-5);
+}
+
+.mq-panel__pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-5);
+    border-top: var(--border-hairline);
+}
+
+.mq-tarjeta-entrada {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    background-color: var(--color-background-primary);
+    border: var(--border-hairline);
+    border-radius: var(--radius-lg);
+    color: inherit;
+    text-decoration: none;
+}
+
+.mq-tarjeta-entrada__icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-icon);
+    background-color: var(--color-brand-primary-tint);
+    color: var(--color-brand-primary);
+}
+
+.mq-tarjeta-entrada--modulo-b .mq-tarjeta-entrada__icono {
+    background-color: var(--color-background-info);
+    color: var(--color-accent-module-b);
+}
+
+/* --- Tablas ----------------------------------------------------------------------------- */
+.mq-tabla-envoltorio {
+    overflow-x: auto;
+}
+
+.mq-tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mq-tabla thead th {
+    padding: var(--space-2) var(--space-4);
+    text-align: left;
+    background-color: var(--color-background-tertiary);
+    border-bottom: var(--border-hairline);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-meta);
+    white-space: nowrap;
+}
+
+.mq-tabla tbody td,
+.mq-tabla tbody th {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: var(--border-hairline);
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.mq-th-plano--cuerpo {
+    font-size: var(--font-size-body-strong);
+    font-weight: var(--font-weight-body-strong);
+    color: var(--color-text-primary);
+}
+
+.mq-num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.mq-tabla thead th.mq-num,
+.mq-tabla thead th.mq-td-acciones {
+    text-align: right;
+}
+
+.mq-td-acciones {
+    text-align: right;
+}
+
+.mq-acciones-fila {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: flex-end;
+}
+
+.mq-iniciales {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: var(--space-1);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-brand-primary-tint);
+    color: var(--color-brand-primary);
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-meta);
+}
+
+/* --- Tarjetas apiladas: la misma colección debajo del punto de quiebre ------------------- */
+.mq-tarjetas-apiladas {
+    display: none;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+}
+
+.mq-tarjeta-fila {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: var(--border-hairline);
+    border-radius: var(--radius-md);
+}
+
+.mq-tarjeta-fila-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+/* --- Esqueletos ------------------------------------------------------------------------- */
+.mq-esqueleto {
+    background-color: var(--color-background-secondary);
+    border-radius: var(--radius-md);
+    animation: mq-latido 1200ms var(--motion-ease) infinite;
+}
+
+.mq-esqueleto--fila {
+    height: 32px;
+    margin: var(--space-2) var(--space-4);
+}
+
+@keyframes mq-latido {
+    50% { opacity: 0.45; }
+}
+
+/* --- Vacíos e indisponible -------------------------------------------------------------- */
+.mq-vacio,
+.mq-aviso-indisponible {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-9) var(--space-5);
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+.mq-vacio > span {
+    color: var(--color-text-tertiary);
+}
+
+.mq-aviso-indisponible {
+    color: var(--color-text-warning);
+}
+
+/* --- Diálogos --------------------------------------------------------------------------- */
+.mq-dialogo {
+    width: min(420px, calc(100vw - var(--space-9)));
+    padding: var(--space-6);
+    border: 0;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+}
+
+.mq-dialogo::backdrop {
+    background-color: var(--color-backdrop);
+}
+
+.mq-dialogo > * + * {
+    margin-top: var(--space-4);
+}
+
+.mq-acciones-pie {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
+
+/* --- Pasos del asistente ---------------------------------------------------------------- */
+.mq-pasos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    /* Medida en `ch`, derivada de la escala tipográfica: el catálogo no tiene token de ancho de
+       contenido, y promover uno nuevo no es decisión de este producto. */
+    flex: 1 1 auto;
+    max-width: 60ch;
+}
+
+.mq-pasos-lista {
+    display: flex;
+    align-items: flex-start;
+}
+
+.mq-paso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    flex: 1 1 0;
+    position: relative;
+    text-align: center;
+}
+
+/* El conector es la línea anterior al paso: se pinta cuando el paso quedó completado. */
+.mq-paso:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    top: 11px;
+    right: 50%;
+    left: -50%;
+    height: 2px;
+    background-color: var(--color-background-secondary);
+}
+
+.mq-paso--completado::before,
+.mq-paso--actual::before {
+    background-color: var(--color-brand-primary);
+}
+
+.mq-paso__marca {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-meta);
+}
+
+.mq-paso--actual .mq-paso__marca,
+.mq-paso--completado .mq-paso__marca {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+}
+
+.mq-paso__rotulo {
+    font-size: var(--font-size-meta);
+    font-weight: var(--font-weight-meta);
+    color: var(--color-text-secondary);
+}
+
+.mq-paso--actual .mq-paso__rotulo {
+    color: var(--color-text-primary);
+}
+
+/* --- Ficha clave/valor ------------------------------------------------------------------- */
+.mq-kv {
+    display: flex;
+    flex-direction: column;
+}
+
+.mq-kv > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--space-4);
+    padding: var(--space-2) 0;
+    border-bottom: var(--border-hairline);
+}
+
+.mq-kv__clave {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+}
+
+.mq-kv__valor {
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+}
+
+/* --- Aviso de error del circuito, gobernado por el framework ---------------------------- */
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    padding: var(--space-3) var(--space-5);
+    background-color: var(--color-background-warning);
+    color: var(--color-text-warning);
+    font-size: var(--font-size-body);
+}
+
+#blazor-error-ui .mq-btn {
+    margin-left: var(--space-3);
+}
+
+/* == 5. Utilitarias de composición con nombre ================================================
+   Existen para que ningún marcado lleve `style=` en línea: cada una materializa un token. */
+
+.mq-mt-2 { margin-top: var(--space-2); }
+.mq-mt-3 { margin-top: var(--space-3); }
+.mq-mt-5 { margin-top: var(--space-5); }
+.mq-mt-6 { margin-top: var(--space-6); }
+.mq-mb-6 { margin-bottom: var(--space-6); }
+.mq-ml-auto { margin-left: auto; }
+.mq-ancho-38 { max-width: 38ch; }
+.mq-pila-3 { display: flex; flex-direction: column; gap: var(--space-3); }
+.mq-pila-5 { display: flex; flex-direction: column; gap: var(--space-5); }
+.mq-fila-2 { display: flex; align-items: center; gap: var(--space-2); }
+.mq-fila-2--fin { justify-content: flex-end; }
+
+/* Grilla de campos del formulario de edición (§4.4 del catálogo). */
+.mq-grilla-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+}
+
+/* Grilla de tarjetas de acceso (§3.2 del catálogo). */
+.mq-grilla-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--space-4);
+}
+
+/* Las dos zonas del ABM: formulario de edición y listado. */
+.mq-columnas-abm {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-4);
+    align-items: start;
+}
+
+/* == 6. El único punto de quiebre ============================================================
+   La barra lateral pasa a navegación superior, y la colección conmuta de tabla a tarjetas
+   apiladas: las dos presentaciones están siempre en el marcado y las decide el CSS. */
+
+@media (max-width: 768px) {
+    .mq-shell {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mq-shell-sidebar {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        padding: var(--space-3);
+    }
+
+    .mq-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .mq-shell-contenido > main {
+        padding: var(--space-5);
+    }
+
+    .mq-sello-version {
+        padding: var(--space-4) var(--space-5);
+    }
+
+    .mq-columnas-abm {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mq-tabla-envoltorio {
+        display: none;
+    }
+
+    .mq-tarjetas-apiladas {
+        display: flex;
+    }
+
+    .mq-acciones-pie {
+        flex-direction: column-reverse;
+    }
+}
