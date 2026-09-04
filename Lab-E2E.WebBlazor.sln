@@ -30,6 +30,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Guides", "Guides", "{E903B2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "E2E-Guide", "E2E-Guide", "{28CE06F3-9D5D-4F07-864C-139B9ED75A59}"
 	ProjectSection(SolutionItems) = preProject
+		Guides\E2E-Guide\Caso-Encuesta-Page.md = Guides\E2E-Guide\Caso-Encuesta-Page.md
 		Guides\E2E-Guide\Beginner-Guide.md = Guides\E2E-Guide\Beginner-Guide.md
 		Guides\E2E-Guide\Quick-Guide-ABM.md = Guides\E2E-Guide\Quick-Guide-ABM.md
 	EndProjectSection

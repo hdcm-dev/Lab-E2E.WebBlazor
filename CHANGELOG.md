@@ -27,6 +27,12 @@ tiene su propio registro.
   identificador de prueba: los del `Asistente` son contrato reutilizable y los de la superficie son
   de ella sola.
 
+### Cambiado
+
+- **`Lab-E2E.WebBlazor.sln`** suma el documento nuevo a la carpeta de solución `E2E-Guide`. La
+  solución declara los archivos sueltos uno por uno, así que un documento que no se agrega existe
+  en el repositorio pero no en el explorador de quien abre la solución: queda escrito y sin leer.
+
 ### Encontrado, no resuelto
 
 - **Dos promesas del `src` no tienen caso de prueba.** Verificado el 2026-09-04 contra las nueve
