@@ -11,6 +11,35 @@ tiene su propio registro.
 
 ## [Sin publicar] - 2026-09-04
 
+### Añadido
+
+- **`Guides/E2E-Guide/Caso-Encuesta-Page.md`** — cómo se **diseñan** los casos de la superficie
+  Encuesta, que es lo que las dos guías anteriores no cubren: `Beginner-Guide` explica cómo se
+  escribe una prueba y `Quick-Guide-ABM` cómo se monta la de un ABM; acá está con qué criterios se
+  decide qué probar. El caso obliga a responder una pregunta que no es obvia —**¿tres pasos son
+  tres superficies?**— y la respuesta es que no: el `Asistente` declara en su primera línea que es
+  «solo para actos divisibles», y ninguno de los tres pasos promete nada por sí solo, así que es
+  **una** superficie con estados. La señal para distinguir un acto divisible de un recorrido es si
+  al abandonar en el medio queda algo hecho. Quedan escritos además por qué el `Asistente` —109
+  líneas, con lógica y estados propios— **no es** una superficie, cómo se prueba una promesa sobre
+  la memoria —yendo y volviendo, nunca leyendo el modelo—, por qué el caso central **recarga la
+  página** para distinguir lo persistido de lo que vive en el circuito, y a quién le pertenece cada
+  identificador de prueba: los del `Asistente` son contrato reutilizable y los de la superficie son
+  de ella sola.
+
+### Encontrado, no resuelto
+
+- **Dos promesas del `src` no tienen caso de prueba.** Verificado el 2026-09-04 contra las nueve
+  pruebas de `EncuestaTests`. La primera: el paso es direccionable —`/encuesta/{Paso:int}`— y
+  `OnParametersSet` declara que «un paso pedido por dirección no puede saltear los anteriores»,
+  pero **ninguna prueba navega a `/encuesta/2` ni a `/encuesta/3`**; el `Math.Min(pedido,
+  _pasoMaximoAlcanzado)` que impide el salteo no está cubierto. Es llamativo porque el motivo
+  declarado de que el paso sea direccionable es «para que se pueda verificar de a uno»: la
+  capacidad se construyó para la prueba y la prueba no la usa. La segunda: el `catch` de
+  `FinalizarAsync` y el estado `boton-procesando` del `Asistente` no se ejercitan nunca — ahí la
+  ausencia tiene motivo, porque provocar el fallo desde el navegador exige un punto de inyección
+  que la aplicación hoy no tiene.
+
 ### Cambiado
 
 - **La interfaz pasa a ser el template del Framework SDD.** Se aplica

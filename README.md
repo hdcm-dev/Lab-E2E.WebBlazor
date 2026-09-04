@@ -69,7 +69,7 @@ scripts/
   publicar.sh           Publica el binario autocontenido que usa CI, en `publicacion/`
   pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local)
 Guides/
-  E2E-Guide/                      Pruebas de extremo a extremo: guía de estudio y receta de ABM
+  E2E-Guide/                      Pruebas de extremo a extremo: guía de estudio, receta de ABM y diseño de casos
   Estandares-Modelo-Ramas-Guide/  Modelos de ramas, integración y releases, con sus anexos
   GitFlow-Practice-Guide/         Ocho escenarios del modelo adoptado, sobre un repositorio real
   GitHubFlow-Practice-Guide/      Los mismos ocho, sobre el modelo que no se adoptó
@@ -181,6 +181,7 @@ extremo, y otra sobre el modelo de ramas —una guía de estudio y dos guías pr
 | --- | --- | --- |
 | [Beginner-Guide.md](Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Nueve capítulos y seis anexos: qué es una E2E, marco de escenarios y actores, anatomía del proyecto en .NET, qué testear, cómo se escribe y estabiliza un caso, lo propio de una aplicación con servidor, y la integración con GitHub Actions |
 | [Quick-Guide-ABM.md](Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E | La receta corta para montar las de un ABM: siete pasos, las trampas de Blazor *interactive server* y una lista de verificación |
+| [Caso-Encuesta-Page.md](Guides/E2E-Guide/Caso-Encuesta-Page.md) | Quien tiene que decidir **qué** probar | Cómo se diseñan los casos de una superficie que se recorre en tramos: por qué los tres pasos del asistente son **una** superficie y no tres, cómo se prueba una promesa sobre la memoria, a quién le pertenece cada identificador, y dos promesas del `src` que hoy no tienen caso |
 
 ### [Guides/Estandares-Modelo-Ramas-Guide/](Guides/Estandares-Modelo-Ramas-Guide/) — ramas, integración y releases
 
