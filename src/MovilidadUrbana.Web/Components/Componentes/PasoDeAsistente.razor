@@ -1,0 +1,21 @@
+@* Un paso del asistente: se dibuja solo cuando es el paso vigente. Conserva su encabezado, para
+   que la superficie no quede sin estructura semántica al cambiar de paso. *@
+
+@if (Asistente.PasoActual == Numero)
+{
+    <section data-testid="paso-@Numero" aria-labelledby="@IdDelTitulo">
+        <h2 id="@IdDelTitulo">@Asistente.RotuloDelPaso(Numero)</h2>
+        <div class="mq-mt-5">@ChildContent</div>
+    </section>
+}
+
+@code {
+    [CascadingParameter] private Asistente Asistente { get; set; } = default!;
+
+    /// <summary>Número del paso, contado desde 1.</summary>
+    [Parameter, EditorRequired] public int Numero { get; set; }
+
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    private string IdDelTitulo => $"paso-{Numero}-titulo";
+}

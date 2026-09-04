@@ -83,7 +83,8 @@ public sealed class ServicioDeLocalidades(IRepositorioDeLocalidades repositorio)
         }
         if (!ReglasDeLocalidad.CodigoPostalValido(modelo.CodigoPostal))
         {
-            errores["codigoPostal"] = "El código postal debe tener 4 dígitos.";
+            errores["codigoPostal"] =
+                $"El código postal debe tener {ReglasDeLocalidad.DigitosDelCodigoPostal} dígitos.";
         }
         if (!ReglasDeLocalidad.HabitantesValidos(modelo.Habitantes))
         {

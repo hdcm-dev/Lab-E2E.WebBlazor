@@ -22,7 +22,8 @@ public sealed class ServicioDeEncuestas(IRepositorioDeEncuestas repositorio)
             case 1:
                 if (!ReglasDeEncuesta.NombreValido(modelo.Nombre))
                 {
-                    errores["nombre"] = "Ingrese nombre y apellido (mínimo 3 caracteres).";
+                    errores["nombre"] =
+                        $"Ingrese nombre y apellido (mínimo {ReglasDeEncuesta.LargoMinimoDelNombre} caracteres).";
                 }
                 if (!ReglasDeEncuesta.EdadValida(modelo.Edad))
                 {

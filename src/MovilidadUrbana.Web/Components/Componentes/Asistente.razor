@@ -1,0 +1,109 @@
+@* Asistente de varios niveles. Solo para actos divisibles: el paso es un estado direccionable de
+   la superficie, y la anatomía —círculo numerado, conector, rótulo, contador y los tres estados
+   de paso— es la del catálogo.
+
+   «Anterior» va deshabilitado y sin eventos en el primer paso; «Siguiente» vira a la acción de
+   confirmación en el último; y el estado de envío es un botón distinto, no el mismo botón
+   apagado. *@
+
+<CascadingValue Value="this" IsFixed="true">
+    <div class="mq-panel">
+        <div class="mq-panel__cabecera">
+            <nav class="mq-pasos" aria-label="Progreso del asistente">
+                <p class="mq-sr-only" role="status" aria-live="polite">@Anuncio</p>
+                <ol class="mq-pasos-lista">
+                    @for (var numero = 1; numero <= Total; numero++)
+                    {
+                        var actual = numero;
+                        <li class="mq-paso mq-paso--@ClaseDelPaso(actual)" data-paso="@actual"
+                            aria-current="@(actual == PasoActual ? "step" : null)">
+                            <span class="mq-paso__marca" aria-hidden="true">
+                                @if (actual < PasoActual)
+                                {
+                                    <Icono Nombre="@Iconos.Tilde" Tamanio="RolesDeIcono.Fila" />
+                                }
+                                else
+                                {
+                                    @actual
+                                }
+                            </span>
+                            <span class="mq-paso__rotulo">@RotuloDelPaso(actual)</span>
+                        </li>
+                    }
+                </ol>
+                <p class="mq-caption" data-testid="etiqueta-paso">Paso @PasoActual de @Total</p>
+            </nav>
+        </div>
+
+        <div class="mq-panel__cuerpo">@ChildContent</div>
+
+        <div class="mq-panel__pie">
+            <button type="button" class="mq-btn mq-btn--secundario" data-testid="boton-anterior"
+                    disabled="@(PasoActual == 1)" @onclick="AnteriorAsync">
+                <Icono Nombre="@Iconos.Anterior" Tamanio="RolesDeIcono.Fila" />Anterior
+            </button>
+
+            <div class="mq-fila-2 mq-fila-2--fin">
+                @if (PasoActual < Total)
+                {
+                    <button type="button" class="mq-btn mq-btn--primario" data-testid="boton-siguiente"
+                            @onclick="SiguienteAsync">
+                        Siguiente<Icono Nombre="@Iconos.Siguiente" Tamanio="RolesDeIcono.Fila" />
+                    </button>
+                }
+                else if (Procesando)
+                {
+                    <button type="button" class="mq-btn mq-btn--primario" disabled data-testid="boton-procesando">
+                        <span class="mq-spinner"></span>@RotuloEnProceso
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="mq-btn mq-btn--primario" data-testid="boton-finalizar"
+                            @onclick="AlConfirmar">
+                        <Icono Nombre="@Iconos.Tilde" Tamanio="RolesDeIcono.Fila" />@RotuloDeConfirmacion
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</CascadingValue>
+
+@code {
+    /// <summary>Paso vigente, contado desde 1.</summary>
+    [Parameter, EditorRequired] public int PasoActual { get; set; }
+
+    /// <summary>Rótulo de cada paso, en orden. Su cantidad es el total de pasos.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<string> Rotulos { get; set; } = default!;
+
+    /// <summary>Los pasos, declarados con <see cref="PasoDeAsistente" />.</summary>
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    /// <summary>Pedido de cambio de paso. La superficie decide si lo concede.</summary>
+    [Parameter] public EventCallback<int> AlCambiarPaso { get; set; }
+
+    /// <summary>Acción del último paso.</summary>
+    [Parameter] public EventCallback AlConfirmar { get; set; }
+
+    [Parameter] public string RotuloDeConfirmacion { get; set; } = "Confirmar";
+
+    [Parameter] public string RotuloEnProceso { get; set; } = "Confirmando…";
+
+    /// <summary>La confirmación está viajando al servidor.</summary>
+    [Parameter] public bool Procesando { get; set; }
+
+    public int Total => Rotulos.Count;
+
+    public string RotuloDelPaso(int numero) =>
+        numero >= 1 && numero <= Rotulos.Count ? Rotulos[numero - 1] : string.Empty;
+
+    private string Anuncio => $"Paso {PasoActual} de {Total}: {RotuloDelPaso(PasoActual)}";
+
+    private string ClaseDelPaso(int numero) => numero < PasoActual ? "completado"
+        : numero == PasoActual ? "actual"
+        : "pendiente";
+
+    private Task AnteriorAsync() => AlCambiarPaso.InvokeAsync(PasoActual - 1);
+
+    private Task SiguienteAsync() => AlCambiarPaso.InvokeAsync(PasoActual + 1);
+}

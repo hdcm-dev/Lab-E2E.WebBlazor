@@ -1,0 +1,29 @@
+/* Visibilidad del aviso y de cada uno de sus textos. Es lo único exclusivo de este componente:
+   los colores y los espacios salen de `mq-banda` y de los tokens. */
+
+.mq-aviso-reconexion {
+    display: none;
+    position: fixed;
+    left: var(--space-5);
+    right: var(--space-5);
+    bottom: var(--space-5);
+    z-index: 40;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.mq-aviso-reconexion:not([data-estado="oculto"]) {
+    display: flex;
+}
+
+[data-visible-en] {
+    display: none;
+}
+
+[data-estado="reconectando"] [data-visible-en~="reconectando"],
+[data-estado="reintentando"] [data-visible-en~="reintentando"],
+[data-estado="fallo"] [data-visible-en~="fallo"],
+[data-estado="pausada"] [data-visible-en~="pausada"],
+[data-estado="fallo-al-retomar"] [data-visible-en~="fallo-al-retomar"] {
+    display: inline-flex;
+}

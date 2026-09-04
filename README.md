@@ -13,10 +13,16 @@ en una base **SQLite**, y cada interacción viaja por el circuito de Blazor.
 | ABM de localidades | [Localidades.razor](src/MovilidadUrbana.Web/Components/Pages/Localidades.razor) | Alta, modificación y baja sobre una tabla, validación en el servidor, diálogo de confirmación y persistencia |
 | Encuesta de transporte | [Encuesta.razor](src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor) | Asistente de tres pasos: datos de la persona, medios que utiliza para viajar y distancia recorrida |
 
-El diseño es **Bootstrap 5.3.8** vendorizado en
-[wwwroot/vendor/bootstrap/](src/MovilidadUrbana.Web/wwwroot/vendor/bootstrap/), sin CDN y **sin el
-bundle de JavaScript**: el menú colapsable y el diálogo modal se resuelven con estado del
-componente, que es lo natural en una aplicación interactiva.
+El diseño **no usa librería de componentes ni framework de CSS**: es el template del Framework
+SDD —[Knowledge-Template-HTML-SDD-Default](../../IA/SDD/IA.SDD/Conocimiento/Knowledge-Template-HTML-SDD-Default.md)
+y su realización en Blazor,
+[Knowledge-Template-Blazor-Interactive-Server-SDD-Default](../../IA/SDD/IA.SDD/Conocimiento/Knowledge-Template-Blazor-Interactive-Server-SDD-Default.md)—.
+Los tokens del catálogo viven en
+[wwwroot/css/Tokens.css](src/MovilidadUrbana.Web/wwwroot/css/Tokens.css) y los patrones en
+[Componentes.css](src/MovilidadUrbana.Web/wwwroot/css/Componentes.css); cada patrón del catálogo
+—grilla, asistente, diálogo, insignia, banda, estado vacío— es un componente Razor propio de
+[Components/Componentes/](src/MovilidadUrbana.Web/Components/Componentes/), y las páginas no
+reimplementan ninguno en línea. Ver [Diseño](#diseño).
 
 ## Estructura
 
@@ -39,8 +45,13 @@ src/MovilidadUrbana.Web/
     Persistencia/       EF Core sobre SQLite, repositorios y siembra inicial
     Sesiones/           Cookie de sesión y su middleware
   Components/           Presentación (Blazor). Depende de Aplicacion.
-    App.razor, Routes.razor, Layout/, Pages/
-  wwwroot/              Bootstrap vendorizado y estilos propios
+    App.razor, Routes.razor
+    Layout/             MainLayout: shell de trabajo, barra lateral, hosts y sello de versión
+    Componentes/        Un componente propio por patrón del catálogo de diseño
+    Pages/              Una superficie por pantalla, con su code-behind
+  Theme/                Iconos.cs (trazos SVG) y RolesDeIcono.cs (tamaño por rol)
+  Servicios/            Diálogos y foco (Scoped) e identidad de versión (Singleton)
+  wwwroot/              css/Tokens.css, css/Componentes.css y la interoperabilidad mínima de js/
   Program.cs            Composición: es el único lugar que conoce todas las capas
 tests/MovilidadUrbana.E2ETests/
   Infraestructura/
@@ -75,6 +86,88 @@ Los archivos que no pertenecen a ningún proyecto están agrupados en carpetas d
 salir de Visual Studio. `Guides` reproduce el árbol del disco: una carpeta por guía, y los anexos
 de la guía de estudio colgando de ella. Son carpetas de solución: no se compilan ni cambian nada
 del build.
+
+## Diseño
+
+La interfaz aplica el template del Framework SDD: el
+[template HTML de maqueta](../../IA/SDD/IA.SDD/Conocimiento/Knowledge-Template-HTML-SDD-Default.md)
+y su realización en
+[Blazor Interactive Server sin librería de componentes](../../IA/SDD/IA.SDD/Conocimiento/Knowledge-Template-Blazor-Interactive-Server-SDD-Default.md),
+que hereda de él. Los valores visuales salen del catálogo
+[`Design-Rules-Web-Generico.md`](../../IA/SDD/IA.SDD/SDD/Devs/References/Design/Design-Rules-Web-Generico.md)
+§2, copiados sin cambios en `Tokens.css`.
+
+### Un componente propio por patrón
+
+| Patrón del catálogo | Componente | Qué concentra |
+| --- | --- | --- |
+| §4.1 Navegación lateral | [BarraLateral](src/MovilidadUrbana.Web/Components/Componentes/BarraLateral.razor) | Identidad, ítems con ícono, ítem activo con `aria-current="page"` |
+| §4.2 Tarjeta de acceso | `.mq-tarjeta-entrada` en [Inicio](src/MovilidadUrbana.Web/Components/Pages/Inicio.razor) | Toda la tarjeta es el área activable, con el foco en el contenedor |
+| §4.3 Grilla de listado | [Grilla](src/MovilidadUrbana.Web/Components/Componentes/Grilla.razor) + [ColumnaDeGrilla](src/MovilidadUrbana.Web/Components/Componentes/ColumnaDeGrilla.cs) | Tabla con `caption` y `scope`, tarjetas apiladas, y los cuatro estados del ciclo de datos |
+| §4.4 Formulario de edición | [Campo](src/MovilidadUrbana.Web/Components/Componentes/Campo.razor) | Rótulo visible, requisito antes del intento y error asociado por `aria-describedby` |
+| §4.5 Asistente | [Asistente](src/MovilidadUrbana.Web/Components/Componentes/Asistente.razor) + [PasoDeAsistente](src/MovilidadUrbana.Web/Components/Componentes/PasoDeAsistente.razor) | Círculo, conector y rótulo por paso; tres estados de paso; contador y región activa |
+| §4.8 Insignia | [Insignia](src/MovilidadUrbana.Web/Components/Componentes/Insignia.razor) | Par texto + tint; el texto siempre se imprime |
+| §5 Estados | [EstadoVacio](src/MovilidadUrbana.Web/Components/Componentes/EstadoVacio.razor), [EstadoIndisponible](src/MovilidadUrbana.Web/Components/Componentes/EstadoIndisponible.razor), [Esqueleto](src/MovilidadUrbana.Web/Components/Componentes/Esqueleto.razor), [Banda](src/MovilidadUrbana.Web/Components/Componentes/Banda.razor) | Vacío, filtrado sin resultados, cargando, indisponible y bandas de resultado |
+| §5.4 del template Blazor · diálogo | [Dialogo](src/MovilidadUrbana.Web/Components/Componentes/Dialogo.razor) + [DialogoHost](src/MovilidadUrbana.Web/Components/Componentes/DialogoHost.razor) | `<dialog>` nativo, host único en el layout, dos grados de confirmación |
+| §6 Iconografía | [Icono](src/MovilidadUrbana.Web/Components/Componentes/Icono.razor) + [Iconos](src/MovilidadUrbana.Web/Theme/Iconos.cs) | SVG inline con `currentColor`, grilla de 24, trazo 1.75 |
+| Identidad de versión | [SelloDeVersion](src/MovilidadUrbana.Web/Components/Componentes/SelloDeVersion.razor) | Versión resuelta en el host, no compuesta en la vista |
+
+El estado de cada superficie es un
+[`EstadoDeSuperficie`](src/MovilidadUrbana.Web/Components/Componentes/EstadoDeSuperficie.cs) con un
+bloque `@if` por estado: es la realización del `data-mq-estado` de la maqueta, con el mismo
+vocabulario. `Vacio` y `FiltradoSinResultados` son estados distintos y ofrecen acciones distintas,
+que es lo que hizo aparecer la barra de filtros del ABM.
+
+### Lo que no aplica, declarado
+
+- **Shell de acceso, endpoints de identidad y guard en tres capas.** Este laboratorio no tiene
+  credenciales: la sesión la reparte un middleware por cookie para aislar los datos entre pruebas.
+  No hay superficie sin sesión, así que no hay segundo layout ni POST de ingreso.
+- **Host de avisos efímeros.** Los resultados de acción se muestran como banda en la superficie,
+  que es la forma que el catálogo admite («toast/inline»). Una región que se autodescarta haría que
+  la evidencia E2E dependiera de un temporizador.
+- **Conmutador (toggle) y confirmación escrita.** Ninguna pantalla tiene un interruptor, y la baja
+  de una localidad no arrastra dependientes —las respuestas de encuesta guardan el nombre, no la
+  clave—, así que la confirmación es del primer grado. El segundo grado está implementado en el
+  componente y sin uso.
+- **Dataset de maqueta, barra de validación y recarga automática.** Son instrumentos de la maqueta
+  y no viajan al producto.
+
+### Desviaciones declaradas
+
+1. **El render mode se declara en la raíz y no por página.** El template pide `@rendermode
+   InteractiveServer` en cada superficie interactiva. Acá el identificador de sesión se lee en
+   `App.razor` —el único lugar con la petición HTTP a mano— y se pasa como parámetro a `Routes`,
+   que por eso tiene que ser el componente interactivo raíz. Es el puente descrito en
+   [«El estado es del servidor»](#2-el-estado-es-del-servidor-así-que-hay-que-aislarlo); no hay
+   superficies de identidad que necesiten quedar en SSR estático.
+2. **`EditForm` sin `DataAnnotationsValidator`.** El template decide anotaciones más
+   `ValidationMessage` por campo. Acá la política vive en `Dominio/Reglas` y la valida el servicio
+   de aplicación —con sus propias pruebas unitarias—, así que anotar el modelo de pantalla sería
+   exactamente el anti-patrón «transcribir la política de validación en la vista». Se conserva lo
+   que la regla protege: error por campo, asociado al control y anunciado, y requisito derivado de
+   la política en [PoliticaDeLocalidades](src/MovilidadUrbana.Web/Aplicacion/Localidades/PoliticaDeLocalidades.cs)
+   y [PoliticaDeEncuestas](src/MovilidadUrbana.Web/Aplicacion/Encuestas/PoliticaDeEncuestas.cs).
+3. **El paso de revisión del asistente es el estado de éxito, no un cuarto paso.** `TotalDePasos`
+   es una regla de dominio con pruebas propias; la ficha clave/valor de
+   [ResumenDeEncuesta](src/MovilidadUrbana.Web/Aplicacion/Encuestas/ResumenDeEncuesta.cs) se
+   recorre —no se escribe a mano— y se muestra al registrar.
+4. **Anchos de contenido en `ch`.** El catálogo no tiene token de ancho de contenido y promover uno
+   nuevo no es decisión de este producto, así que las tres medidas que hacían falta se expresan en
+   `ch`, derivadas de la escala tipográfica. Ningún color, tipografía ni espaciado se escribe fuera
+   de `Tokens.css`.
+
+### Lo que cambió en las pruebas
+
+La suite sigue siendo de 22 casos y verifica lo mismo. Cuatro puntos se adaptaron a la interfaz
+nueva, y ninguno afloja una verificación:
+
+| Antes | Ahora | Por qué |
+| --- | --- | --- |
+| `IrPorMenuAsync` desplegaba el `navbar-toggler` | Hace click en el enlace | Debajo del punto de quiebre la barra lateral pasa a navegación superior con los enlaces a la vista: no hay menú que desplegar |
+| `modal-nombre`, `boton-cancelar-baja`, `boton-confirmar-baja` | `dialogo-titulo`, `boton-cancelar-dialogo`, `boton-confirmar-dialogo` | El diálogo es un componente único gobernado por el servicio, y su marcado vive una sola vez |
+| `progreso-contenedor` con `aria-valuenow` | Los `[data-paso]` con `aria-current="step"` y sus clases de estado | El catálogo norma el indicador de pasos; una barra de progreso era un segundo canal que decía lo mismo |
+| Las acciones de fila se buscaban en la tabla | Se buscan en la presentación visible (`Filter(Visible = true)`) | La grilla lleva tabla y tarjetas apiladas siempre en el marcado, y el mismo caso corre en escritorio y en móvil |
 
 ## Guías
 
@@ -282,8 +375,11 @@ carpeta de la publicación.
 
 En la versión estática hubo que corregir dos defectos alrededor del modal de Bootstrap: el click
 que llegaba durante la animación de apertura y el orden del manejador de `data-bs-dismiss`. Acá el
-diálogo es marcado propio gobernado por el estado del componente, así que esa clase de carrera no
-existe y no hace falta desactivar las animaciones.
+diálogo es el `<dialog>` nativo, abierto y cerrado por el
+[servicio de diálogos](src/MovilidadUrbana.Web/Servicios/ServicioDeDialogos.cs) con la
+interoperabilidad mínima de [mq-dialogo.js](src/MovilidadUrbana.Web/wwwroot/js/mq-dialogo.js): el
+confinamiento de foco y el cierre por Escape los trae el navegador, no hay animación de apertura
+que esperar y esa clase de carrera no existe.
 
 ### 5. El enlace de datos tiene que escuchar el evento correcto
 
@@ -452,6 +548,38 @@ La traza se comprobó con un caso que falla a propósito, agregado y quitado par
 `resultados/trazas/…FallaAProposito.zip` de 138 KB con `trace.trace`, `trace.network` y los
 recursos de pantalla. Una corrida en verde no crea la carpeta. La grabación permanente cuesta unos
 2 segundos sobre los 22 casos de chromium.
+
+El 2026-09-04, con el template del Framework SDD aplicado a la interfaz:
+
+```
+$ dotnet build Lab-E2E.WebBlazor.sln --configuration Release -warnaserror
+  Build succeeded.
+      0 Warning(s)
+
+$ dotnet test tests/MovilidadUrbana.UnitTests --configuration Release
+  Passed! - Failed: 0, Passed: 49, Skipped: 0, Total: 49, Duration: 32 ms
+
+$ scripts/pruebas.sh chromium
+  Passed! - Failed: 0, Passed: 22, Skipped: 0, Total: 22, Duration: 9 s
+
+$ EMULAR_MOVIL=true scripts/pruebas.sh chromium
+  Passed! - Failed: 0, Passed: 22, Skipped: 0, Total: 22, Duration: 8 s
+
+$ scripts/pruebas.sh firefox
+  Passed! - Failed: 0, Passed: 22, Skipped: 0, Total: 22, Duration: 17 s
+
+$ scripts/pruebas.sh webkit
+  Passed! - Failed: 0, Passed: 22, Skipped: 0, Total: 22, Duration: 13 s
+```
+
+La corrida móvil es la que ejercita las tarjetas apiladas: debajo de los 768px la tabla se oculta y
+las acciones de fila se activan sobre la tarjeta.
+
+Un detalle del entorno, que no es del laboratorio: en esta máquina el límite de instancias de
+`inotify` del kernel (`fs.inotify.max_user_instances = 128`) estaba agotado, y la aplicación moría
+con código 134 al construir su configuración. Las corridas de arriba llevan
+`DOTNET_USE_POLLING_FILE_WATCHER=1`. Si aparece «La aplicación terminó sola con código 134 antes de
+escuchar», es eso y no la publicación.
 
 Lo que **no** se verificó desde acá: la ejecución desde el Explorador de pruebas de Visual Studio
 —no hay Windows ni Visual Studio en esta máquina— y el comportamiento real de los workflows, del

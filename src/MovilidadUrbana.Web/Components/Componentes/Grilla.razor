@@ -1,0 +1,94 @@
+@typeparam TItem
+@* Presentación de una colección homogénea. La tabla y las tarjetas apiladas están las dos
+   siempre en el marcado y las conmuta el único punto de quiebre del CSS: una tabla que reflowea
+   deja de ser tabla, y cambiar el tipo de presentación es deriva mayor.
+
+   Los cuatro estados del ciclo de datos se resuelven acá, con un bloque por estado. *@
+
+<CascadingValue Value="this" IsFixed="true">@Columnas</CascadingValue>
+
+@if (Estado is EstadoDeSuperficie.Cargando)
+{
+    <Esqueleto />
+}
+else if (Estado is EstadoDeSuperficie.Vacio)
+{
+    @Vacio
+}
+else if (Estado is EstadoDeSuperficie.FiltradoSinResultados)
+{
+    @SinResultados
+}
+else
+{
+    <div class="mq-tabla-envoltorio">
+        <table class="mq-tabla">
+            <caption class="mq-sr-only">@TituloAccesible</caption>
+            <thead>
+                <tr>
+                    @foreach (var columna in Definiciones)
+                    {
+                        <th scope="col" class="@(columna.EsNumerica ? "mq-num" : null)">@columna.Titulo</th>
+                    }
+                    @if (Acciones is not null)
+                    {
+                        <th scope="col" class="mq-td-acciones">@RotuloDeAcciones</th>
+                    }
+                </tr>
+            </thead>
+            <tbody data-testid="@TestidCuerpo">
+                @foreach (var elemento in Items)
+                {
+                    <tr @key="Clave(elemento)" data-testid="@TestidFila" data-id="@Clave(elemento)">
+                        @foreach (var columna in Definiciones)
+                        {
+                            @if (columna.EsEncabezadoDeFila)
+                            {
+                                <th scope="row" class="mq-th-plano mq-th-plano--cuerpo" data-testid="@columna.Testid">
+                                    @columna.Plantilla(elemento)
+                                </th>
+                            }
+                            else
+                            {
+                                <td class="@(columna.EsNumerica ? "mq-num" : null)" data-testid="@columna.Testid">
+                                    @columna.Plantilla(elemento)
+                                </td>
+                            }
+                        }
+                        @if (Acciones is not null)
+                        {
+                            <td class="mq-td-acciones">
+                                <span class="mq-acciones-fila">@Acciones(elemento)</span>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mq-tarjetas-apiladas" role="list">
+        @foreach (var elemento in Items)
+        {
+            <article class="mq-tarjeta-fila" role="listitem" @key="Clave(elemento)" data-testid="@TestidTarjeta">
+                <div class="mq-tarjeta-fila-cabecera">
+                    <h3 class="mq-body-strong">@Encabezado(elemento)</h3>
+                </div>
+                <p class="mq-caption">
+                    @foreach (var (columna, indice) in Detalles.Select((columna, indice) => (columna, indice)))
+                    {
+                        @if (indice > 0)
+                        {
+                            <span> · </span>
+                        }
+                        @columna.Plantilla(elemento)
+                    }
+                </p>
+                @if (Acciones is not null)
+                {
+                    <div class="mq-acciones-fila">@Acciones(elemento)</div>
+                }
+            </article>
+        }
+    </div>
+}

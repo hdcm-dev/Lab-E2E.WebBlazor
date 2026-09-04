@@ -1,81 +1,29 @@
+@* Shell de trabajo: barra lateral con el ítem activo, contenido y sello de versión al pie. La
+   frontera entre superficies es una navegación, no un condicional dentro del layout. *@
 @inherits LayoutComponentBase
-@implements IDisposable
-@inject NavigationManager Navegacion
 
-@*
-    El menú colapsable se resuelve con estado del componente y no con el JavaScript de Bootstrap:
-    en una aplicación interactiva no hace falta el bundle, y desaparece la carrera entre el click
-    y la animación que hay que sortear en la versión estática de este laboratorio.
-*@
-<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
-    <div class="container">
-        <a class="navbar-brand" href="" data-testid="marca">Movilidad Urbana</a>
-        <button class="navbar-toggler" type="button" aria-controls="menu"
-                aria-expanded="@_menuAbierto.ToString().ToLowerInvariant()"
-                aria-label="Alternar navegación" @onclick="() => _menuAbierto = !_menuAbierto">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse @(_menuAbierto ? "show" : null)" id="menu">
-            <ul class="navbar-nav ms-auto">
-                @foreach (var enlace in Enlaces)
-                {
-                    <li class="nav-item">
-                        <a class="nav-link @(EsActiva(enlace.Ruta) ? "active" : null)"
-                           href="@enlace.Ruta"
-                           aria-current="@(EsActiva(enlace.Ruta) ? "page" : null)"
-                           data-testid="@enlace.Testid">@enlace.Texto</a>
-                    </li>
-                }
-            </ul>
-        </div>
+<div class="mq-shell">
+    <BarraLateral />
+    <div class="mq-shell-contenido">
+        <main id="mq-main" tabindex="-1">@Body</main>
+        <SelloDeVersion />
     </div>
-</nav>
+</div>
 
-<main class="container py-4">
-    @Body
-</main>
-
-<footer class="container py-4 text-body-secondary border-top">
-    <small>Lab-E2E.WebBlazor — laboratorio de pruebas E2E</small>
-</footer>
+@* Los dos hosts que el layout monta una sola vez para todo el shell. *@
+<DialogoHost />
+<AvisoDeReconexion />
 
 @*
-    Testigo de interactividad. Durante el prerender vale `false` y pasa a `true` cuando el
+    Testigo de interactividad. Durante el prerenderizado vale `false` y pasa a `true` cuando el
     circuito quedó conectado: las pruebas esperan ese cambio antes de hacer el primer click, que
     de otro modo llegaría a una página que todavía no tiene quién la escuche.
 *@
-<div hidden data-testid="estado-app" data-interactivo="@RendererInfo.IsInteractive.ToString().ToLowerInvariant()"></div>
+<div hidden data-testid="estado-app"
+     data-interactivo="@RendererInfo.IsInteractive.ToString().ToLowerInvariant()"></div>
 
+@* Aviso de error no recuperable del circuito. El marcado lo exige el framework por su id. *@
 <div id="blazor-error-ui" data-nosnippet>
-    Se produjo un error inesperado.
-    <a href="." class="reload">Recargar</a>
-    <span class="dismiss">🗙</span>
+    Se produjo un error inesperado y la pantalla dejó de responder.
+    <a class="mq-btn mq-btn--secundario reload" href=".">Recargar la pantalla</a>
 </div>
-
-@code {
-    private static readonly (string Ruta, string Texto, string Testid)[] Enlaces =
-    [
-        ("", "Inicio", "nav-inicio"),
-        ("localidades", "Localidades", "nav-localidades"),
-        ("encuesta", "Encuesta", "nav-encuesta")
-    ];
-
-    private bool _menuAbierto;
-
-    protected override void OnInitialized() => Navegacion.LocationChanged += AlNavegar;
-
-    // Sin recarga de página el menú desplegado quedaría abierto sobre la pantalla siguiente.
-    private void AlNavegar(object? origen, LocationChangedEventArgs argumentos)
-    {
-        _menuAbierto = false;
-        StateHasChanged();
-    }
-
-    private bool EsActiva(string ruta)
-    {
-        var actual = Navegacion.ToBaseRelativePath(Navegacion.Uri).Split('?')[0].Trim('/');
-        return string.Equals(actual, ruta, StringComparison.OrdinalIgnoreCase);
-    }
-
-    public void Dispose() => Navegacion.LocationChanged -= AlNavegar;
-}

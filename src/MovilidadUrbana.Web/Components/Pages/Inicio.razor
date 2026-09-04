@@ -2,36 +2,40 @@
 
 <PageTitle>Movilidad Urbana — Inicio</PageTitle>
 
-<h1 class="mb-3" data-testid="titulo">Demostración de pruebas E2E</h1>
-<p class="lead">
+<div class="mq-encabezado">
+    <div>
+        <h1 data-testid="titulo">Demostración de pruebas E2E</h1>
+        <p class="mq-caption">Elegí una de las dos pantallas para empezar.</p>
+    </div>
+</div>
+
+<p class="mq-prosa mq-mb-6">
     Dos pantallas típicas de una aplicación de gestión, resueltas con Blazor en modo
     <em>interactive server</em> y persistidas en SQLite, para practicar pruebas de extremo a
     extremo con Playwright y su integración en la cadena de desarrollo.
 </p>
 
-<div class="row g-4 mt-1">
-    <div class="col-md-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title h5">ABM de localidades</h2>
-                <p class="card-text">
-                    Alta, baja y modificación sobre una tabla, con validación en el servidor y
-                    persistencia en la base de datos.
-                </p>
-                <a href="localidades" class="btn btn-primary" data-testid="ir-localidades">Abrir ABM</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title h5">Encuesta de transporte</h2>
-                <p class="card-text">
-                    Asistente de tres pasos: datos de la persona, medios que utiliza para viajar y
-                    distancia recorrida, con resumen final.
-                </p>
-                <a href="encuesta" class="btn btn-primary" data-testid="ir-encuesta">Abrir encuesta</a>
-            </div>
-        </div>
-    </div>
+@* Toda la tarjeta es el área que se puede activar, y el foco se ve en el contenedor. *@
+<div class="mq-grilla-tarjetas">
+    <a class="mq-tarjeta-entrada" href="localidades" data-testid="ir-localidades">
+        <span class="mq-tarjeta-entrada__icono">
+            <Icono Nombre="@Iconos.Localidad" Tamanio="RolesDeIcono.Tarjeta" />
+        </span>
+        <h2>ABM de localidades</h2>
+        <p class="mq-caption">
+            Alta, baja y modificación sobre una tabla, con la validación que decide en el servidor
+            y persistencia en la base de datos.
+        </p>
+    </a>
+
+    <a class="mq-tarjeta-entrada mq-tarjeta-entrada--modulo-b" href="encuesta" data-testid="ir-encuesta">
+        <span class="mq-tarjeta-entrada__icono">
+            <Icono Nombre="@Iconos.Encuesta" Tamanio="RolesDeIcono.Tarjeta" />
+        </span>
+        <h2>Encuesta de transporte</h2>
+        <p class="mq-caption">
+            Asistente de tres pasos: datos de la persona, medios que utiliza para viajar y
+            distancia recorrida, con revisión final.
+        </p>
+    </a>
 </div>

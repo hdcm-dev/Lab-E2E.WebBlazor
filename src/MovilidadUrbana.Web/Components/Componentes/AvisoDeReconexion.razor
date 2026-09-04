@@ -1,0 +1,29 @@
+@* Aviso de reconexión del circuito, estilizado acorde a la marca y anunciado en una región
+   activa. No es un modal: cortar la interacción con un velo mientras el circuito vuelve no
+   agrega nada, y lo que la persona escribió sigue estando. *@
+
+<script src="@Assets["Components/Componentes/AvisoDeReconexion.razor.js"]" type="module"></script>
+
+<div id="components-reconnect-modal" class="mq-banda mq-banda--atencion mq-aviso-reconexion"
+     role="status" aria-live="polite" data-estado="oculto" data-nosnippet>
+    <Icono Nombre="@Iconos.Alerta" />
+    <span data-visible-en="reconectando">
+        Se perdió la conexión con el servicio. Estamos reconectando; lo que escribiste sigue acá.
+    </span>
+    <span data-visible-en="reintentando">
+        La reconexión falló. Volvemos a intentar en <span id="components-seconds-to-next-attempt"></span> segundos.
+    </span>
+    <span data-visible-en="fallo">
+        No pudimos reconectar con el servicio.
+    </span>
+    <span data-visible-en="pausada">
+        El servicio puso la sesión en pausa.
+    </span>
+    <span data-visible-en="fallo-al-retomar">
+        No pudimos retomar la sesión.
+    </span>
+    <button id="components-reconnect-button" type="button" class="mq-btn mq-btn--secundario"
+            data-visible-en="fallo">Reintentar la conexión</button>
+    <button id="components-resume-button" type="button" class="mq-btn mq-btn--secundario"
+            data-visible-en="pausada fallo-al-retomar">Retomar la sesión</button>
+</div>

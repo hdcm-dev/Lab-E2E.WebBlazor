@@ -1,0 +1,17 @@
+@* Host único de los diálogos, montado por el layout de trabajo. Suscribe al servicio, así que
+   libera la suscripción cuando el circuito lo descarta. *@
+@implements IDisposable
+@inject IServicioDeDialogos Dialogos
+
+@if (Dialogos.Vigente is { } pedido)
+{
+    <Dialogo Pedido="pedido" AlCerrar="Dialogos.Resolver" />
+}
+
+@code {
+    protected override void OnInitialized() => Dialogos.AlCambiar += Refrescar;
+
+    private void Refrescar() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Dialogos.AlCambiar -= Refrescar;
+}

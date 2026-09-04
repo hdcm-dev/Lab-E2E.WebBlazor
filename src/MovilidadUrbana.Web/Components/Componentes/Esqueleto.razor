@@ -1,0 +1,13 @@
+@* Esqueletos de carga: se muestran por encima de los 400ms de espera y no anuncian nada, porque
+   lo que se está cargando ya se dijo en la región activa de la superficie. *@
+
+<div aria-hidden="true">
+    @for (var i = 0; i < Filas; i++)
+    {
+        <div class="mq-esqueleto mq-esqueleto--fila"></div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Filas { get; set; } = 3;
+}
