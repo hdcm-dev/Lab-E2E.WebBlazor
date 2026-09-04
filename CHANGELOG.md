@@ -9,6 +9,32 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-09-03
+
+### Cambiado
+
+- **Cada guía del modelo de ramas pasa a ser un solo documento**, tomando la consolidación hecha en
+  [`Lab-Documentos.Documentacion`](https://github.com/hdcm-dev/Lab-Documentos.Documentacion): los
+  ocho documentos de estudio y los cinco anexos de `Estandares-Modelo-Ramas-Guide/` se unifican en
+  `Estandares-Modelo-Ramas.md` (2029 líneas), y los ocho escenarios de cada guía práctica en
+  `Guia-Practica-GitFlow.md` (1178) y `Guia-Practica-GitHubFlow.md` (1067). El texto es el mismo: lo
+  que cambia es que las referencias cruzadas pasan a ser anclas internas y desaparecen las líneas de
+  navegación «Sigue: …». Se borran los 27 archivos que reemplazan, los `README.md` de esas tres
+  carpetas incluidos. `E2E-Guide/` conserva sus dos documentos, porque son dos guías distintas y no
+  dos capítulos. Fuera del consolidado quedan `Anexos/` —los cinco archivos sueltos y los tres
+  workflows de ejemplo con su `README.md`—.
+- **`.github/workflows/e2e.yml` vuelve al runner autoalojado**: `runs-on: [self-hosted,
+  i7infra-dev]` deja de estar comentado y `ubuntu-latest` pasa a ser el ejemplo comentado. Es la
+  configuración de este laboratorio; el repositorio es público, así que la aprobación de workflows
+  desde forks queda como guardarraíl del lado de GitHub.
+
+### Pendiente
+
+- **El índice del `README.md` y las carpetas de solución del `.sln` siguen apuntando a los archivos
+  borrados** —`01-Marco-De-Referencia.md`, `00-Preparacion.md` y los demás—. Hasta que se
+  reescriban, el Explorador de soluciones muestra archivos faltantes y los enlaces del README
+  quedan rotos.
+
 ## [Sin publicar] - 2026-08-31
 
 ### Añadido

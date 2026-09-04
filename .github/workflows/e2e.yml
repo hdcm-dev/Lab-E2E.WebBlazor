@@ -86,8 +86,8 @@ jobs:
     if: ${{ inputs.url-base == '' }}
     # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
     # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
-    # runs-on: [self-hosted, i7infra-dev]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, i7infra-dev]
+    # runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Descargar el código
