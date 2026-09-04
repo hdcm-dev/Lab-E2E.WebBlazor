@@ -16,7 +16,7 @@ traces: [E2E-00]
 Receta para quien ya escribió pruebas de extremo a extremo y necesita el camino corto: qué se copia
 tal cual, qué se decide en cada ABM y dónde están las trampas propias de Blazor con render
 *interactive server*. Toma como base el ABM de localidades de
-[este mismo repositorio](../../README.md), que tiene nueve casos en verde.
+[Lab-E2E.WebBlazor](../../Lab-E2E.WebBlazor), que tiene nueve casos en verde.
 
 Si en algún paso falta el fundamento —por qué se elige un localizador y no otro, qué es el circuito
 de Blazor, cómo se decide qué testear— está desarrollado en

@@ -13,6 +13,19 @@ tiene su propio registro.
 
 ### Cambiado
 
+- **La solución se pone al día con la consolidación de las guías.** `Lab-E2E.WebBlazor.sln` seguía
+  declarando la estructura vieja: los nodos `GitFlow-Practice-Guide`, `GitHubFlow-Practice-Guide`,
+  `Estandares-Modelo-Ramas-Guide` con sus `Anexos` y `workflows`, y `GitHub-Action-Guide`, con
+  **37 archivos que ya no existen**. En Visual Studio eso se ve como una carpeta llena de enlaces
+  rotos, y es la clase de cosa que sobrevive meses porque no rompe el build. Los cinco nodos se
+  eliminan y los cuatro documentos consolidados —`Estandares-Modelo-Ramas.md`,
+  `Guia-Practica-GitFlow.md`, `Guia-Practica-GitHubFlow.md` y `GitHub-Action-Guide.md`— cuelgan
+  directo de `Guides`.
+- **Se suman a la solución los archivos de la raíz** que nunca habían estado: `README.md`,
+  `CHANGELOG.md` y `pruebas.runsettings`, en un nodo `Solution Items`. El `runsettings` es el que
+  más se busca y el que menos se encontraba.
+
+
 - **Cada guía del modelo de ramas pasa a ser un solo documento**, tomando la consolidación hecha en
   [`Lab-Documentos.Documentacion`](https://github.com/hdcm-dev/Lab-Documentos.Documentacion): los
   ocho documentos de estudio y los cinco anexos de `Estandares-Modelo-Ramas-Guide/` se unifican en

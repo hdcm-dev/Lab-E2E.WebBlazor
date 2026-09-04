@@ -1357,7 +1357,7 @@ del workspace, y qué mirar antes de darlo por bueno.
 ## 7.1 E-01 — Verificación de un cambio propuesto
 
 **Qué resuelve.** Que un pull request no integre una rotura. Es el escenario que originó la guía de
-ramas de este repositorio —[GF-08](../Estandares-Modelo-Ramas-Guide/08-Pull-Requests-Y-Pruebas.md)
+ramas de este repositorio —[GF-08](../Estandares-Modelo-Ramas-Guide/Estandares-Modelo-Ramas.md#8-pull-requests-y-pruebas-automatizadas)
 fija el procedimiento; acá está la herramienta con la que se implementa—: sin verificación
 automática, el defecto aparece días después.
 
@@ -2386,7 +2386,7 @@ es la regla que **impide integrar** si el check no está en verde. **[F: GHDOC-2
 
 La configuración se hace en el repositorio, no en el YAML, y se apoya en el **nombre del check**. Qué
 controles configura este equipo, y con qué criterio de rutas sensibles, está en
-[GF-08](../Estandares-Modelo-Ramas-Guide/08-Pull-Requests-Y-Pruebas.md); acá va solo lo que la
+[GF-08](../Estandares-Modelo-Ramas-Guide/Estandares-Modelo-Ramas.md#8-pull-requests-y-pruebas-automatizadas); acá va solo lo que la
 plataforma necesita del lado del workflow. De
 ahí la conveniencia del job resumen de [§7.1](#71-e-01--verificación-de-un-cambio-propuesto):
 `ci-ok` es el único nombre que la regla necesita conocer, y agregar jobs no obliga a tocarla.
@@ -2841,7 +2841,7 @@ realmente está la afirmación, y no la ruta antigua que también responde 200.
 ## Documentación oficial de GitHub Actions
 
 El prefijo es `GHDOC-` y no `GHA-` a propósito: `GHA-1` ya está tomado en
-[Anexos/Fuentes.md](../Estandares-Modelo-Ramas-Guide/Anexos/Fuentes.md) del cuerpo hermano, donde
+[Anexos/Fuentes.md](../Estandares-Modelo-Ramas-Guide/Estandares-Modelo-Ramas.md#anexo-e--fuentes) del cuerpo hermano, donde
 nombra *Reusing workflows*. Dentro de un mismo cuerpo documental un ID resuelve a una sola fuente.
 
 | ID | Fuente | URL | Estado |

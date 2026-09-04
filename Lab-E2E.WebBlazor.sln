@@ -21,6 +21,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-workflow", "github-w
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Guides", "Guides", "{E903B2C1-7088-49D1-9C0D-1BA347FE0A15}"
+	ProjectSection(SolutionItems) = preProject
+		Guides\Estandares-Modelo-Ramas.md = Guides\Estandares-Modelo-Ramas.md
+		Guides\GitHub-Action-Guide.md = Guides\GitHub-Action-Guide.md
+		Guides\Guia-Practica-GitFlow.md = Guides\Guia-Practica-GitFlow.md
+		Guides\Guia-Practica-GitHubFlow.md = Guides\Guia-Practica-GitHubFlow.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "E2E-Guide", "E2E-Guide", "{28CE06F3-9D5D-4F07-864C-139B9ED75A59}"
 	ProjectSection(SolutionItems) = preProject
@@ -28,72 +34,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "E2E-Guide", "E2E-Guide", "{
 		Guides\E2E-Guide\Quick-Guide-ABM.md = Guides\E2E-Guide\Quick-Guide-ABM.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitFlow-Practice-Guide", "GitFlow-Practice-Guide", "{DC826EEF-ABD1-4D9C-8F8A-D20870F6ABE4}"
-	ProjectSection(SolutionItems) = preProject
-		Guides\GitFlow-Practice-Guide\00-Preparacion.md = Guides\GitFlow-Practice-Guide\00-Preparacion.md
-		Guides\GitFlow-Practice-Guide\01-Funcionalidad-Nueva.md = Guides\GitFlow-Practice-Guide\01-Funcionalidad-Nueva.md
-		Guides\GitFlow-Practice-Guide\02-Defecto-Con-Release-Abierta.md = Guides\GitFlow-Practice-Guide\02-Defecto-Con-Release-Abierta.md
-		Guides\GitFlow-Practice-Guide\03-Corte-De-Release.md = Guides\GitFlow-Practice-Guide\03-Corte-De-Release.md
-		Guides\GitFlow-Practice-Guide\04-PR-Que-Rompe-La-Regresion.md = Guides\GitFlow-Practice-Guide\04-PR-Que-Rompe-La-Regresion.md
-		Guides\GitFlow-Practice-Guide\05-Emergencia-En-Produccion.md = Guides\GitFlow-Practice-Guide\05-Emergencia-En-Produccion.md
-		Guides\GitFlow-Practice-Guide\06-Version-De-Demostracion.md = Guides\GitFlow-Practice-Guide\06-Version-De-Demostracion.md
-		Guides\GitFlow-Practice-Guide\07-Cierre-Y-Auditoria.md = Guides\GitFlow-Practice-Guide\07-Cierre-Y-Auditoria.md
-		Guides\GitFlow-Practice-Guide\README.md = Guides\GitFlow-Practice-Guide\README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Estandares-Modelo-Ramas-Guide", "Estandares-Modelo-Ramas-Guide", "{0B59F1F9-B484-4C75-B971-118688D85FF7}"
-	ProjectSection(SolutionItems) = preProject
-		Guides\Estandares-Modelo-Ramas-Guide\01-Marco-De-Referencia.md = Guides\Estandares-Modelo-Ramas-Guide\01-Marco-De-Referencia.md
-		Guides\Estandares-Modelo-Ramas-Guide\02-Mapa-Conceptual.md = Guides\Estandares-Modelo-Ramas-Guide\02-Mapa-Conceptual.md
-		Guides\Estandares-Modelo-Ramas-Guide\03-Fundamentos-De-Git.md = Guides\Estandares-Modelo-Ramas-Guide\03-Fundamentos-De-Git.md
-		Guides\Estandares-Modelo-Ramas-Guide\04-GitFlow.md = Guides\Estandares-Modelo-Ramas-Guide\04-GitFlow.md
-		Guides\Estandares-Modelo-Ramas-Guide\05-Como-Elegir-El-Modelo.md = Guides\Estandares-Modelo-Ramas-Guide\05-Como-Elegir-El-Modelo.md
-		Guides\Estandares-Modelo-Ramas-Guide\06-Modelo-Adoptado.md = Guides\Estandares-Modelo-Ramas-Guide\06-Modelo-Adoptado.md
-		Guides\Estandares-Modelo-Ramas-Guide\07-Integracion-Y-Versionado.md = Guides\Estandares-Modelo-Ramas-Guide\07-Integracion-Y-Versionado.md
-		Guides\Estandares-Modelo-Ramas-Guide\08-Pull-Requests-Y-Pruebas.md = Guides\Estandares-Modelo-Ramas-Guide\08-Pull-Requests-Y-Pruebas.md
-		Guides\Estandares-Modelo-Ramas-Guide\README.md = Guides\Estandares-Modelo-Ramas-Guide\README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Anexos", "Anexos", "{919497A5-466C-4F76-A422-ABDB5A85BBBC}"
-	ProjectSection(SolutionItems) = preProject
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\Fuentes.md = Guides\Estandares-Modelo-Ramas-Guide\Anexos\Fuentes.md
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\Glosario.md = Guides\Estandares-Modelo-Ramas-Guide\Anexos\Glosario.md
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\Listas-De-Verificacion.md = Guides\Estandares-Modelo-Ramas-Guide\Anexos\Listas-De-Verificacion.md
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\Plantillas.md = Guides\Estandares-Modelo-Ramas-Guide\Anexos\Plantillas.md
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\Preguntas-Frecuentes.md = Guides\Estandares-Modelo-Ramas-Guide\Anexos\Preguntas-Frecuentes.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{28FBFA94-A1C7-4F6C-9D6C-52F3452BE849}"
-	ProjectSection(SolutionItems) = preProject
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\README.md = Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\README.md
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\auditoria-convergencia.yml = Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\auditoria-convergencia.yml
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\ci.yml = Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\ci.yml
-		Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\release.yml = Guides\Estandares-Modelo-Ramas-Guide\Anexos\workflows\release.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub-Action-Guide", "GitHub-Action-Guide", "{9A5C7E14-6B23-4D98-B10F-3E7A4C85D2F6}"
-	ProjectSection(SolutionItems) = preProject
-		Guides\GitHub-Action-Guide\GitHub-Action-Guide.md = Guides\GitHub-Action-Guide\GitHub-Action-Guide.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHubFlow-Practice-Guide", "GitHubFlow-Practice-Guide", "{7C4E1F2A-9B65-4D30-8E71-2A5C0D9F4B18}"
-	ProjectSection(SolutionItems) = preProject
-		Guides\GitHubFlow-Practice-Guide\00-Preparacion.md = Guides\GitHubFlow-Practice-Guide\00-Preparacion.md
-		Guides\GitHubFlow-Practice-Guide\01-Funcionalidad-Nueva.md = Guides\GitHubFlow-Practice-Guide\01-Funcionalidad-Nueva.md
-		Guides\GitHubFlow-Practice-Guide\02-Correccion-Hacia-Adelante.md = Guides\GitHubFlow-Practice-Guide\02-Correccion-Hacia-Adelante.md
-		Guides\GitHubFlow-Practice-Guide\03-PR-Que-Rompe-La-Regresion.md = Guides\GitHubFlow-Practice-Guide\03-PR-Que-Rompe-La-Regresion.md
-		Guides\GitHubFlow-Practice-Guide\04-Cambio-Grande-Con-Feature-Flag.md = Guides\GitHubFlow-Practice-Guide\04-Cambio-Grande-Con-Feature-Flag.md
-		Guides\GitHubFlow-Practice-Guide\05-Reversion.md = Guides\GitHubFlow-Practice-Guide\05-Reversion.md
-		Guides\GitHubFlow-Practice-Guide\06-Vista-Previa-Para-Demostracion.md = Guides\GitHubFlow-Practice-Guide\06-Vista-Previa-Para-Demostracion.md
-		Guides\GitHubFlow-Practice-Guide\07-Cierre-Y-Auditoria.md = Guides\GitHubFlow-Practice-Guide\07-Cierre-Y-Auditoria.md
-		Guides\GitHubFlow-Practice-Guide\README.md = Guides\GitHubFlow-Practice-Guide\README.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{F72DCD18-AD00-4913-86D5-847419217A14}"
 	ProjectSection(SolutionItems) = preProject
 		scripts\dotnet.sh = scripts\dotnet.sh
 		scripts\publicar.sh = scripts\publicar.sh
 		scripts\pruebas.sh = scripts\pruebas.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1C0D2E3-4F56-4789-A0B1-C2D3E4F56789}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		README.md = README.md
+		pruebas.runsettings = pruebas.runsettings
 	EndProjectSection
 EndProject
 Global
@@ -151,11 +103,5 @@ Global
 		{784AB174-C9CF-476B-BAD8-C45A17F206A8} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{2B9CA490-528A-47D8-9F30-447E4A326153} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{28CE06F3-9D5D-4F07-864C-139B9ED75A59} = {E903B2C1-7088-49D1-9C0D-1BA347FE0A15}
-		{DC826EEF-ABD1-4D9C-8F8A-D20870F6ABE4} = {E903B2C1-7088-49D1-9C0D-1BA347FE0A15}
-		{0B59F1F9-B484-4C75-B971-118688D85FF7} = {E903B2C1-7088-49D1-9C0D-1BA347FE0A15}
-		{919497A5-466C-4F76-A422-ABDB5A85BBBC} = {0B59F1F9-B484-4C75-B971-118688D85FF7}
-		{28FBFA94-A1C7-4F6C-9D6C-52F3452BE849} = {919497A5-466C-4F76-A422-ABDB5A85BBBC}
-		{7C4E1F2A-9B65-4D30-8E71-2A5C0D9F4B18} = {E903B2C1-7088-49D1-9C0D-1BA347FE0A15}
-		{9A5C7E14-6B23-4D98-B10F-3E7A4C85D2F6} = {E903B2C1-7088-49D1-9C0D-1BA347FE0A15}
 	EndGlobalSection
 EndGlobal
