@@ -9,6 +9,30 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-09-09
+
+### Quitado
+
+- **`Guides/`** — toda la documentación de estudio se muda a
+  [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion),
+  a `Guides/E2E-Guide/` las de pruebas y a `Guides/` las de ramas e integración continua. El motivo
+  es que las mismas guías vivían repartidas entre este repositorio y `Lab-E2E.WebBlazor.Base`, con
+  dos copias del mismo texto que podían divergir sin que nada avisara. Una sola copia sirve ahora a
+  los dos laboratorios.
+
+### Cambiado
+
+- **`Lab-E2E.WebBlazor.sln`** — se retiran las carpetas de solución `Guides` y `E2E-Guide` con sus
+  siete elementos, y el anidamiento de la segunda dentro de la primera. Los documentos ya no están
+  en el disco de este repositorio, así que el Explorador de soluciones los mostraría rotos.
+  Se conservan `github-workflow`, `scripts` y `Solution Items`.
+- **`README.md`** — la sección «Guías» deja de listar documento por documento y remite al
+  repositorio de documentación, con dos entradas por carpeta y la advertencia de que los documentos
+  citan el código de acá por ruta relativa, así que conviene clonar los repositorios como carpetas
+  hermanas. Se retiran de paso los enlaces a `Guides/Estandares-Modelo-Ramas-Guide/` y
+  `Guides/GitFlow-Practice-Guide/`, que apuntaban a una estructura de una carpeta por guía con
+  archivos numerados que este repositorio nunca tuvo: estaban rotos desde antes de la mudanza.
+
 ## [Sin publicar] - 2026-09-04
 
 ### Añadido

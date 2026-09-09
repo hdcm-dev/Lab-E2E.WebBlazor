@@ -171,63 +171,20 @@ nueva, y ninguno afloja una verificación:
 
 ## Guías
 
-La documentación de estudio vive en [Guides/](Guides/) y se lee desde el repositorio o desde el
-Explorador de soluciones. Son dos familias en cuatro carpetas: una sobre pruebas de extremo a
-extremo, y otra sobre el modelo de ramas —una guía de estudio y dos guías prácticas—.
+Toda la documentación de estudio de este laboratorio vive ahora en un repositorio propio,
+[**Lab-E2E.WebBlazor.Documentacion**](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion),
+para que una sola copia sirva a los dos laboratorios —este y
+[Lab-E2E.WebBlazor.Base](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Base)— y no haya que
+mantener dos versiones del mismo texto.
 
-### [Guides/E2E-Guide/](Guides/E2E-Guide/) — pruebas de extremo a extremo
-
-| Documento | Para quién | Qué deja |
-| --- | --- | --- |
-| [Beginner-Guide.md](Guides/E2E-Guide/Beginner-Guide.md) | Quien nunca escribió una prueba E2E | Nueve capítulos y seis anexos: qué es una E2E, marco de escenarios y actores, anatomía del proyecto en .NET, qué testear, cómo se escribe y estabiliza un caso, lo propio de una aplicación con servidor, y la integración con GitHub Actions |
-| [Quick-Guide-ABM.md](Guides/E2E-Guide/Quick-Guide-ABM.md) | Quien ya escribió pruebas E2E | La receta corta para montar las de un ABM: siete pasos, las trampas de Blazor *interactive server* y una lista de verificación |
-| [Caso-Encuesta-Page.md](Guides/E2E-Guide/Caso-Encuesta-Page.md) | Quien tiene que decidir **qué** probar | Cómo se diseñan los casos de una superficie que se recorre en tramos: por qué los tres pasos del asistente son **una** superficie y no tres, cómo se prueba una promesa sobre la memoria, a quién le pertenece cada identificador, y dos promesas del `src` que hoy no tienen caso |
-
-### [Guides/Estandares-Modelo-Ramas-Guide/](Guides/Estandares-Modelo-Ramas-Guide/) — ramas, integración y releases
-
-Cómo se organiza el trabajo alrededor del código que estas pruebas verifican: qué rama recibe qué
-cambio, cuándo se corta una versión y qué tiene que estar en verde para que un merge ocurra.
-
-La carpeta se llama *Estandares-Modelo-Ramas* y no *GitFlow* a propósito: lo que documenta es la
-**elección** entre modelos. GitFlow es uno de los comparados —y tiene su [capítulo
-propio](Guides/Estandares-Modelo-Ramas-Guide/04-GitFlow.md)—, pero el modelo adoptado es otro:
-tronco con ramas de release.
-
-| # | Documento | De qué trata |
-| --- | --- | --- |
-| 01 | [Marco de referencia](Guides/Estandares-Modelo-Ramas-Guide/01-Marco-De-Referencia.md) | Escenarios, contextos y actores: el vocabulario que usa todo lo demás |
-| 02 | [Mapa conceptual](Guides/Estandares-Modelo-Ramas-Guide/02-Mapa-Conceptual.md) | Entradas por escenario, por rol y por artefacto |
-| 03 | [Fundamentos de Git](Guides/Estandares-Modelo-Ramas-Guide/03-Fundamentos-De-Git.md) | Merge, squash, rebase, cherry-pick y tags |
-| 04 | [GitFlow](Guides/Estandares-Modelo-Ramas-Guide/04-GitFlow.md) | El modelo original, sus reglas y la nota de 2020 de su autor |
-| 05 | [Cómo elegir el modelo](Guides/Estandares-Modelo-Ramas-Guide/05-Como-Elegir-El-Modelo.md) | GitHub Flow, GitFlow, GitLab Flow y tronco: comparación y criterio |
-| 06 | [Modelo adoptado](Guides/Estandares-Modelo-Ramas-Guide/06-Modelo-Adoptado.md) | Las siete reglas, guardarraíles y antipatrones |
-| 07 | [Integración y versionado](Guides/Estandares-Modelo-Ramas-Guide/07-Integracion-Y-Versionado.md) | Ambientes, promoción, versionado semántico y releases |
-| 08 | [Pull requests y pruebas](Guides/Estandares-Modelo-Ramas-Guide/08-Pull-Requests-Y-Pruebas.md) | Ciclo del pull request, protección de rama y qué verifica el pipeline |
-
-Los [anexos](Guides/Estandares-Modelo-Ramas-Guide/Anexos/) suman
-[glosario](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Glosario.md),
-[plantillas](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Plantillas.md),
-[listas de verificación](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Listas-De-Verificacion.md),
-[preguntas que forman criterio](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Preguntas-Frecuentes.md),
-[fuentes](Guides/Estandares-Modelo-Ramas-Guide/Anexos/Fuentes.md) y tres
-[workflows de ejemplo](Guides/Estandares-Modelo-Ramas-Guide/Anexos/workflows/) listos para copiar.
-
-### Las dos guías prácticas
-
-Cada una es un recorrido de ocho escenarios ejecutables sobre un repositorio real, para un equipo
-de tres personas que rotan por los roles. Se practican sobre
-[`Lab-GitFlow`](https://github.com/hdcm-dev/Lab-GitFlow), con la aplicación de este laboratorio como
-sistema bajo prueba.
-
-| Guía | Qué ejercita |
+| Carpeta | Qué contiene |
 | --- | --- |
-| [GitFlow-Practice-Guide/](Guides/GitFlow-Practice-Guide/README.md) | El modelo adoptado, de la [preparación](Guides/GitFlow-Practice-Guide/00-Preparacion.md) al [cierre y auditoría](Guides/GitFlow-Practice-Guide/07-Cierre-Y-Auditoria.md), incluido el [PR que rompe la regresión](Guides/GitFlow-Practice-Guide/04-PR-Que-Rompe-La-Regresion.md), que es donde las E2E de este laboratorio entran en la historia |
-| [GitHubFlow-Practice-Guide/](Guides/GitHubFlow-Practice-Guide/README.md) | El modelo que **no** se adoptó, como línea de base: una sola rama de vida larga, [corrección hacia adelante](Guides/GitHubFlow-Practice-Guide/02-Correccion-Hacia-Adelante.md), [feature flag](Guides/GitHubFlow-Practice-Guide/04-Cambio-Grande-Con-Feature-Flag.md) y [reversión](Guides/GitHubFlow-Practice-Guide/05-Reversion.md) en lugar de releases. Sirve para medir qué agrega cada pieza del modelo adoptado |
+| [`Guides/E2E-Guide/`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion/tree/main/Guides/E2E-Guide) | Pruebas de extremo a extremo: la guía de estudio, la receta para montar un ABM, los tres casos de diseño y el marco conceptual de la superficie verificable |
+| [`Guides/`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion/tree/main/Guides) | Ramas, integración y releases: estándares del modelo de ramas, las dos guías prácticas y la de GitHub Actions |
 
-Las dos familias se leen bien juntas, y el punto de contacto es concreto: la [guía de estudio
-E2E](Guides/E2E-Guide/Beginner-Guide.md) explica qué verifica cada prueba y cómo se ata al pipeline;
-[pull requests y pruebas](Guides/Estandares-Modelo-Ramas-Guide/08-Pull-Requests-Y-Pruebas.md)
-explica cuándo esa verificación bloquea un merge y quién decide.
+Los documentos siguen citando el código de este repositorio por ruta, así que se leen mejor con
+los dos clonados como carpetas hermanas.
+
 
 ### Por qué las pruebas E2E son un proyecto de la solución
 
