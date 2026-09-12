@@ -1,4 +1,4 @@
-using MovilidadUrbana.Web.Dominio.Reglas;
+using MovilidadUrbana.Dominio.Reglas;
 
 namespace MovilidadUrbana.UnitTests;
 

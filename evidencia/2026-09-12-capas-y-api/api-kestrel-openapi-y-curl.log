@@ -1,0 +1,18 @@
+== OpenAPI: rutas expuestas ==
+bash: line 5: python3: command not found
+== flujo por curl con sesión ==
+sesión asignada: 854410443f244d70b1e4bd742377d4cd
+bash: line 8: python3: command not found
+  POST localidad inválida: 400
+{"id":1,"registradaEn":"2026-09-12T20:11:30.1938487+00:00","resumen":[{"clave":"persona","etiqueta":"Persona","valor":"Ana Pérez (34 años)"},{"clave":"localidad","etiqueta":"Localidad","valor":"Corrientes"},{"clave":"medios","etiqueta":"Medios","valor":"Colectivo"},{"clave":"frecuencia","etiqueta"
+{"cantidad":1}
+MovilidadUrbana.ApiWeb | v1 3.1.1
+   GET    /api/v1/encuestas/contador
+   POST   /api/v1/encuestas/pasos/{paso}/validacion
+   POST   /api/v1/encuestas
+   GET    /api/v1/localidades
+   POST   /api/v1/localidades
+   GET    /api/v1/localidades/{id}
+   PUT    /api/v1/localidades/{id}
+   DELETE /api/v1/localidades/{id}
+GET localidades: ['Corrientes', 'Resistencia']

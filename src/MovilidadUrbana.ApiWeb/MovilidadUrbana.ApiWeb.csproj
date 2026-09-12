@@ -1,16 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <!-- Presentación Blazor y punto de composición. Las capas viven en sus propios proyectos. -->
+  <!-- Cabeza REST sobre las mismas capas que la web: solo presentación y composición. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MovilidadUrbana.Aplicacion\MovilidadUrbana.Aplicacion.csproj" />
     <ProjectReference Include="..\MovilidadUrbana.Infraestructura\MovilidadUrbana.Infraestructura.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MovilidadUrbana.ApiWeb.Tests" />
   </ItemGroup>
 
 </Project>

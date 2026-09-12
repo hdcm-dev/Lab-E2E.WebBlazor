@@ -64,6 +64,14 @@ jobs:
           --configuration Release --no-build
           --logger "trx;LogFileName=unitarias.trx" --results-directory resultados
 
+      - name: Pruebas de la API
+        # La API se prueba en proceso con WebApplicationFactory: sin Kestrel ni navegador, sobre una
+        # base SQLite propia de la corrida. Va acá por el mismo motivo que las unitarias: es barata.
+        run: >-
+          dotnet test tests/MovilidadUrbana.ApiWeb.Tests
+          --configuration Release --no-build
+          --logger "trx;LogFileName=api.trx" --results-directory resultados
+
       - name: Subir los resultados de las unitarias
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7

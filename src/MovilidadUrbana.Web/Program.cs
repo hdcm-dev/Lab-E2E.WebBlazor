@@ -1,11 +1,9 @@
 using System.Globalization;
-using Microsoft.EntityFrameworkCore;
-using MovilidadUrbana.Web.Aplicacion.Abstracciones;
-using MovilidadUrbana.Web.Aplicacion.Encuestas;
-using MovilidadUrbana.Web.Aplicacion.Localidades;
+using MovilidadUrbana.Aplicacion;
+using MovilidadUrbana.Infraestructura;
 using MovilidadUrbana.Web.Components;
-using MovilidadUrbana.Web.Infraestructura.Persistencia;
-using MovilidadUrbana.Web.Infraestructura.Sesiones;
+using MovilidadUrbana.Infraestructura.Persistencia;
+using MovilidadUrbana.Infraestructura.Sesiones;
 using MovilidadUrbana.Web.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,20 +17,12 @@ CultureInfo.DefaultThreadCurrentUICulture = cultura;
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// --- Infraestructura -------------------------------------------------------------------------
+// --- Infraestructura y aplicación ------------------------------------------------------------
+// Cada capa registra lo suyo; este archivo solo decide la cadena de conexión y las compone.
 var cadenaDeConexion = builder.Configuration.GetConnectionString("BaseDeDatos")
-    ?? "Data Source=datos/movilidad.db;Default Timeout=30";
-builder.Services.AddDbContextFactory<ContextoDeDatos>(opciones => opciones.UseSqlite(cadenaDeConexion));
-
-builder.Services.AddScoped<ContextoDeSesion>();
-builder.Services.AddScoped<IContextoDeSesion>(sp => sp.GetRequiredService<ContextoDeSesion>());
-builder.Services.AddScoped<SembradorDeSesion>();
-builder.Services.AddScoped<IRepositorioDeLocalidades, RepositorioDeLocalidades>();
-builder.Services.AddScoped<IRepositorioDeEncuestas, RepositorioDeEncuestas>();
-
-// --- Aplicación ------------------------------------------------------------------------------
-builder.Services.AddScoped<ServicioDeLocalidades>();
-builder.Services.AddScoped<ServicioDeEncuestas>();
+    ?? ServiciosDeInfraestructura.CadenaDeConexionPorDefecto;
+builder.Services.AgregarInfraestructura(cadenaDeConexion);
+builder.Services.AgregarAplicacion();
 
 // --- Presentación ----------------------------------------------------------------------------
 // La identidad de versión se resuelve una sola vez, acá: la cadena que ve la persona en el sello

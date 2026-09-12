@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
-using MovilidadUrbana.Web.Aplicacion.Localidades;
+using MovilidadUrbana.Aplicacion.Localidades;
 using MovilidadUrbana.Web.Components.Componentes;
-using MovilidadUrbana.Web.Dominio.Entidades;
+using MovilidadUrbana.Dominio.Entidades;
 using MovilidadUrbana.Web.Servicios;
 
 namespace MovilidadUrbana.Web.Components.Pages;

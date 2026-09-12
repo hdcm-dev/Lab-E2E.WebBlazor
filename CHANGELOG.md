@@ -11,7 +11,31 @@ tiene su propio registro.
 
 ## [Sin publicar] - 2026-09-12
 
+### Añadido
+
+- **`MovilidadUrbana.ApiWeb`** — la misma aplicación como API REST: `LocalidadesController` y
+  `EncuestasController` sobre los mismos casos de uso, repositorios y base que la web. Sesión por
+  encabezado `X-Sesion-Id` —el equivalente de la cookie—, `ValidationProblemDetails` (RFC 9457) con las
+  mismas claves de error que la web, `201 Created` con `Location`, OpenAPI 3.1 en Development.
+  Escucha en `http://localhost:5250`.
+- **`MovilidadUrbana.ApiWeb.Tests`** — 11 casos en proceso con `WebApplicationFactory` sobre una base
+  SQLite propia de la corrida: siembra por sesión, alta con `Location`, 400 por campo, duplicado,
+  modificar y dar de baja, aislamiento entre sesiones, encuesta completa con resumen, encuesta
+  incompleta, validación de un paso, paso inexistente. `ci.yml` los corre junto a las unitarias.
+- **`evidencia/2026-09-12-capas-y-api/`** — Movilidad Urbana 22/22 tras extraer las capas; la API
+  11/11, una falsificación (200 en vez de 201 pone un caso en rojo) y una corrida real sobre Kestrel
+  con el OpenAPI y el flujo por `curl`.
+
 ### Cambiado
+
+- **Las capas de Movilidad Urbana pasan a proyectos propios**: `MovilidadUrbana.Dominio`,
+  `MovilidadUrbana.Aplicacion` y `MovilidadUrbana.Infraestructura`, con los espacios de nombres sin
+  el `.Web.`. Hacía falta para que la API y la web compartieran las reglas sin duplicarlas ni
+  referenciar un proyecto web desde otro. Cada capa registra sus servicios —`AgregarAplicacion()`,
+  `AgregarInfraestructura(cadena)`— y los dos `Program.cs` solo componen. `MovilidadUrbana.UnitTests`
+  referencia ahora `Dominio`, que es lo único que prueba. La web y sus 22 E2E no cambiaron de
+  comportamiento; `Infraestructura` referencia el framework de ASP.NET Core solo por el middleware de
+  sesión. La solución queda en doce proyectos.
 
 - **Los proyectos mudados pierden el prefijo `E2E.Base`**: `WebBlazor.E2E.Base.HolaMundo` pasa a
   `WebBlazor.HolaMundo` y `WebBlazor.E2E.Base.Login` a `WebBlazor.Login`, y con ellos sus proyectos

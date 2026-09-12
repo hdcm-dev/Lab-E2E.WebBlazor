@@ -26,47 +26,39 @@ reimplementan ninguno en línea. Ver [Diseño](#diseño).
 
 ## Estructura
 
-Movilidad Urbana es un único proyecto, con las capas de **Clean Architecture** separadas en carpetas y
-las dependencias apuntando siempre hacia adentro. Al lado viven dos proyectos web más simples, Hola
-Mundo y Login:
+Movilidad Urbana está repartida en **cuatro proyectos por capa de Clean Architecture** y dos cabezas
+—la web Blazor y una API REST— que comparten las tres capas de abajo. Las dependencias apuntan
+siempre hacia adentro. Al lado viven dos proyectos web más simples, Hola Mundo y Login:
 
 ```
 Lab-E2E.WebBlazor.sln
-src/MovilidadUrbana.Web/
-  Dominio/              Entidades y reglas de negocio. No depende de nada.
-    Entidades/          Localidad, RespuestaDeEncuesta, Sesion
-    Reglas/             ReglasDeLocalidad, ReglasDeEncuesta
-    Catalogos.cs        Provincias, medios, frecuencias y motivos
-  Aplicacion/           Casos de uso. Depende solo de Dominio.
-    Abstracciones/      IRepositorioDeLocalidades, IRepositorioDeEncuestas, IContextoDeSesion
-    Localidades/        ServicioDeLocalidades + su modelo de pantalla
-    Encuestas/          ServicioDeEncuestas + su modelo de pantalla
-    Resultado.cs        Salida de un caso de uso: aviso y errores por campo
-  Infraestructura/      Implementa las abstracciones de Aplicacion.
-    Persistencia/       EF Core sobre SQLite, repositorios y siembra inicial
-    Sesiones/           Cookie de sesión y su middleware
-  Components/           Presentación (Blazor). Depende de Aplicacion.
-    App.razor, Routes.razor
-    Layout/             MainLayout: shell de trabajo, barra lateral, hosts y sello de versión
-    Componentes/        Un componente propio por patrón del catálogo de diseño
-    Pages/              Una superficie por pantalla, con su code-behind
-  Theme/                Iconos.cs (trazos SVG) y RolesDeIcono.cs (tamaño por rol)
-  Servicios/            Diálogos y foco (Scoped) e identidad de versión (Singleton)
-  wwwroot/              css/Tokens.css, css/Componentes.css y la interoperabilidad mínima de js/
-  Program.cs            Composición: es el único lugar que conoce todas las capas
-tests/MovilidadUrbana.E2ETests/
-  Infraestructura/
-    ServidorDeLaAplicacion.cs   Levanta y baja la aplicación bajo prueba
-    PruebaE2E.cs                Base: sesión por prueba, espera de interactividad, menú, traza
-    ParalelismoDelEnsamblado.cs Alcance del paralelismo de NUnit
-  NavegacionTests.cs    Portada, menú y ruta inexistente
-  LocalidadesTests.cs   ABM completo y aislamiento entre sesiones
-  EncuestaTests.cs      Asistente completo
-tests/MovilidadUrbana.UnitTests/
-  ReglasDeLocalidadTests.cs   Bordes de cada validación del ABM, sin navegador
-  ReglasDeEncuestaTests.cs    Rangos de la encuesta, paso por paso
-src/WebBlazor.HolaMundo/        La superficie más simple: un formulario interactivo y sus estados
-src/WebBlazor.Login/            La misma superficie detrás de un acceso por cookies
+src/MovilidadUrbana.Dominio/          Entidades y reglas de negocio. No depende de nada.
+  Entidades/                          Localidad, RespuestaDeEncuesta, Sesion
+  Reglas/                             ReglasDeLocalidad, ReglasDeEncuesta
+  Catalogos.cs                        Provincias, medios, frecuencias y motivos
+src/MovilidadUrbana.Aplicacion/       Casos de uso. Depende solo de Dominio.
+  Abstracciones/                      IRepositorioDeLocalidades, IRepositorioDeEncuestas, IContextoDeSesion
+  Localidades/, Encuestas/            Servicio, modelo y política de cada uno
+  Resultado.cs                        Salida de un caso de uso: aviso y errores por campo
+  ServiciosDeAplicacion.cs            AgregarAplicacion(): registra los casos de uso
+src/MovilidadUrbana.Infraestructura/  Implementa las abstracciones de Aplicacion.
+  Persistencia/                       EF Core sobre SQLite, repositorios y siembra inicial
+  Sesiones/                           Cookie de sesión y su middleware
+  ServiciosDeInfraestructura.cs       AgregarInfraestructura(cadena): registra persistencia y sesión
+src/MovilidadUrbana.Web/              Presentación Blazor. Depende de Aplicacion e Infraestructura.
+  Components/                         App.razor, Routes.razor, Layout/, Componentes/, Pages/
+  Theme/, Servicios/, wwwroot/        Íconos; diálogos, foco y versión; tokens, patrones y js/
+  Program.cs                          Composición: elige la cadena de conexión y compone las capas
+src/MovilidadUrbana.ApiWeb/           Presentación REST sobre las mismas capas.
+  Controllers/                        LocalidadesController, EncuestasController
+  Contratos/                          DTOs de entrada y salida
+  Sesiones/                           La sesión por encabezado X-Sesion-Id
+  Program.cs                          Composición: controllers, ProblemDetails y OpenAPI
+tests/MovilidadUrbana.E2ETests/       22 casos Playwright sobre la web + su fixture
+tests/MovilidadUrbana.UnitTests/      49 casos sobre las reglas de dominio, sin navegador
+tests/MovilidadUrbana.ApiWeb.Tests/   11 casos sobre la API en proceso, con WebApplicationFactory
+src/WebBlazor.HolaMundo/              La superficie más simple: un formulario interactivo y sus estados
+src/WebBlazor.Login/                  La misma superficie detrás de un acceso por cookies
 tests/WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture: la aplicación la levanta quien corre la prueba
 tests/WebBlazor.Login.E2ETests/       10 casos sobre el acceso y el guard, también sin fixture
 scripts/
@@ -78,11 +70,32 @@ pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
 evidencia/              Registros de corridas que respaldan lo que afirman las guías
 ```
 
-Son siete proyectos: **tres aplicaciones web con su proyecto de pruebas E2E cada una**, más las
-unitarias sobre las reglas de dominio de Movilidad Urbana. Las tres aplicaciones tienen grados de
+Son doce proyectos. De Movilidad Urbana, tres capas, dos cabezas y tres proyectos de prueba; de
+Hola Mundo y Login, cada uno su web y su E2E. Las tres aplicaciones web tienen grados de
 complejidad distintos a propósito —Hola Mundo, Login y Movilidad Urbana, en ese orden—, para que la
 temática se pueda estudiar de a un escalón. Hola Mundo y Login llegaron desde
 `Lab-E2E.WebBlazor.Base`, que se retiró.
+
+### La API
+
+`MovilidadUrbana.ApiWeb` es la misma aplicación sin interfaz: dos controllers sobre los mismos casos
+de uso, repositorios y base que la web. Lo que la web resuelve con formularios, la API lo resuelve con
+los estándares de HTTP:
+
+| Aspecto | Cómo |
+| --- | --- |
+| Rutas | `/api/v1/localidades` (GET, GET `{id}`, POST, PUT `{id}`, DELETE `{id}`) y `/api/v1/encuestas` (POST), `/api/v1/encuestas/contador` (GET), `/api/v1/encuestas/pasos/{paso}/validacion` (POST) |
+| Sesión | Encabezado **`X-Sesion-Id`**. Si el cliente no lo manda, la respuesta trae uno para que lo repita. Es el equivalente de la cookie de la web: cada sesión ve solo sus datos |
+| Errores de validación | `400` con `ValidationProblemDetails` (RFC 9457), un error por campo con las mismas claves que la web (`nombre`, `codigoPostal`, …) |
+| Alta | `201 Created` con `Location` |
+| Contrato | OpenAPI 3.1 en `/openapi/v1.json`, en Development |
+| Pruebas | En proceso, con `WebApplicationFactory` y una base SQLite propia de la corrida: `dotnet test tests/MovilidadUrbana.ApiWeb.Tests` |
+
+```bash
+dotnet run --project src/MovilidadUrbana.ApiWeb          # http://localhost:5250
+curl -i http://localhost:5250/api/v1/localidades          # devuelve X-Sesion-Id
+curl -H "X-Sesion-Id: <el que vino>" http://localhost:5250/api/v1/encuestas/contador
+```
 
 Los archivos que no pertenecen a ningún proyecto están agrupados en carpetas de solución
 —`github-workflow`, `scripts` y `Solution Items`—, para poder abrirlos desde el Explorador de
@@ -148,11 +161,11 @@ que es lo que hizo aparecer la barra de filtros del ABM.
    de aplicación —con sus propias pruebas unitarias—, así que anotar el modelo de pantalla sería
    exactamente el anti-patrón «transcribir la política de validación en la vista». Se conserva lo
    que la regla protege: error por campo, asociado al control y anunciado, y requisito derivado de
-   la política en [PoliticaDeLocalidades](src/MovilidadUrbana.Web/Aplicacion/Localidades/PoliticaDeLocalidades.cs)
-   y [PoliticaDeEncuestas](src/MovilidadUrbana.Web/Aplicacion/Encuestas/PoliticaDeEncuestas.cs).
+   la política en [PoliticaDeLocalidades](src/MovilidadUrbana.Aplicacion/Localidades/PoliticaDeLocalidades.cs)
+   y [PoliticaDeEncuestas](src/MovilidadUrbana.Aplicacion/Encuestas/PoliticaDeEncuestas.cs).
 3. **El paso de revisión del asistente es el estado de éxito, no un cuarto paso.** `TotalDePasos`
    es una regla de dominio con pruebas propias; la ficha clave/valor de
-   [ResumenDeEncuesta](src/MovilidadUrbana.Web/Aplicacion/Encuestas/ResumenDeEncuesta.cs) se
+   [ResumenDeEncuesta](src/MovilidadUrbana.Aplicacion/Encuestas/ResumenDeEncuesta.cs) se
    recorre —no se escribe a mano— y se muestra al registrar.
 4. **Anchos de contenido en `ch`.** El catálogo no tiene token de ancho de contenido y promover uno
    nuevo no es decisión de este producto, así que las tres medidas que hacían falta se expresan en
@@ -208,8 +221,8 @@ TypeScript— es la que eligió la aplicación de referencia de .NET,
 ### Desde Visual Studio
 
 Abrí `Lab-E2E.WebBlazor.sln` y listo: **Test > Explorador de pruebas** descubre las pruebas de los
-cuatro proyectos —33 casos E2E: 22 de Movilidad Urbana, 10 de Login y 1 de Hola Mundo; y 49
-unitarios— y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de
+cinco proyectos —33 casos E2E: 22 de Movilidad Urbana, 10 de Login y 1 de Hola Mundo; 49
+unitarios; y 11 de la API— y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de
 la prueba.
 
 La primera corrida tarda unos minutos porque baja el navegador; las siguientes, segundos.
@@ -312,7 +325,7 @@ En el ejemplo estático cada prueba tenía su `localStorage`. Acá hay una únic
 las pruebas —incluidas las que corren en paralelo— la comparten.
 
 La solución es que la aplicación reparta un **espacio de datos por sesión**: una cookie que emite
-[MiddlewareDeSesion](src/MovilidadUrbana.Web/Infraestructura/Sesiones/MiddlewareDeSesion.cs), y por
+[MiddlewareDeSesion](src/MovilidadUrbana.Infraestructura/Sesiones/MiddlewareDeSesion.cs), y por
 la que filtran todos los repositorios. Cada prueba escribe esa cookie con un valor propio antes de
 navegar y recibe su juego de localidades recién sembrado, sin ver nada de las demás. Es lo que
 permite correr las clases de prueba en paralelo y que la corrida de chromium termine en segundos.
@@ -446,7 +459,8 @@ jobs:
 | `merge_group` | Igual que `push`, al entrar en la cola de merge |
 
 Antes de gastar un runner con navegadores corre `compilacion`, que construye la solución con
-`-warnaserror`, ejecuta las **pruebas unitarias** —las reglas de dominio, en milisegundos— y lista
+`-warnaserror`, ejecuta las **pruebas unitarias** —las reglas de dominio, en milisegundos—, las **de la API** en
+proceso, y lista
 las E2E con `dotnet test --list-tests` —el equivalente del `playwright test --list` del runner de
 JavaScript: comprueba que el descubrimiento funcione sin levantar navegadores ni la aplicación—. Al terminar, `comentario-en-pr` deja (o actualiza, no duplica) un comentario con el
 resultado y el enlace a la corrida, y `ci-ok` resume todos los jobs en un único check —que es el
