@@ -25,8 +25,9 @@ tiene su propio registro.
 - **`scripts/pruebas.sh` elige el proyecto con `PROYECTO`** (`holamundo`, `login`; sin variable,
   Movilidad Urbana como antes) y suma `REPETIR`. Para los dos sin fixture levanta la aplicación en la
   URL que la prueba tiene escrita.
-- **`evidencia/`**, con la carpeta del testigo de hidratación rescatada de Base —la enlaza una guía— y
-  la de esta unificación. `.gitignore` deja pasar sus `.log`.
+- **`evidencia/`**, con las dos carpetas rescatadas de Base —la del testigo de hidratación, que
+  enlaza una guía, y la de la aplicación del template, que cita `Template-SDD-Aplicado.md`— y la de
+  esta unificación. `.gitignore` deja pasar sus `.log`.
 
 ### Cambiado
 

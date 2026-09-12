@@ -1,0 +1,12 @@
+OK   holamundo inicio
+OK   estado vacio visible
+OK   campo-mensaje == frase
+OK   error de entrada exhibido
+OK   sin scroll horizontal a 320px
+OK   guard lleva al ingreso
+OK   rechazo indiferenciado
+OK   ingreso aceptado
+OK   superficie protegida operable
+OK   cierre de sesión por POST
+
+TODO VERDE
