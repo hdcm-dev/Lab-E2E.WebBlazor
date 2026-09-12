@@ -16,6 +16,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-workflow", "github-workflow", "{86901D2A-0C35-4D66-9648-E4FB8E078325}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\e2e-holamundo.yml = .github\workflows\e2e-holamundo.yml
+		.github\workflows\e2e-login.yml = .github\workflows\e2e-login.yml
 		.github\workflows\e2e.yml = .github\workflows\e2e.yml
 		.github\workflows\verificacion-entorno.yml = .github\workflows\verificacion-entorno.yml
 	EndProjectSection

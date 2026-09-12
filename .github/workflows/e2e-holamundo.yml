@@ -1,0 +1,87 @@
+# E2E de la superficie Hola Mundo — el más simple de los tres workflows de pruebas, a propósito.
+#
+# Un solo job y un solo navegador: compila, levanta la aplicación en la URL que la prueba tiene
+# escrita y corre la batería. No publica, no reparte una matriz ni junta reportes: eso lo muestran,
+# en ese orden, `e2e-login.yml` y `e2e.yml`.
+#
+# La prueba no tiene fixture que levante la aplicación, así que el workflow lo hace por ella. La URL
+# se copia de HolaMundoE2ETests.cs: cambiarla de un lado obliga a cambiarla del otro.
+name: E2E — Hola Mundo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/WebBlazor.E2E.Base.HolaMundo/**'
+      - 'tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/**'
+      - '.github/workflows/e2e-holamundo.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/WebBlazor.E2E.Base.HolaMundo/**'
+      - 'tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/**'
+      - '.github/workflows/e2e-holamundo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  APP: src/WebBlazor.E2E.Base.HolaMundo
+  PRUEBAS: tests/WebBlazor.E2E.Base.HolaMundo.E2ETests
+  URL_APP: http://localhost:5027
+
+jobs:
+  pruebas:
+    name: Pruebas (chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Preparar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Compilar la aplicación y las pruebas
+        run: |
+          dotnet build "$APP" --configuration Release
+          dotnet build "$PRUEBAS" --configuration Release
+
+      - name: Instalar chromium y sus dependencias del sistema
+        # El CLI viene dentro del paquete de Playwright y baja la build que corresponde a su versión.
+        run: |
+          cli="$PRUEBAS/bin/Release/net10.0/.playwright"
+          "$cli/node/linux-x64/node" "$cli/package/cli.js" install --with-deps chromium
+
+      - name: Levantar la aplicación
+        # Queda corriendo en segundo plano para los pasos siguientes; el runner la apaga al terminar.
+        run: |
+          ASPNETCORE_URLS="$URL_APP" ASPNETCORE_ENVIRONMENT=Development \
+            nohup dotnet run --project "$APP" --configuration Release --no-build --no-launch-profile \
+            > aplicacion.log 2>&1 &
+          for _ in $(seq 1 60); do curl -fs -o /dev/null "$URL_APP/" && exit 0; sleep 1; done
+          echo "La aplicación no respondió en $URL_APP" >&2
+          cat aplicacion.log >&2
+          exit 1
+
+      - name: Ejecutar las pruebas
+        run: >-
+          dotnet test "$PRUEBAS"
+          --configuration Release
+          --no-build
+          --settings pruebas.runsettings
+          --logger "trx;LogFileName=holamundo.trx"
+          --results-directory resultados
+
+      - name: Subir los resultados y el log de la aplicación
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-holamundo
+          path: |
+            resultados
+            aplicacion.log
+          if-no-files-found: ignore

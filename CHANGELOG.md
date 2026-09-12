@@ -9,6 +9,46 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-09-12
+
+### Añadido
+
+- **Hola Mundo y Login, desde `Lab-E2E.WebBlazor.Base`**, que se retira: sus dos proyectos web y sus
+  pruebas E2E llegan a `src/` y `tests/`, idénticos byte a byte, y entran en la solución. El
+  laboratorio queda con tres aplicaciones de complejidad creciente —Hola Mundo, Login, Movilidad
+  Urbana— para estudiar la temática de a un escalón.
+- **Un workflow E2E por proyecto web**, independientes y escalonados: `e2e-holamundo.yml` (un job,
+  un navegador, levanta la app y prueba), `e2e-login.yml` (publica una vez y reparte a una matriz) y
+  el `e2e.yml` de siempre para Movilidad Urbana. Se retira `e2e_2.yml`, que era el workflow de Base
+  sin cambios: tenía 0 corridas exitosas de 4, no levantaba la aplicación y compartía `name` y nombre
+  de artefacto con `e2e.yml`.
+- **`scripts/pruebas.sh` elige el proyecto con `PROYECTO`** (`holamundo`, `login`; sin variable,
+  Movilidad Urbana como antes) y suma `REPETIR`. Para los dos sin fixture levanta la aplicación en la
+  URL que la prueba tiene escrita.
+- **`evidencia/`**, con la carpeta del testigo de hidratación rescatada de Base —la enlaza una guía— y
+  la de esta unificación. `.gitignore` deja pasar sus `.log`.
+
+### Cambiado
+
+- **Las pruebas de Hola Mundo y Login pasan de https a http**, en `http://localhost:5027` y
+  `http://localhost:5181` —los perfiles http de sus `launchSettings`—. Con https no podían correr en
+  CI sin confiar un certificado; se verificó que, escuchando solo http, ninguna de las dos redirige.
+- **Playwright 1.62.0 en los tres proyectos de prueba**: los mudados venían en 1.52.0.
+- **README**: estructura, cómo se corren los tres proyectos, los workflows en escalera y el conteo
+  real de casos (22 + 10 + 1 E2E, 49 unitarios).
+
+### Verificado
+
+Registros en `evidencia/2026-09-12-unificacion/`: solución en Release con `-warnaserror` sin
+advertencias; Hola Mundo 3 de 3 y Login 3 de 3 con el script; Movilidad Urbana 22/22 por el camino
+por defecto; Login como lo corre `e2e-login.yml` —binario autocontenido en Production— 10/10 en
+chromium y en firefox; y las dos baterías **fallan** sin la aplicación levantada.
+
+### Encontrado, no resuelto
+
+- La sección *Runner* del README dice que los jobs corren en `ubuntu-latest`, pero el job `publicar`
+  de `e2e.yml` (línea 89) tiene activo el runner propio `[self-hosted, i7infra-dev]`.
+
 ## [Sin publicar] - 2026-09-09
 
 ### Quitado

@@ -119,6 +119,8 @@ StyleCopReport.xml
 *.tmp_proj
 *_wpftmp.csproj
 *.log
+# La evidencia de una corrida sí se versiona: es lo que respalda lo que afirman las guías.
+!evidencia/**/*.log
 *.tlog
 *.vspscc
 *.vssscc

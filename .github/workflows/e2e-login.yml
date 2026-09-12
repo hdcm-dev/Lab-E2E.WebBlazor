@@ -1,0 +1,154 @@
+# E2E de la superficie de acceso — el escalón intermedio entre `e2e-holamundo.yml` y `e2e.yml`.
+#
+# Suma dos cosas a lo que hace el de Hola Mundo:
+#   - compilar una vez, probar muchas: la aplicación se publica en un job y viaja como artefacto a
+#     cada navegador de la matriz, en vez de compilarse en cada uno;
+#   - la matriz de navegadores, que se elige al dispararlo a mano.
+# No junta los resultados en un reporte unificado ni se deja invocar desde otro workflow: eso es lo
+# que agrega `e2e.yml`.
+#
+# La prueba no tiene fixture que levante la aplicación, así que el workflow lo hace por ella. La URL
+# se copia de PruebaDeSuperficie.UrlBase: cambiarla de un lado obliga a cambiarla del otro.
+name: E2E — Login
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/WebBlazor.E2E.Base.Login/**'
+      - 'tests/WebBlazor.E2E.Base.Login.E2ETests/**'
+      - '.github/workflows/e2e-login.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/WebBlazor.E2E.Base.Login/**'
+      - 'tests/WebBlazor.E2E.Base.Login.E2ETests/**'
+      - '.github/workflows/e2e-login.yml'
+  workflow_dispatch:
+    inputs:
+      navegadores:
+        description: Navegadores a probar.
+        type: choice
+        default: chromium
+        options:
+          - chromium
+          - chromium,firefox
+          - chromium,firefox,webkit
+
+# Un push nuevo sobre la misma rama cancela la corrida anterior de un PR; en `main` no se cancela.
+concurrency:
+  group: e2e-login-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  PROYECTO_APP: src/WebBlazor.E2E.Base.Login/WebBlazor.E2E.Base.Login.csproj
+  EJECUTABLE: WebBlazor.E2E.Base.Login
+  PRUEBAS: tests/WebBlazor.E2E.Base.Login.E2ETests
+  URL_APP: http://localhost:5181
+  ARTEFACTO: aplicacion-login
+
+jobs:
+  publicar:
+    name: Publicar la aplicación
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      navegadores: ${{ steps.matriz.outputs.navegadores }}
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Preparar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publicar autocontenido para linux-x64
+        run: >-
+          dotnet publish "$PROYECTO_APP"
+          --configuration Release
+          --runtime linux-x64
+          --self-contained true
+          --output publicacion
+
+      - name: Subir la aplicación publicada
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ARTEFACTO }}
+          path: publicacion
+          retention-days: 7
+
+      - name: Armar la lista de navegadores
+        id: matriz
+        # Un push o un PR no traen `inputs`: se prueba con chromium.
+        env:
+          ENTRADA: ${{ inputs.navegadores || 'chromium' }}
+        run: |
+          lista="$(echo "$ENTRADA" | tr -d ' ' | awk -F, '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i<NF?",":"")}')"
+          echo "navegadores=[${lista}]" >> "$GITHUB_OUTPUT"
+
+  pruebas:
+    name: Pruebas (${{ matrix.navegador }})
+    needs: publicar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        navegador: ${{ fromJSON(needs.publicar.outputs.navegadores) }}
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Preparar el SDK de .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Compilar las pruebas
+        run: dotnet build "$PRUEBAS" --configuration Release
+
+      - name: Instalar el navegador y sus dependencias del sistema
+        run: |
+          cli="$PRUEBAS/bin/Release/net10.0/.playwright"
+          "$cli/node/linux-x64/node" "$cli/package/cli.js" install --with-deps "${{ matrix.navegador }}"
+
+      - name: Traer la aplicación publicada
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTEFACTO }}
+          path: publicacion
+
+      - name: Levantar la aplicación publicada
+        # Los artefactos se empaquetan en zip y pierden el bit de ejecución. La aplicación corre desde
+        # su carpeta para que encuentre sus archivos estáticos, y queda en segundo plano.
+        run: |
+          chmod +x "publicacion/$EJECUTABLE"
+          (cd publicacion && ASPNETCORE_URLS="$URL_APP" nohup "./$EJECUTABLE" > ../aplicacion.log 2>&1 &)
+          for _ in $(seq 1 60); do curl -fs -o /dev/null "$URL_APP/login" && exit 0; sleep 1; done
+          echo "La aplicación no respondió en $URL_APP" >&2
+          cat aplicacion.log >&2
+          exit 1
+
+      - name: Ejecutar las pruebas
+        run: >-
+          dotnet test "$PRUEBAS"
+          --configuration Release
+          --no-build
+          --settings pruebas.runsettings
+          --logger "trx;LogFileName=login-${{ matrix.navegador }}.trx"
+          --results-directory resultados
+          -- Playwright.BrowserName=${{ matrix.navegador }}
+
+      - name: Subir los resultados y el log de la aplicación
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-login-${{ matrix.navegador }}
+          path: |
+            resultados
+            aplicacion.log
+          if-no-files-found: ignore

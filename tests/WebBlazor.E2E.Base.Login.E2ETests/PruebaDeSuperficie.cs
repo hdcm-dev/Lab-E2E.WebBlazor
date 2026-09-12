@@ -12,7 +12,7 @@ namespace WebBlazor.E2E.Base.Login.E2ETests;
 public abstract class PruebaDeSuperficie : PageTest
 {
     /// <summary>Dónde escucha la aplicación bajo prueba.</summary>
-    protected const string UrlBase = "https://localhost:7212";
+    protected const string UrlBase = "http://localhost:5181";
 
     /// <summary>La credencial de laboratorio que el servicio de identidad admite.</summary>
     protected const string Identificador = "admin";
@@ -20,10 +20,11 @@ public abstract class PruebaDeSuperficie : PageTest
     /// <summary>El secreto de esa credencial.</summary>
     protected const string Secreto = "admin";
 
-    // El certificado de desarrollo no lo valida el navegador de Playwright. La URL
-    // base se declara una sola vez y las llamadas quedan relativas.
+    // La URL base se declara una sola vez y las llamadas quedan relativas. La aplicación
+    // tiene que estar escuchando ahí: la prueba no la levanta. Lo hacen scripts/pruebas.sh
+    // y el workflow e2e-login.yml, con esta misma URL.
     public override BrowserNewContextOptions ContextOptions() =>
-        new() { IgnoreHTTPSErrors = true, BaseURL = UrlBase };
+        new() { BaseURL = UrlBase };
 
     /// <summary>
     /// Ingresa por la superficie de acceso, que es el circuito que la aplicación

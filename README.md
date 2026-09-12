@@ -26,8 +26,9 @@ reimplementan ninguno en línea. Ver [Diseño](#diseño).
 
 ## Estructura
 
-Un único proyecto en la solución, con las capas de **Clean Architecture** separadas en carpetas y
-las dependencias apuntando siempre hacia adentro:
+Movilidad Urbana es un único proyecto, con las capas de **Clean Architecture** separadas en carpetas y
+las dependencias apuntando siempre hacia adentro. Al lado viven dos proyectos web más simples, Hola
+Mundo y Login:
 
 ```
 Lab-E2E.WebBlazor.sln
@@ -64,28 +65,29 @@ tests/MovilidadUrbana.E2ETests/
 tests/MovilidadUrbana.UnitTests/
   ReglasDeLocalidadTests.cs   Bordes de cada validación del ABM, sin navegador
   ReglasDeEncuestaTests.cs    Rangos de la encuesta, paso por paso
+src/WebBlazor.E2E.Base.HolaMundo/        La superficie más simple: un formulario interactivo y sus estados
+src/WebBlazor.E2E.Base.Login/            La misma superficie detrás de un acceso por cookies
+tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/   1 caso, sin fixture: la aplicación la levanta quien corre la prueba
+tests/WebBlazor.E2E.Base.Login.E2ETests/       10 casos sobre el acceso y el guard, también sin fixture
 scripts/
   dotnet.sh             Ejecuta el SDK de .NET dentro del contenedor oficial
   publicar.sh           Publica el binario autocontenido que usa CI, en `publicacion/`
-  pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local)
-Guides/
-  E2E-Guide/                      Pruebas de extremo a extremo: guía de estudio, receta de ABM y diseño de casos
-  Estandares-Modelo-Ramas-Guide/  Modelos de ramas, integración y releases, con sus anexos
-  GitFlow-Practice-Guide/         Ocho escenarios del modelo adoptado, sobre un repositorio real
-  GitHubFlow-Practice-Guide/      Los mismos ocho, sobre el modelo que no se adoptó
+  pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local); el proyecto se elige con PROYECTO
 pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
-.github/workflows/      CI, workflow reutilizable de E2E y verificación de entornos
+.github/workflows/      CI, un workflow de E2E por proyecto web y verificación de entornos
+evidencia/              Registros de corridas que respaldan lo que afirman las guías
 ```
 
-Son tres proyectos: la aplicación, las pruebas de extremo a extremo y las unitarias sobre las
-reglas de dominio. La aplicación sigue siendo **un solo proyecto** con las capas en carpetas; lo que
-se sumó son proyectos de prueba.
+Son siete proyectos: **tres aplicaciones web con su proyecto de pruebas E2E cada una**, más las
+unitarias sobre las reglas de dominio de Movilidad Urbana. Las tres aplicaciones tienen grados de
+complejidad distintos a propósito —Hola Mundo, Login y Movilidad Urbana, en ese orden—, para que la
+temática se pueda estudiar de a un escalón. Hola Mundo y Login llegaron desde
+`Lab-E2E.WebBlazor.Base`, que se retiró.
 
 Los archivos que no pertenecen a ningún proyecto están agrupados en carpetas de solución
-—`github-workflow`, `Guides` y `scripts`—, para poder abrirlos desde el Explorador de soluciones sin
-salir de Visual Studio. `Guides` reproduce el árbol del disco: una carpeta por guía, y los anexos
-de la guía de estudio colgando de ella. Son carpetas de solución: no se compilan ni cambian nada
-del build.
+—`github-workflow`, `scripts` y `Solution Items`—, para poder abrirlos desde el Explorador de
+soluciones sin salir de Visual Studio. Son carpetas de solución: no se compilan ni cambian nada del
+build. Las guías ya no viven acá: están en el repositorio de documentación, ver [Guías](#guías).
 
 ## Diseño
 
@@ -171,11 +173,9 @@ nueva, y ninguno afloja una verificación:
 
 ## Guías
 
-Toda la documentación de estudio de este laboratorio vive ahora en un repositorio propio,
+Toda la documentación de estudio de este laboratorio vive en un repositorio propio,
 [**Lab-E2E.WebBlazor.Documentacion**](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion),
-para que una sola copia sirva a los dos laboratorios —este y
-[Lab-E2E.WebBlazor.Base](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Base)— y no haya que
-mantener dos versiones del mismo texto.
+separada del código.
 
 | Carpeta | Qué contiene |
 | --- | --- |
@@ -207,13 +207,21 @@ TypeScript— es la que eligió la aplicación de referencia de .NET,
 
 ### Desde Visual Studio
 
-Abrí `Lab-E2E.WebBlazor.sln` y listo: **Test > Explorador de pruebas** descubre los 22 casos y
-podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de la prueba.
-No hay ningún paso previo.
+Abrí `Lab-E2E.WebBlazor.sln` y listo: **Test > Explorador de pruebas** descubre las pruebas de los
+cuatro proyectos —33 casos E2E: 22 de Movilidad Urbana, 10 de Login y 1 de Hola Mundo; y 49
+unitarios— y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de
+la prueba.
 
 La primera corrida tarda unos minutos porque baja el navegador; las siguientes, segundos.
 
-**No hace falta publicar la aplicación a mano.** Las pruebas ejercitan la aplicación *publicada*
+**Hola Mundo y Login necesitan un paso previo, y es a propósito.** Sus pruebas no tienen fixture:
+apuntan a una URL fija y no levantan la aplicación. Antes de correrlas hay que arrancar el proyecto
+web con su perfil `http` —`http://localhost:5027` para Hola Mundo, `http://localhost:5181` para
+Login—. Tampoco instalan el navegador por su cuenta: usan el mismo que instala la primera corrida
+de Movilidad Urbana, porque los tres proyectos comparten la versión de Playwright. Todo lo que
+sigue sobre publicar e instalar solo aplica a Movilidad Urbana.
+
+**En Movilidad Urbana no hace falta publicar la aplicación a mano.** Sus pruebas ejercitan la aplicación *publicada*
 —no el proyecto compilado—, y publicarla es responsabilidad del propio fixture: antes de la primera
 prueba corre `dotnet publish` sobre `publicacion/`. Eso además garantiza que lo que se prueba está
 al día: si tocás una página de Blazor y volvés a correr las pruebas, se republica sola.
@@ -264,9 +272,17 @@ scripts/pruebas.sh                     # chromium
 scripts/pruebas.sh firefox
 scripts/pruebas.sh webkit
 EMULAR_MOVIL=true scripts/pruebas.sh   # chromium emulando un Pixel 7
+PROYECTO=holamundo scripts/pruebas.sh            # la superficie Hola Mundo
+PROYECTO=login scripts/pruebas.sh firefox        # la de acceso, en firefox
+REPETIR=8 PROYECTO=login scripts/pruebas.sh      # ocho corridas seguidas, para buscar intermitencias
 ```
 
-Para probar contra un entorno ya desplegado se define `URL_BASE` y no se levanta nada local:
+Sin `PROYECTO` se corre Movilidad Urbana, que levanta la aplicación desde su propio fixture. Con
+`holamundo` o `login` el script la levanta él mismo en la URL que la prueba tiene escrita, y la apaga
+al terminar.
+
+Para probar contra un entorno ya desplegado se define `URL_BASE` y no se levanta nada local —solo en
+Movilidad Urbana: las otras dos pruebas tienen la URL escrita—:
 
 ```bash
 URL_BASE=https://ejemplo.test scripts/pruebas.sh chromium
@@ -363,9 +379,35 @@ se queja de la cookie—.
 
 ## Los workflows
 
-### `e2e.yml` — la definición reutilizable
+Hay un workflow de pruebas E2E **por proyecto web**, y no son copias de uno solo: cada uno tiene la
+complejidad que su proyecto necesita, en escalera, para que se puedan estudiar de a un escalón.
 
-Es el único lugar donde está escrito *cómo* se corren las pruebas. Se dispara de tres maneras:
+| Workflow | Proyecto | Qué suma respecto del anterior |
+| --- | --- | --- |
+| [`e2e-holamundo.yml`](.github/workflows/e2e-holamundo.yml) | Hola Mundo | Punto de partida: un job y un navegador que compila, levanta la aplicación y prueba |
+| [`e2e-login.yml`](.github/workflows/e2e-login.yml) | Login | Publica una vez y reparte la aplicación como artefacto a una matriz de navegadores |
+| [`e2e.yml`](.github/workflows/e2e.yml) | Movilidad Urbana | Reporte unificado, invocable desde otros workflows, regresión nocturna y prueba contra un entorno desplegado |
+
+Los dos primeros se disparan cuando cambia su proyecto —`push` a `main` o pull request, con filtro
+de rutas— y a pedido. A `e2e.yml` lo invoca `ci.yml`.
+
+### `e2e-holamundo.yml` — el escalón más simple
+
+La prueba de Hola Mundo no tiene fixture: apunta a una URL fija y no levanta nada. Por eso el
+workflow compila la aplicación, la arranca con `dotnet run` en `http://localhost:5027` —la URL que la
+prueba tiene escrita—, espera a que responda y recién ahí corre `dotnet test`. Los resultados y el
+log de la aplicación se suben solo si algo falla.
+
+### `e2e-login.yml` — compilar una vez, probar muchas
+
+El mismo principio de URL fija, en `http://localhost:5181`, con dos cosas más: la aplicación se
+publica autocontenida en un job y viaja como artefacto a cada navegador de la matriz, y la lista de
+navegadores se elige al dispararlo a mano. Un `push` o un pull request prueban con chromium.
+
+### `e2e.yml` — Movilidad Urbana, la definición reutilizable
+
+Es el único lugar donde está escrito *cómo* se corren las pruebas de Movilidad Urbana. Se dispara de
+tres maneras:
 
 | Disparador | Para qué |
 | --- | --- |

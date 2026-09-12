@@ -7,7 +7,9 @@ public class HolaMundoE2ETests : PageTest
     [SetUp]
     public async Task Setup()
     {
-        await Page.GotoAsync("https://localhost:7071/HolaMundo");
+        // La aplicación tiene que estar escuchando acá: la prueba no la levanta. Lo hacen
+        // scripts/pruebas.sh y el workflow e2e-holamundo.yml, con esta misma URL.
+        await Page.GotoAsync("http://localhost:5027/HolaMundo");
 
         // La superficie llega pintada antes de que el circuito abra, y en esa ventana
         // el botón se ve y se puede clickear pero no responde. `Expect` reintenta:
