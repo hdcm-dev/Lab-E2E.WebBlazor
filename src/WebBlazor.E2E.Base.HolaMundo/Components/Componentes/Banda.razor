@@ -1,0 +1,36 @@
+@* Banda de resultado de una acción. El rol depende del tono: lo que informa se
+   anuncia como estado; lo que falla, como alerta. *@
+
+<p class="mq-banda @Clase" role="@Rol" @attributes="Atributos">
+    <Icono Nombre="@IconoDelTono" />
+    @ChildContent
+</p>
+
+@code {
+    /// <summary>Tono semántico de la banda.</summary>
+    [Parameter] public Tono Tono { get; set; } = Tono.Info;
+
+    /// <summary>Texto del resultado. Sale del catálogo de códigos, nunca de una excepción.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Atributos sueltos —por ejemplo el identificador de prueba— que la superficie agrega.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Atributos { get; set; }
+
+    private string Clase => Tono switch
+    {
+        Tono.Exito => "mq-banda--exito",
+        Tono.Atencion => "mq-banda--atencion",
+        Tono.Peligro => "mq-banda--error",
+        _ => "mq-banda--info"
+    };
+
+    private string Rol => Tono == Tono.Peligro ? "alert" : "status";
+
+    private string IconoDelTono => Tono switch
+    {
+        Tono.Exito => Iconos.Exito,
+        Tono.Peligro or Tono.Atencion => Iconos.Alerta,
+        _ => Iconos.Mensaje
+    };
+}

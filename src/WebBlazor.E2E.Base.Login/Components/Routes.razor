@@ -1,0 +1,16 @@
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Paginas.NoEncontrado)">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                @* Primera capa del guard: la del ruteo. Redirige a la superficie de
+                   acceso sin decir por qué, y reemplaza la entrada del historial
+                   para que el retroceso no devuelva a un limbo. *@
+                <Redireccion Destino="@($"/login?estado={CatalogoDeResultados.SesionRequerida}")" />
+            </NotAuthorized>
+            <Authorizing>
+                <p class="mq-caption">Verificando la sesión…</p>
+            </Authorizing>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="#mq-main" />
+    </Found>
+</Router>

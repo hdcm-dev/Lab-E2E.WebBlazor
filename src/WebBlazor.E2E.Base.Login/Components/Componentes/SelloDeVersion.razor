@@ -1,0 +1,26 @@
+@* Sello de versión. El valor sale del contrato resuelto en el punto de composición
+   del host: el componente no lo compone ni lo lee de una constante de la vista. *@
+
+@inject IIdentidadDeVersion Version
+
+<span class="mq-sello-version mq-meta @ClaseDeUbicacion" data-testid="sello-version">
+    @Version.VersionLegible
+
+    @if (Version.EsPreliminar)
+    {
+        <Insignia Valor="preliminar" Tono="Tono.Atencion" />
+    }
+
+    @if (Version.OrigenIndeterminado)
+    {
+        <span class="mq-meta">origen indeterminado</span>
+    }
+</span>
+
+@code {
+    /// <summary>Dónde se exhibe el sello: al pie del shell de trabajo o en el lienzo de acceso.</summary>
+    [Parameter] public UbicacionDelSello Ubicacion { get; set; } = UbicacionDelSello.Pie;
+
+    private string ClaseDeUbicacion =>
+        Ubicacion == UbicacionDelSello.Lienzo ? "mq-pie-lienzo" : string.Empty;
+}

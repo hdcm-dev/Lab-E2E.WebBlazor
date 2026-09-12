@@ -1,0 +1,47 @@
+@* Reconexión del circuito, estilizada acorde a la marca y anunciada en una región
+   activa. El elemento conserva su identificador, sus clases de estado y el hueco
+   de la cuenta de segundos, porque son el contrato que el circuito conmuta; lo
+   que se reemplaza es el marcado de adentro. *@
+
+<script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
+
+<dialog id="components-reconnect-modal" data-nosnippet>
+    <div class="mq-reconexion" role="status" aria-live="polite">
+        <p class="mq-banda mq-banda--atencion components-reconnect-first-attempt-visible">
+            <Icono Nombre="@Iconos.Alerta" />
+            Se perdió la conexión con el servicio. Estamos reconectando; lo que escribiste sigue acá.
+        </p>
+
+        <p class="mq-banda mq-banda--atencion components-reconnect-repeated-attempt-visible">
+            <Icono Nombre="@Iconos.Alerta" />
+            No pudimos reconectar. Lo intentamos de nuevo en
+            <span id="components-seconds-to-next-attempt"></span> segundos.
+        </p>
+
+        <p class="mq-banda mq-banda--error components-reconnect-failed-visible">
+            <Icono Nombre="@Iconos.Alerta" />
+            No pudimos reconectar con el servicio.
+        </p>
+
+        <p class="mq-banda mq-banda--atencion components-pause-visible">
+            <Icono Nombre="@Iconos.Alerta" />
+            El servicio dejó la sesión en pausa.
+        </p>
+
+        <p class="mq-banda mq-banda--error components-resume-failed-visible">
+            <Icono Nombre="@Iconos.Alerta" />
+            No pudimos reanudar la sesión.
+        </p>
+
+        @* Cada acción nombra el reintento concreto, no «Reintentar» a secas. *@
+        <button id="components-reconnect-button" type="button"
+                class="mq-btn mq-btn--secundario components-reconnect-failed-visible">
+            Reintentar la conexión
+        </button>
+
+        <button id="components-resume-button" type="button"
+                class="mq-btn mq-btn--primario components-pause-visible components-resume-failed-visible">
+            Reanudar la sesión
+        </button>
+    </div>
+</dialog>

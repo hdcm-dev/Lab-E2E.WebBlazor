@@ -1,0 +1,26 @@
+@* Único portador de iconografía del producto: envuelve un trazo de `Iconos` y le
+   da tratamiento accesible. Sin título es decorativo; con título es significativo. *@
+
+@if (string.IsNullOrEmpty(Titulo))
+{
+    <svg xmlns="http://www.w3.org/2000/svg" width="@Tamanio" height="@Tamanio" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+         stroke-linejoin="round" aria-hidden="true" focusable="false">@((MarkupString)Nombre)</svg>
+}
+else
+{
+    <svg xmlns="http://www.w3.org/2000/svg" width="@Tamanio" height="@Tamanio" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+         stroke-linejoin="round" role="img"><title>@Titulo</title>@((MarkupString)Nombre)</svg>
+}
+
+@code {
+    /// <summary>Trazo del ícono, tomado de <see cref="Iconos" />.</summary>
+    [Parameter, EditorRequired] public string Nombre { get; set; } = default!;
+
+    /// <summary>Tamaño en píxeles; sale de <see cref="RolesDeIcono" />.</summary>
+    [Parameter] public int Tamanio { get; set; } = RolesDeIcono.Inline;
+
+    /// <summary>Con título el ícono es significativo; sin título, decorativo.</summary>
+    [Parameter] public string? Titulo { get; set; }
+}

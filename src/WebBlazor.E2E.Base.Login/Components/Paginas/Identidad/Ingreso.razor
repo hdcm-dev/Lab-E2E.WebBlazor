@@ -1,0 +1,58 @@
+@page "/login"
+@layout AccesoLayout
+
+@* SIN @rendermode: SSR estático. El formulario se envía por POST a un endpoint,
+   porque la credencial de sesión se emite en el ciclo de request; con el circuito
+   ya establecido la respuesta HTTP ya se envió y no hay dónde escribir la cabecera
+   que crea la cookie. Los campos son nativos, con `autocomplete` declarado y con
+   token antifalsificación, y la navegación mejorada no intercepta el envío. *@
+
+<PageTitle>Ingresar</PageTitle>
+
+<h1>Ingresar</h1>
+
+@if (!string.IsNullOrEmpty(Codigo))
+{
+    @* El texto sale del catálogo de códigos: nunca el código crudo ni la traza. *@
+    <Banda Tono="CatalogoDeResultados.TonoDe(Codigo)" data-testid="mensaje-resultado">
+        @CatalogoDeResultados.TextoDe(Codigo)
+    </Banda>
+}
+
+<form method="post" action="/identidad/ingreso" data-enhance="false" class="mq-pila">
+    <AntiforgeryToken />
+    <input type="hidden" name="returnurl" value="@ReturnUrl" />
+
+    <div class="mq-campo">
+        <label for="campo-usuario">Identificador</label>
+        <input class="mq-input" id="campo-usuario" data-testid="campo-usuario" name="identificador"
+               type="text" autocomplete="username" required />
+    </div>
+
+    <div class="mq-campo">
+        <label for="campo-clave">Secreto</label>
+        <input class="mq-input" id="campo-clave" data-testid="campo-clave" name="secreto"
+               type="password" autocomplete="current-password" required />
+    </div>
+
+    @* Superficie sin estado previo al que volver: no lleva «Cancelar», y su ausencia
+       se declara acá para que no se lea como olvido. *@
+    <button type="submit" data-testid="boton-ingresar" class="mq-btn mq-btn--primario mq-btn--ancho">
+        <Icono Nombre="@Iconos.Ingresar" Tamanio="RolesDeIcono.Fila" />
+        Ingresar
+    </button>
+</form>
+
+<p class="mq-caption mq-mt-5">
+    Si perdiste el secreto, pedile a quien administra la instancia que lo restablezca.
+</p>
+
+@code {
+    /// <summary>Código de resultado con el que llegó la persona a esta superficie.</summary>
+    [SupplyParameterFromQuery(Name = "estado")]
+    public string? Codigo { get; set; }
+
+    /// <summary>Superficie a la que volver una vez que el ingreso se acepta.</summary>
+    [SupplyParameterFromQuery(Name = "returnurl")]
+    public string? ReturnUrl { get; set; }
+}

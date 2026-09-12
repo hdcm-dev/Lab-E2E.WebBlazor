@@ -1,0 +1,65 @@
+@* Barra lateral del shell de trabajo. El cierre de sesión está a un clic desde
+   cualquier superficie, va separado por hairline al pie, y es un `form` POST con
+   el botón adentro: muta estado, y un enlace no. *@
+
+@implements IDisposable
+@inject NavigationManager Navegacion
+
+<nav class="mq-shell-sidebar" aria-label="Navegación principal">
+    <span class="mq-identidad">
+        <Icono Nombre="@Iconos.Marca" Tamanio="RolesDeIcono.Navegacion" />
+        Acceso
+    </span>
+
+    <div class="mq-nav">
+        @foreach (var destino in Destinos)
+        {
+            <a class="mq-nav__item" href="@destino.Ruta"
+               aria-current="@(EsVigente(destino.Ruta) ? "page" : null)">
+                <Icono Nombre="@destino.Icono" />
+                @destino.Rotulo
+            </a>
+        }
+    </div>
+
+    <div class="mq-nav-pie">
+        <form method="post" action="/identidad/salida" data-enhance="false">
+            <AntiforgeryToken />
+            <button type="submit" data-testid="boton-cerrar-sesion" class="mq-btn mq-btn--secundario mq-btn--ancho"
+                    aria-label="Cerrar la sesión y volver a la superficie de ingreso">
+                <Icono Nombre="@Iconos.Salir" Tamanio="RolesDeIcono.Fila" />
+                Cerrar sesión
+            </button>
+        </form>
+    </div>
+</nav>
+
+@code {
+    private sealed record Destino(string Ruta, string Rotulo, string Icono);
+
+    private static readonly Destino[] Destinos =
+    [
+        new("", "Inicio", Iconos.Inicio),
+        new("HolaMundo", "Hola Mundo", Iconos.Mensaje)
+    ];
+
+    protected override void OnInitialized() =>
+        Navegacion.LocationChanged += AlNavegar;
+
+    private void AlNavegar(object? origen, LocationChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private bool EsVigente(string ruta)
+    {
+        var actual = Navegacion.ToBaseRelativePath(Navegacion.Uri);
+        var corte = actual.IndexOfAny(['?', '#']);
+        if (corte >= 0) { actual = actual[..corte]; }
+
+        return ruta.Length == 0
+            ? actual.Length == 0
+            : actual.Equals(ruta, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // El componente suscribe a un servicio: libera la suscripción con el circuito.
+    public void Dispose() => Navegacion.LocationChanged -= AlNavegar;
+}

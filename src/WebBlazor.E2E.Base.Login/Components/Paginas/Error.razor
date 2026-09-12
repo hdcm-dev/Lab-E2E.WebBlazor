@@ -1,0 +1,41 @@
+@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Algo falló — Acceso</PageTitle>
+
+<h1>Algo falló</h1>
+
+@* El detalle técnico no se le muestra a la persona: filtra información del sistema
+   y no dice qué hacer. El identificador del pedido es lo único que se expone, y
+   sirve para cruzar el reporte con la traza del servicio. *@
+<EstadoIndisponible Titulo="No pudimos completar el pedido"
+                    Cuerpo="El servicio no llegó a resolverlo. Volvé a intentarlo; si vuelve a pasar, avisá con el identificador de abajo."
+                    AccionRotulo="Volver al inicio"
+                    AlReintentar="VolverAlInicio" />
+
+@if (MostrarIdentificador)
+{
+    <dl class="mq-kv mq-mt-5">
+        <div>
+            <dt class="mq-kv__clave">Identificador del pedido</dt>
+            <dd class="mq-kv__valor" data-testid="identificador-pedido">@IdentificadorDePedido</dd>
+        </div>
+    </dl>
+}
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [Inject]
+    private NavigationManager Navegacion { get; set; } = default!;
+
+    private string? IdentificadorDePedido { get; set; }
+
+    private bool MostrarIdentificador => !string.IsNullOrEmpty(IdentificadorDePedido);
+
+    protected override void OnInitialized() =>
+        IdentificadorDePedido = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+
+    private void VolverAlInicio() => Navegacion.NavigateTo("/");
+}

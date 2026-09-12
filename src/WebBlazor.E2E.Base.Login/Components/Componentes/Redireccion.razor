@@ -1,0 +1,12 @@
+@* Resolución neutra de un guard: lleva a la superficie que corresponde en lugar de
+   devolver un error, y reemplaza la entrada del historial para que el botón de
+   retroceso no devuelva al limbo del que se salió. *@
+
+@inject NavigationManager Navegacion
+
+@code {
+    /// <summary>Superficie a la que se resuelve el rechazo.</summary>
+    [Parameter, EditorRequired] public string Destino { get; set; } = default!;
+
+    protected override void OnInitialized() => Navegacion.NavigateTo(Destino, replace: true);
+}

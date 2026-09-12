@@ -1,0 +1,41 @@
+@* Estado vacío. Es una invitación a actuar, no un adorno: siempre lleva la acción
+   siguiente. El vacío de colección y el vacío de filtrado son estados distintos y
+   se resuelven con dos instancias con acciones distintas. *@
+
+<section class="mq-vacio" aria-labelledby="@_idTitulo">
+    <Icono Nombre="@Iconos.Vacio" Tamanio="RolesDeIcono.Navegacion" />
+    <h2 id="@_idTitulo">@Titulo</h2>
+    <p class="mq-prosa">@Cuerpo</p>
+
+    @if (!string.IsNullOrEmpty(AccionRotulo))
+    {
+        @if (!string.IsNullOrEmpty(AccionHref))
+        {
+            <a class="mq-btn mq-btn--primario mq-mt-5" href="@AccionHref">@AccionRotulo</a>
+        }
+        else
+        {
+            <button type="button" class="mq-btn mq-btn--secundario mq-mt-5"
+                    @onclick="AlAccionar">@AccionRotulo</button>
+        }
+    }
+</section>
+
+@code {
+    /// <summary>Qué falta, dicho desde el lado de la persona.</summary>
+    [Parameter, EditorRequired] public string Titulo { get; set; } = default!;
+
+    /// <summary>Qué va a pasar cuando haya datos.</summary>
+    [Parameter] public string? Cuerpo { get; set; }
+
+    /// <summary>Verbo de la acción siguiente. Nombra la acción exacta.</summary>
+    [Parameter] public string? AccionRotulo { get; set; }
+
+    /// <summary>Destino, cuando la acción siguiente es una navegación.</summary>
+    [Parameter] public string? AccionHref { get; set; }
+
+    /// <summary>Manejador, cuando la acción siguiente ocurre en esta misma superficie.</summary>
+    [Parameter] public EventCallback AlAccionar { get; set; }
+
+    private readonly string _idTitulo = $"vacio-{Guid.NewGuid():n}";
+}

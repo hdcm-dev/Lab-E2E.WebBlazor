@@ -1,0 +1,19 @@
+@* Shell de trabajo: barra lateral con el ítem activo, contenido y sello al pie. *@
+@inherits LayoutComponentBase
+
+<div class="mq-shell">
+    <BarraLateral />
+
+    <div class="mq-shell-contenido">
+        <main id="mq-main" tabindex="-1">@Body</main>
+        <SelloDeVersion Ubicacion="UbicacionDelSello.Pie" />
+    </div>
+</div>
+
+@* El error no manejado se presenta con la banda de la marca, no con el bloque por
+   defecto del andamiaje. *@
+<div id="blazor-error-ui" class="mq-banda mq-banda--error" role="alert" data-nosnippet>
+    Algo falló y la superficie no puede seguir.
+    <a class="reload mq-btn mq-btn--secundario" href=".">Recargar la página</a>
+    <span class="dismiss mq-sr-only">Cerrar el aviso</span>
+</div>

@@ -1,0 +1,179 @@
+@page "/HolaMundo"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+@* Superficie interactiva: reacciona sin recargar, así que abre circuito. Los
+   identificadores de prueba están declarados en el marcado, junto al control que
+   nombran, para que la prueba E2E no dependa de clases de presentación. *@
+
+<PageTitle>Hola Mundo</PageTitle>
+
+@* Testigo de hidratación. La superficie llega pintada por el servidor antes de que
+   el circuito abra: en esa ventana los controles se ven y se pueden tocar, pero
+   todavía no responden. Este elemento afirma en el DOM algo que mirando la pantalla
+   no se puede deducir —que el circuito ya adoptó el marcado—, y solo lo puede
+   escribir el código que ya corre del lado interactivo. La prueba E2E espera este
+   estado antes de actuar. *@
+<span class="mq-sr-only" data-testid="estado-app" data-interactivo="@_interactivo"></span>
+
+<div class="mq-encabezado">
+    <div>
+        <h1>Hola Mundo</h1>
+        <p class="mq-caption">Escribí una frase y mostrala en la superficie.</p>
+    </div>
+</div>
+
+@* Región activa: dice en voz alta en qué estado quedó la superficie. *@
+<p class="mq-sr-only" role="status" aria-live="polite">@_anuncio</p>
+
+@if (_estado is EstadoDeSuperficie.ErrorDeEntrada)
+{
+    @* La banda dice en qué estado quedó la superficie y remite al campo; el detalle
+       de qué falta lo dice el mensaje asociado al control, que es donde se anuncia. *@
+    <Banda Tono="Tono.Peligro" data-testid="mensaje-error">
+        No mostramos la frase: revisá lo que escribiste.
+    </Banda>
+}
+
+<EditForm EditContext="_contexto" OnValidSubmit="MostrarLaFraseAsync"
+          OnInvalidSubmit="AlRechazarLaEntrada" FormName="frase"
+          class="mq-tarjeta mq-ancho-38">
+    <DataAnnotationsValidator />
+
+    <div class="mq-campo">
+        @* El rótulo es visible y está asociado por `for`: el placeholder no lo sustituye. *@
+        <label for="campo-frase">Frase</label>
+
+        @*
+            InputText:
+            Al elemento del DOM se lo identifica con: data-testid="campo-frase"
+            Se lo llena con: await Page.GetByTestId("campo-frase").FillAsync(frase);
+        *@
+        <InputText id="campo-frase" data-testid="campo-frase" class="mq-input"
+                   @bind-Value="_modelo.Frase" autocomplete="off"
+                   placeholder="Hola Mundo" aria-describedby="campo-frase-req" />
+
+        @* El requisito se declara ANTES del intento, no al fallar. *@
+        <span class="mq-requisito" id="campo-frase-req">Entre 1 y 120 caracteres.</span>
+        <ValidationMessage For="() => _modelo.Frase" class="mq-error-inline" />
+    </div>
+
+    <div class="mq-acciones-pie">
+        @*
+            button:
+            Al elemento del DOM se lo identifica con: data-testid="boton-mostrar-frase"
+            Se lo acciona con: await Page.GetByTestId("boton-mostrar-frase").ClickAsync();
+        *@
+        <button type="submit" data-testid="boton-mostrar-frase" class="mq-btn mq-btn--primario"
+                disabled="@_procesando">
+            @if (_procesando)
+            {
+                <span class="mq-spinner"></span>
+                <text>Mostrando…</text>
+            }
+            else
+            {
+                <Icono Nombre="@Iconos.Mensaje" Tamanio="RolesDeIcono.Fila" />
+                <text>Mostrar la frase</text>
+            }
+        </button>
+    </div>
+</EditForm>
+
+@* La superficie tiene tres estados de presentación, y cada uno es un bloque. El
+   estado `Indisponible` no aplica: la frase no viaja a ningún servicio externo,
+   así que no hay servicio que pueda no responder. *@
+
+<div class="mq-mt-5 mq-ancho-38">
+    @if (_estado is EstadoDeSuperficie.Enviando)
+    {
+        <Esqueleto Filas="1" />
+    }
+    else if (_estado is EstadoDeSuperficie.ConDatos)
+    {
+        <div class="mq-tarjeta">
+            <h2>Frase mostrada</h2>
+            @*
+                div:
+                Al elemento del DOM se lo identifica con: data-testid="campo-mensaje"
+                Se lo verifica con: await Expect(Page.GetByTestId("campo-mensaje")).ToHaveTextAsync(frase);
+                El elemento contiene el mensaje y nada más, para que la comparación sea exacta.
+            *@
+            <p class="mq-kv__valor mq-mt-2" data-testid="campo-mensaje">@_mensaje</p>
+        </div>
+    }
+    else
+    {
+        <EstadoVacio Titulo="Todavía no mostraste ninguna frase"
+                     Cuerpo="Escribí una frase arriba y mostrala: va a aparecer acá." />
+    }
+</div>
+
+@code {
+    private readonly ModeloDeFrase _modelo = new();
+    private EditContext _contexto = default!;
+
+    private EstadoDeSuperficie _estado = EstadoDeSuperficie.Vacio;
+    private string _mensaje = string.Empty;
+    private string _anuncio = string.Empty;
+    private bool _procesando;
+
+    // Arranca en `false` y así viaja en el HTML del servidor: el testigo dice que no
+    // hay circuito hasta que lo haya.
+    private string _interactivo = "false";
+
+    protected override void OnInitialized() => _contexto = new EditContext(_modelo);
+
+    // `OnAfterRender` solo corre del lado del circuito: si esto se ejecutó, la
+    // superficie ya responde. Es lo que hace del testigo una prueba y no una promesa.
+    protected override void OnAfterRender(bool primeraVez)
+    {
+        if (!primeraVez || _interactivo == "true") { return; }
+
+        _interactivo = "true";
+        StateHasChanged();
+    }
+
+    private async Task MostrarLaFraseAsync()
+    {
+        // La bandera se setea ANTES del await: la ventana entre el clic y el await
+        // alcanza para el doble envío.
+        if (_procesando) { return; }
+        _procesando = true;
+        _estado = EstadoDeSuperficie.Enviando;
+        _anuncio = "Mostrando la frase.";
+
+        try
+        {
+            _mensaje = (_modelo.Frase ?? string.Empty).Trim();
+            _estado = EstadoDeSuperficie.ConDatos;
+            _anuncio = "La frase quedó mostrada en la superficie.";
+        }
+        finally
+        {
+            _procesando = false;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    // Lo que no cumple lo que la superficie enuncia no viaja: la superficie pasa a su
+    // estado de error de entrada y el detalle queda asociado a su campo.
+    private void AlRechazarLaEntrada()
+    {
+        _estado = EstadoDeSuperficie.ErrorDeEntrada;
+        _anuncio = "No mostramos la frase: revisá lo que escribiste.";
+    }
+
+    /// <summary>
+    /// Lo que la superficie toma. La validación de acá es de conveniencia: dice qué
+    /// se espera antes del intento y evita el viaje inútil.
+    /// </summary>
+    private sealed class ModeloDeFrase
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "La frase es obligatoria.")]
+        [System.ComponentModel.DataAnnotations.StringLength(120, MinimumLength = 1,
+            ErrorMessage = "La frase va de 1 a 120 caracteres.")]
+        public string? Frase { get; set; } = "Hola Mundo";
+    }
+}

@@ -1,0 +1,7 @@
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Paginas.NoEncontrado)">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        @* El foco viaja al contenido principal, que es donde arranca la superficie nueva. *@
+        <FocusOnNavigate RouteData="routeData" Selector="#mq-main" />
+    </Found>
+</Router>

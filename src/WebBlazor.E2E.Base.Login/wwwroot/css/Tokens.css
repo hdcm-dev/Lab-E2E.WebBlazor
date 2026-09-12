@@ -1,0 +1,115 @@
+/* ============================================================================
+   Tokens.css — bloque :root del catálogo de diseño.
+
+   Es la fuente única de todo valor visual del producto. Los nombres de las
+   variables son los del catálogo (`Design-Rules-Web-Generico.md` §2) y sostienen
+   la trazabilidad entre el diseño y la implementación: no se renombran.
+
+   Qué se toca al derivar: los tres tokens de marca, si el producto tiene acento
+   propio. Qué no se toca: los nombres. Un valor visual nuevo se promueve al
+   catálogo antes de usarse; escribirlo suelto en una regla rompe la trazabilidad.
+   ========================================================================= */
+
+:root {
+    /* --- Superficies ----------------------------------------------------- */
+    --color-background-primary: #FFFFFF;   /* tarjetas y contenido elevado     */
+    --color-background-secondary: #F1F1EF; /* controles inertes, chips neutros */
+    --color-background-tertiary: #F7F6F4;  /* lienzo de página                 */
+
+    /* --- Texto ----------------------------------------------------------- */
+    --color-text-primary: #1A1A18;
+    --color-text-secondary: #5C5C57;
+    --color-text-tertiary: #8A8A82;
+    --color-text-danger: #A03030;
+    --color-text-on-brand: #FFFFFF;
+
+    /* --- Bordes ---------------------------------------------------------- */
+    --color-border-secondary: #D9D9D4;     /* controles interactivos, 1px      */
+    --color-border-tertiary: #E6E6E1;      /* separadores hairline, 0.5px      */
+    --color-border-danger: #E0B4B4;
+
+    /* --- Marca ----------------------------------------------------------- */
+    --color-brand-primary: #0F6E56;        /* acción primaria, foco, selección */
+    --color-brand-dark: #04342C;           /* chrome de la barra lateral       */
+    --color-brand-tint: #E1F5EE;           /* fondo suave de marca             */
+
+    /* --- Acento por módulo: codifican pertenencia, no estética ------------ */
+    --color-accent-module-a: #0F6E56;
+    --color-accent-module-b: #534AB7;
+    --color-accent-module-c: #854F0B;
+    --color-accent-module-d: #185FA5;
+
+    /* --- Semánticos: siempre en par texto + tint ------------------------- */
+    --color-text-success: #0F6E56;
+    --color-background-success: #E1F5EE;
+    --color-text-warning: #854F0B;
+    --color-background-warning: #FAEEDA;
+    --color-text-error: #A03030;
+    --color-background-error: #FBEAF0;
+    --color-text-info: #185FA5;
+    --color-background-info: #E7F0F9;
+    --color-border-info: #BBD4EA;
+
+    /* --- Velo del diálogo -------------------------------------------------
+       El catálogo nombra la familia pero no fija su valor: se deriva del texto
+       principal a opacidad media, para que el velo no introduzca un hue nuevo. */
+    --color-backdrop: rgba(26, 26, 24, 0.45);
+
+    /* --- Tipografía: cinco escalones, cada uno con su par tamaño + peso ---- */
+    --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+    --font-size-title: 17px;
+    --font-weight-title: 500;
+    --font-size-body-strong: 14px;
+    --font-weight-body-strong: 500;
+    --font-size-body: 13px;
+    --font-weight-body: 400;
+    --font-size-caption: 12px;
+    --font-weight-caption: 400;
+    --font-size-meta: 11px;
+    --font-weight-meta: 500;
+
+    --line-height-titulo: 1.2;
+    --line-height-texto: 1.45;
+
+    /* --- Espaciado: escala base 4 ---------------------------------------- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 14px;
+    --space-5: 16px;
+    --space-6: 18px;
+    --space-7: 20px;
+    --space-8: 22px;
+    --space-9: 28px;
+
+    /* --- Radios y bordes -------------------------------------------------- */
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-pill: 20px;
+    --radius-icon: 12px;
+    --border-hairline: 0.5px solid var(--color-border-tertiary);
+    --border-control: 1px solid var(--color-border-secondary);
+
+    /* --- Movimiento ------------------------------------------------------- */
+    --motion-fast: 150ms;
+    --motion-base: 200ms;
+    --motion-ease: ease;
+
+    /* --- Layout ----------------------------------------------------------- */
+    --shell-sidebar-width: 168px;
+}
+
+/* La única regla de movimiento reducido del producto: las animaciones no
+   esenciales se desactivan, no se aceleran. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

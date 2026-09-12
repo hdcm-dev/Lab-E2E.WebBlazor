@@ -1,0 +1,32 @@
+@* Superficie que no pudo traer lo suyo. Dice qué pasó, qué implica y qué hacer, y
+   su acción nombra el reintento concreto, nunca «Reintentar» a secas. *@
+
+<section class="mq-aviso-indisponible" role="alert" aria-labelledby="@_idTitulo">
+    <h2 id="@_idTitulo" class="mq-fila">
+        <Icono Nombre="@Iconos.Alerta" />
+        @Titulo
+    </h2>
+    <p>@Cuerpo</p>
+
+    @if (!string.IsNullOrEmpty(AccionRotulo))
+    {
+        <button type="button" class="mq-btn mq-btn--secundario mq-mt-3"
+                @onclick="AlReintentar">@AccionRotulo</button>
+    }
+</section>
+
+@code {
+    /// <summary>Qué no se pudo hacer.</summary>
+    [Parameter, EditorRequired] public string Titulo { get; set; } = default!;
+
+    /// <summary>Por qué, y qué implica para lo que se está viendo.</summary>
+    [Parameter] public string? Cuerpo { get; set; }
+
+    /// <summary>Verbo del reintento, con su objeto.</summary>
+    [Parameter] public string? AccionRotulo { get; set; }
+
+    /// <summary>Manejador del reintento.</summary>
+    [Parameter] public EventCallback AlReintentar { get; set; }
+
+    private readonly string _idTitulo = $"indisponible-{Guid.NewGuid():n}";
+}

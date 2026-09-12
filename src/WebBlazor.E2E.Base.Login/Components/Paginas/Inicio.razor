@@ -1,0 +1,44 @@
+@page "/"
+@page "/index"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Inicio — Acceso</PageTitle>
+
+<div class="mq-encabezado">
+    <div>
+        <h1>Inicio</h1>
+        <p class="mq-caption">Sesión iniciada como @_identificador.</p>
+    </div>
+    <a class="mq-btn mq-btn--primario mq-ml-auto" href="HolaMundo">Ir a la superficie Hola Mundo</a>
+</div>
+
+@* Esta superficie no presenta ninguna colección: se declara acá para que la
+   ausencia del estado vacío se lea deliberada y no como olvido. *@
+
+<div class="mq-tarjeta mq-prosa">
+    <h2>Qué demuestra este proyecto</h2>
+    <p class="mq-mt-2">
+        El ingreso y el cierre de sesión se resuelven por POST a un endpoint, fuera del
+        circuito interactivo, y el resto de las superficies quedan detrás del guard en
+        sus tres capas: ruteo, superficie y acción.
+    </p>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? EstadoDeAutenticacion { get; set; }
+
+    private string _identificador = string.Empty;
+
+    // Segunda capa del guard: la de la superficie. Cubre la apertura fuera de tiempo,
+    // que el ruteo por sí solo no alcanza a cortar.
+    protected override async Task OnInitializedAsync()
+    {
+        if (EstadoDeAutenticacion is null) { return; }
+
+        var estado = await EstadoDeAutenticacion;
+        _identificador = estado.User.Identity?.Name ?? string.Empty;
+    }
+}

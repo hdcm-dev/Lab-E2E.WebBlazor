@@ -1,0 +1,16 @@
+@* Shell de acceso: sin sesión no hay navegación que ofrecer, así que no hay chrome.
+   La superficie conserva su encabezado de primer nivel: la ausencia de navegación
+   no puede dejar la página sin estructura semántica. *@
+@inherits LayoutComponentBase
+
+<div class="mq-lienzo">
+    <main id="mq-main" class="mq-tarjeta-acceso" tabindex="-1">
+        <span class="mq-identidad">
+            <Icono Nombre="@Iconos.Marca" Tamanio="RolesDeIcono.Tarjeta" />
+            Ingreso
+        </span>
+        @Body
+    </main>
+
+    <SelloDeVersion Ubicacion="UbicacionDelSello.Lienzo" />
+</div>
