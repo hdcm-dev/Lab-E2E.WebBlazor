@@ -1,0 +1,6 @@
+Build succeeded.
+GET /scalar/v1 -> 200 text/html
+Movilidad Urbana — API
+openapi/v1.json
+GET /scalar/v1 en Production -> 
+  404

@@ -17,11 +17,13 @@ tiene su propio registro.
   `EncuestasController` sobre los mismos casos de uso, repositorios y base que la web. Sesión por
   encabezado `X-Sesion-Id` —el equivalente de la cookie—, `ValidationProblemDetails` (RFC 9457) con las
   mismas claves de error que la web, `201 Created` con `Location`, OpenAPI 3.1 en Development.
-  Escucha en `http://localhost:5250`.
-- **`MovilidadUrbana.ApiWeb.Tests`** — 11 casos en proceso con `WebApplicationFactory` sobre una base
+  Escucha en `http://localhost:5250`, y en Development sirve **Scalar** en `/scalar/v1`: la
+  documentación navegable del contrato, con cada ruta probable desde el navegador.
+- **`MovilidadUrbana.ApiWeb.Tests`** — 13 casos en proceso con `WebApplicationFactory` sobre una base
   SQLite propia de la corrida: siembra por sesión, alta con `Location`, 400 por campo, duplicado,
   modificar y dar de baja, aislamiento entre sesiones, encuesta completa con resumen, encuesta
-  incompleta, validación de un paso, paso inexistente. `ci.yml` los corre junto a las unitarias.
+  incompleta, validación de un paso, paso inexistente, el contrato OpenAPI con sus rutas y Scalar
+  sirviéndose. `ci.yml` los corre junto a las unitarias.
 - **`evidencia/2026-09-12-capas-y-api/`** — Movilidad Urbana 22/22 tras extraer las capas; la API
   11/11, una falsificación (200 en vez de 201 pone un caso en rojo) y una corrida real sobre Kestrel
   con el OpenAPI y el flujo por `curl`.

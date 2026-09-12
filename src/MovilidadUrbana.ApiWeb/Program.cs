@@ -3,6 +3,7 @@ using MovilidadUrbana.Aplicacion;
 using MovilidadUrbana.ApiWeb.Sesiones;
 using MovilidadUrbana.Infraestructura;
 using MovilidadUrbana.Infraestructura.Persistencia;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,13 @@ app.UseStatusCodePages();
 
 if (app.Environment.IsDevelopment())
 {
+    // El contrato en /openapi/v1.json y su documentación navegable en /scalar/v1, donde cada
+    // ruta se puede probar desde el navegador. El encabezado de sesión se declara ahí mismo para
+    // que quien lo repita en cada pedido vea sus propios datos.
     app.MapOpenApi();
+    app.MapScalarApiReference(opciones => opciones
+        .WithTitle("Movilidad Urbana — API")
+        .WithDefaultHttpClient(ScalarTarget.Shell, ScalarClient.Curl));
 }
 
 app.UseMiddleware<MiddlewareDeSesionPorEncabezado>();

@@ -56,7 +56,7 @@ src/MovilidadUrbana.ApiWeb/           Presentación REST sobre las mismas capas.
   Program.cs                          Composición: controllers, ProblemDetails y OpenAPI
 tests/MovilidadUrbana.E2ETests/       22 casos Playwright sobre la web + su fixture
 tests/MovilidadUrbana.UnitTests/      49 casos sobre las reglas de dominio, sin navegador
-tests/MovilidadUrbana.ApiWeb.Tests/   11 casos sobre la API en proceso, con WebApplicationFactory
+tests/MovilidadUrbana.ApiWeb.Tests/   13 casos sobre la API en proceso, con WebApplicationFactory
 src/WebBlazor.HolaMundo/              La superficie más simple: un formulario interactivo y sus estados
 src/WebBlazor.Login/                  La misma superficie detrás de un acceso por cookies
 tests/WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture: la aplicación la levanta quien corre la prueba
@@ -89,10 +89,11 @@ los estándares de HTTP:
 | Errores de validación | `400` con `ValidationProblemDetails` (RFC 9457), un error por campo con las mismas claves que la web (`nombre`, `codigoPostal`, …) |
 | Alta | `201 Created` con `Location` |
 | Contrato | OpenAPI 3.1 en `/openapi/v1.json`, en Development |
-| Pruebas | En proceso, con `WebApplicationFactory` y una base SQLite propia de la corrida: `dotnet test tests/MovilidadUrbana.ApiWeb.Tests` |
+| Documentación navegable | **Scalar** en `/scalar/v1`, en Development: lee ese contrato, muestra cada ruta con su esquema y deja probarla desde el navegador (con ejemplos en `curl`). Para ver datos propios, repetí el `X-Sesion-Id` en el encabezado de cada pedido |
+| Pruebas | En proceso, con `WebApplicationFactory` y una base SQLite propia de la corrida: `dotnet test tests/MovilidadUrbana.ApiWeb.Tests`. 13 casos, dos de ellos sobre el contrato y Scalar |
 
 ```bash
-dotnet run --project src/MovilidadUrbana.ApiWeb          # http://localhost:5250
+dotnet run --project src/MovilidadUrbana.ApiWeb          # http://localhost:5250 — la documentación, en /scalar/v1
 curl -i http://localhost:5250/api/v1/localidades          # devuelve X-Sesion-Id
 curl -H "X-Sesion-Id: <el que vino>" http://localhost:5250/api/v1/encuestas/contador
 ```
@@ -222,7 +223,7 @@ TypeScript— es la que eligió la aplicación de referencia de .NET,
 
 Abrí `Lab-E2E.WebBlazor.sln` y listo: **Test > Explorador de pruebas** descubre las pruebas de los
 cinco proyectos —33 casos E2E: 22 de Movilidad Urbana, 10 de Login y 1 de Hola Mundo; 49
-unitarios; y 11 de la API— y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de
+unitarios; y 13 de la API— y podés ejecutarlos o depurarlos de a uno, con puntos de interrupción en el código C# de
 la prueba.
 
 La primera corrida tarda unos minutos porque baja el navegador; las siguientes, segundos.
