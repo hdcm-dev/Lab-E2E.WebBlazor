@@ -12,14 +12,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/WebBlazor.E2E.Base.HolaMundo/**'
-      - 'tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/**'
+      - 'src/WebBlazor.HolaMundo/**'
+      - 'tests/WebBlazor.HolaMundo.E2ETests/**'
       - '.github/workflows/e2e-holamundo.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'src/WebBlazor.E2E.Base.HolaMundo/**'
-      - 'tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/**'
+      - 'src/WebBlazor.HolaMundo/**'
+      - 'tests/WebBlazor.HolaMundo.E2ETests/**'
       - '.github/workflows/e2e-holamundo.yml'
   workflow_dispatch:
 
@@ -27,8 +27,8 @@ permissions:
   contents: read
 
 env:
-  APP: src/WebBlazor.E2E.Base.HolaMundo
-  PRUEBAS: tests/WebBlazor.E2E.Base.HolaMundo.E2ETests
+  APP: src/WebBlazor.HolaMundo
+  PRUEBAS: tests/WebBlazor.HolaMundo.E2ETests
   URL_APP: http://localhost:5027
 
 jobs:

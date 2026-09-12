@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored /trabajo/tests/WebBlazor.HolaMundo.E2ETests/WebBlazor.HolaMundo.E2ETests.csproj (in 1.78 sec).
+  WebBlazor.HolaMundo.E2ETests -> /trabajo/tests/WebBlazor.HolaMundo.E2ETests/bin/Debug/net10.0/WebBlazor.HolaMundo.E2ETests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.57
+  Determining projects to restore...
+  Restored /trabajo/src/WebBlazor.HolaMundo/WebBlazor.HolaMundo.csproj (in 414 ms).
+  WebBlazor.HolaMundo -> /trabajo/src/WebBlazor.HolaMundo/bin/Debug/net10.0/WebBlazor.HolaMundo.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.43
+== Levantando src/WebBlazor.HolaMundo en http://localhost:5027 ==
+Test run for /trabajo/tests/WebBlazor.HolaMundo.E2ETests/bin/Debug/net10.0/WebBlazor.HolaMundo.E2ETests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 2 s - WebBlazor.HolaMundo.E2ETests.dll (net10.0)

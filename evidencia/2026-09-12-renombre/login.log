@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Restored /trabajo/tests/WebBlazor.Login.E2ETests/WebBlazor.Login.E2ETests.csproj (in 1.68 sec).
+  WebBlazor.Login.E2ETests -> /trabajo/tests/WebBlazor.Login.E2ETests/bin/Debug/net10.0/WebBlazor.Login.E2ETests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.45
+  Determining projects to restore...
+  Restored /trabajo/src/WebBlazor.Login/WebBlazor.Login.csproj (in 393 ms).
+  WebBlazor.Login -> /trabajo/src/WebBlazor.Login/bin/Debug/net10.0/WebBlazor.Login.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.13
+== Levantando src/WebBlazor.Login en http://localhost:5181 ==
+Test run for /trabajo/tests/WebBlazor.Login.E2ETests/bin/Debug/net10.0/WebBlazor.Login.E2ETests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 3 s - WebBlazor.Login.E2ETests.dll (net10.0)

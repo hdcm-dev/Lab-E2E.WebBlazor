@@ -65,10 +65,10 @@ tests/MovilidadUrbana.E2ETests/
 tests/MovilidadUrbana.UnitTests/
   ReglasDeLocalidadTests.cs   Bordes de cada validación del ABM, sin navegador
   ReglasDeEncuestaTests.cs    Rangos de la encuesta, paso por paso
-src/WebBlazor.E2E.Base.HolaMundo/        La superficie más simple: un formulario interactivo y sus estados
-src/WebBlazor.E2E.Base.Login/            La misma superficie detrás de un acceso por cookies
-tests/WebBlazor.E2E.Base.HolaMundo.E2ETests/   1 caso, sin fixture: la aplicación la levanta quien corre la prueba
-tests/WebBlazor.E2E.Base.Login.E2ETests/       10 casos sobre el acceso y el guard, también sin fixture
+src/WebBlazor.HolaMundo/        La superficie más simple: un formulario interactivo y sus estados
+src/WebBlazor.Login/            La misma superficie detrás de un acceso por cookies
+tests/WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture: la aplicación la levanta quien corre la prueba
+tests/WebBlazor.Login.E2ETests/       10 casos sobre el acceso y el guard, también sin fixture
 scripts/
   dotnet.sh             Ejecuta el SDK de .NET dentro del contenedor oficial
   publicar.sh           Publica el binario autocontenido que usa CI, en `publicacion/`

@@ -11,6 +11,17 @@ tiene su propio registro.
 
 ## [Sin publicar] - 2026-09-12
 
+### Cambiado
+
+- **Los proyectos mudados pierden el prefijo `E2E.Base`**: `WebBlazor.E2E.Base.HolaMundo` pasa a
+  `WebBlazor.HolaMundo` y `WebBlazor.E2E.Base.Login` a `WebBlazor.Login`, y con ellos sus proyectos
+  de prueba, `WebBlazor.HolaMundo.E2ETests` y `WebBlazor.Login.E2ETests`. Cambian carpetas,
+  `.csproj`, espacios de nombres, la solución, los dos workflows, `scripts/pruebas.sh` y el README.
+  El prefijo nombraba al repositorio de origen, que ya no existe. Los registros de `evidencia/`
+  anteriores conservan el nombre viejo: son históricos. Verificado en
+  `evidencia/2026-09-12-renombre/`: la solución compila en Release con `-warnaserror` y las dos
+  baterías pasan con el script.
+
 ### Añadido
 
 - **Hola Mundo y Login, desde `Lab-E2E.WebBlazor.Base`**, que se retira: sus dos proyectos web y sus

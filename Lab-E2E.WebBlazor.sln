@@ -36,13 +36,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		pruebas.runsettings = pruebas.runsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.E2E.Base.HolaMundo", "src\WebBlazor.E2E.Base.HolaMundo\WebBlazor.E2E.Base.HolaMundo.csproj", "{9016D280-E5AB-4989-BDC2-A98A3B414A26}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.HolaMundo", "src\WebBlazor.HolaMundo\WebBlazor.HolaMundo.csproj", "{9016D280-E5AB-4989-BDC2-A98A3B414A26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.E2E.Base.Login", "src\WebBlazor.E2E.Base.Login\WebBlazor.E2E.Base.Login.csproj", "{ADEAB7C4-9D70-4070-9603-171755BD29D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.Login", "src\WebBlazor.Login\WebBlazor.Login.csproj", "{ADEAB7C4-9D70-4070-9603-171755BD29D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.E2E.Base.HolaMundo.E2ETests", "tests\WebBlazor.E2E.Base.HolaMundo.E2ETests\WebBlazor.E2E.Base.HolaMundo.E2ETests.csproj", "{4FDA037A-B687-482F-A358-40E2B2A8257E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.HolaMundo.E2ETests", "tests\WebBlazor.HolaMundo.E2ETests\WebBlazor.HolaMundo.E2ETests.csproj", "{4FDA037A-B687-482F-A358-40E2B2A8257E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.E2E.Base.Login.E2ETests", "tests\WebBlazor.E2E.Base.Login.E2ETests\WebBlazor.E2E.Base.Login.E2ETests.csproj", "{08F7691A-B37D-49B2-B31D-6DA927610B31}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebBlazor.Login.E2ETests", "tests\WebBlazor.Login.E2ETests\WebBlazor.Login.E2ETests.csproj", "{08F7691A-B37D-49B2-B31D-6DA927610B31}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,9 +1,0 @@
-== Falsificación: Login SIN la aplicación levantada, tiene que fallar ==
-Failed!  - Failed:    10, Passed:     0, Skipped:     0, Total:    10, Duration: 2 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
-(fin falsificación)
-== Como e2e-login.yml: publicar autocontenido y correr el binario en Production ==
-      Hosting environment: Production
--- chromium --
-Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 3 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
--- firefox --
-Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 10 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)

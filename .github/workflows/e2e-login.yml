@@ -15,14 +15,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'src/WebBlazor.E2E.Base.Login/**'
-      - 'tests/WebBlazor.E2E.Base.Login.E2ETests/**'
+      - 'src/WebBlazor.Login/**'
+      - 'tests/WebBlazor.Login.E2ETests/**'
       - '.github/workflows/e2e-login.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'src/WebBlazor.E2E.Base.Login/**'
-      - 'tests/WebBlazor.E2E.Base.Login.E2ETests/**'
+      - 'src/WebBlazor.Login/**'
+      - 'tests/WebBlazor.Login.E2ETests/**'
       - '.github/workflows/e2e-login.yml'
   workflow_dispatch:
     inputs:
@@ -44,9 +44,9 @@ permissions:
   contents: read
 
 env:
-  PROYECTO_APP: src/WebBlazor.E2E.Base.Login/WebBlazor.E2E.Base.Login.csproj
-  EJECUTABLE: WebBlazor.E2E.Base.Login
-  PRUEBAS: tests/WebBlazor.E2E.Base.Login.E2ETests
+  PROYECTO_APP: src/WebBlazor.Login/WebBlazor.Login.csproj
+  EJECUTABLE: WebBlazor.Login
+  PRUEBAS: tests/WebBlazor.Login.E2ETests
   URL_APP: http://localhost:5181
   ARTEFACTO: aplicacion-login
 

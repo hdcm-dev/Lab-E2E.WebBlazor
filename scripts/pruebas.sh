@@ -40,13 +40,13 @@ case "$PROYECTO" in
     URL_APP=
     ;;
   holamundo)
-    PRUEBAS=tests/WebBlazor.E2E.Base.HolaMundo.E2ETests
-    APP=src/WebBlazor.E2E.Base.HolaMundo
+    PRUEBAS=tests/WebBlazor.HolaMundo.E2ETests
+    APP=src/WebBlazor.HolaMundo
     URL_APP=http://localhost:5027      # HolaMundoE2ETests.cs
     ;;
   login)
-    PRUEBAS=tests/WebBlazor.E2E.Base.Login.E2ETests
-    APP=src/WebBlazor.E2E.Base.Login
+    PRUEBAS=tests/WebBlazor.Login.E2ETests
+    APP=src/WebBlazor.Login
     URL_APP=http://localhost:5181      # PruebaDeSuperficie.UrlBase
     ;;
   *)
