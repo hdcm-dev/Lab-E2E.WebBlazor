@@ -1,0 +1,36 @@
+================ holamundo — 5 corridas ================
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.82
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.93
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 904 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 895 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 856 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 873 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+================ login — 5 corridas ================
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.06
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.67
+Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 3 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 2 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 3 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 2 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10, Duration: 2 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)

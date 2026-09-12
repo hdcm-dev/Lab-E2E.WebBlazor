@@ -1,0 +1,60 @@
+================ holamundo — 8 corridas ================
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.05
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.71
+-- corrida 1 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+-- corrida 2 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 879 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+-- corrida 3 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 882 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+-- corrida 4 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 896 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+-- corrida 5 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 880 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+-- corrida 6 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+-- corrida 7 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 904 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+-- corrida 8 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 859 ms - WebBlazor.E2E.Base.HolaMundo.E2ETests.dll (net10.0)
+== holamundo: 0 de 8 en rojo ==
+================ login — 8 corridas ================
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.03
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.61
+-- corrida 1 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+-- corrida 2 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+-- corrida 3 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+-- corrida 4 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 1 s - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+-- corrida 5 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 988 ms - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+-- corrida 6 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 982 ms - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+-- corrida 7 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 965 ms - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+-- corrida 8 --
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 967 ms - WebBlazor.E2E.Base.Login.E2ETests.dll (net10.0)
+== login: 0 de 8 en rojo ==
