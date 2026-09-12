@@ -477,8 +477,11 @@ Prueba de humo a pedido contra un entorno ya desplegado, reutilizando `e2e.yml` 
 
 ### Runner
 
-Los jobs corren en los runners alojados por GitHub, `runs-on: ubuntu-latest`. Encima de cada uno
-quedó comentada la línea del runner autoalojado del laboratorio:
+Casi todos los jobs corren en los runners alojados por GitHub, `runs-on: ubuntu-latest`, con la línea
+del runner autoalojado del laboratorio comentada encima. **La excepción es `publicar` de `e2e.yml`**,
+que tiene activo el runner propio: la aplicación de Movilidad Urbana se publica en `i7infra-dev` y
+los jobs de pruebas la bajan como artefacto en `ubuntu-latest`. `e2e-holamundo.yml` y
+`e2e-login.yml` corren enteros en `ubuntu-latest`. El patrón de las dos líneas es este:
 
 ```yaml
     # runs-on: [self-hosted, i7infra-dev]

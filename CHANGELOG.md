@@ -44,10 +44,11 @@ advertencias; Hola Mundo 3 de 3 y Login 3 de 3 con el script; Movilidad Urbana 2
 por defecto; Login como lo corre `e2e-login.yml` —binario autocontenido en Production— 10/10 en
 chromium y en firefox; y las dos baterías **fallan** sin la aplicación levantada.
 
-### Encontrado, no resuelto
+### Corregido
 
-- La sección *Runner* del README dice que los jobs corren en `ubuntu-latest`, pero el job `publicar`
-  de `e2e.yml` (línea 89) tiene activo el runner propio `[self-hosted, i7infra-dev]`.
+- **La sección *Runner* del README** decía que todos los jobs corren en `ubuntu-latest`, pero el job
+  `publicar` de `e2e.yml` (línea 89) tiene activo el runner propio `[self-hosted, i7infra-dev]`. Se
+  corrige el texto, no el workflow: esa combinación es la que acumula 23 corridas en verde.
 
 ## [Sin publicar] - 2026-09-09
 
