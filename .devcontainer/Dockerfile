@@ -58,6 +58,16 @@ RUN yes | sdkmanager --licenses > /dev/null \
 RUN dotnet workload install maui-android --skip-sign-check \
     && dotnet nuget locals http-cache --clear
 
+# Appium para las pruebas de interfaz sobre el teléfono (Test-Guide): servidor en Node.js y el driver
+# UIAutomator2 para Android. El driver actual exige Appium 3; el servidor se instala sin fijar versión.
+# Appium exige que APPIUM_HOME sea escribible por quien lo corre: se le cede al usuario dev más abajo.
+ENV APPIUM_HOME=/opt/appium
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && npm install -g appium \
+    && mkdir -p ${APPIUM_HOME} && appium driver install uiautomator2 \
+    && rm -rf /var/lib/apt/lists/*
+
 # --- Usuario ----------------------------------------------------------------
 # Mismo UID/GID que el usuario del host: los bin/ y obj/ que quedan en el
 # volumen montado siguen siendo editables desde afuera.
@@ -69,7 +79,7 @@ RUN if getent group ${USER_GID} >/dev/null; then \
     else useradd -u ${USER_UID} -g ${USER_GID} -m -s /bin/bash ${USERNAME}; fi \
     && mkdir -p /home/${USERNAME}/.dotnet /home/${USERNAME}/.nuget /home/${USERNAME}/.android \
     && chown -R ${USER_UID}:${USER_GID} /home/${USERNAME} \
-    && chown -R ${USER_UID}:${USER_GID} ${ANDROID_HOME}
+    && chown -R ${USER_UID}:${USER_GID} ${ANDROID_HOME} ${APPIUM_HOME}
 
 # El servidor de adb necesita root: el nodo USB del telefono queda en solo
 # lectura para cualquier otro usuario (ver el comentario en dev.sh). El

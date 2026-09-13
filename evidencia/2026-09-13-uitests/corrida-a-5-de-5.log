@@ -1,0 +1,9 @@
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  MovilidadUrbana.MAUI.UITests -> /work/tests/MovilidadUrbana.MAUI.UITests/bin/Release/net10.0/MovilidadUrbana.MAUI.UITests.dll
+Serie de pruebas para /work/tests/MovilidadUrbana.MAUI.UITests/bin/Release/net10.0/MovilidadUrbana.MAUI.UITests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+ADVERTENCIA: Se sobrescribirá el archivo de resultados: /work/tests/MovilidadUrbana.MAUI.UITests/resultados/uitests.trx
+Archivo de resultados: /work/tests/MovilidadUrbana.MAUI.UITests/resultados/uitests.trx
+
+Correctas! - Con error:     0, Superado:     5, Omitido:     0, Total:     5, Duración: 3 m 21 s - MovilidadUrbana.MAUI.UITests.dll (net10.0)

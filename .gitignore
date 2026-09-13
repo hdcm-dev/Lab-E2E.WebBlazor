@@ -440,5 +440,6 @@ datos/
 /datos-e2e/
 /.nuget/
 /resultados/
+tests/MovilidadUrbana.MAUI.UITests/resultados/
 /.dotnet/
 /.navegadores/

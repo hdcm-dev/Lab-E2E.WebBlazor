@@ -61,6 +61,7 @@ tests/MovilidadUrbana.E2ETests/       22 casos Playwright sobre la web + su fixt
 tests/MovilidadUrbana.UnitTests/      49 casos sobre las reglas de dominio de la web, sin navegador
 tests/MovilidadUrbana.ApiWeb.Tests/   13 casos sobre la API en proceso, con WebApplicationFactory
 tests/MovilidadUrbana.MAUI.Tests/     18 casos sobre los ViewModels de Android, con sus capas enlazadas
+tests/MovilidadUrbana.MAUI.UITests/   5 casos de interfaz con Appium sobre la app instalada en el teléfono
 src/WebBlazor.HolaMundo/              La superficie más simple: un formulario interactivo y sus estados
 src/WebBlazor.Login/                  La misma superficie detrás de un acceso por cookies
 tests/WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture: la aplicación la levanta quien corre la prueba
@@ -76,7 +77,7 @@ Lab-E2E.WebBlazor.SinMaui.slnf  La solución sin la app Android: lo que compila 
 evidencia/              Registros de corridas que respaldan lo que afirman las guías
 ```
 
-Son once proyectos. De Movilidad Urbana, tres aplicaciones independientes y cuatro proyectos de
+Son doce proyectos. De Movilidad Urbana, tres aplicaciones independientes y cinco proyectos de
 prueba; de Hola Mundo y Login, cada uno su web y su E2E. Las tres aplicaciones web tienen grados de
 complejidad distintos a propósito —Hola Mundo, Login y Movilidad Urbana, en ese orden—, para que la
 temática se pueda estudiar de a un escalón. Hola Mundo y Login llegaron desde
@@ -122,6 +123,7 @@ almacenamiento privado de la aplicación y no habla con ningún servidor.
 | Encuesta | Asistente de tres pasos con progreso, validación al avanzar, «Anterior» que conserva lo cargado, resumen al registrar y contador |
 | Diseño | La paleta de `Tokens.css`, objetivos táctiles de 48 dp, acción principal fija abajo, el borde del campo en rojo cuando tiene error, y el error se borra al corregir el campo |
 | Pruebas | `dotnet test tests/MovilidadUrbana.MAUI.Tests`: 18 casos sobre los ViewModels, contra las capas reales y una base SQLite por caso. El proyecto Android no se puede referenciar sin el workload, así que la prueba compila `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` como archivos enlazados |
+| Pruebas de interfaz | `.devcontainer/dev.sh uitests`: 5 casos con **Appium** (driver UIAutomator2) sobre la app instalada en el teléfono, localizando por `AutomationId`. Filtro sin resultados; alta inválida; alta, edición y baja; paso 1 vacío; los tres pasos con «12,5» y el resumen. Cada prueba deja los datos como los encontró; van en serie; no corren en CI porque necesitan el dispositivo |
 
 Compilar la aplicación pide el workload `maui-android`, JDK 17 y el SDK de Android. Para no instalar
 nada, está el devcontainer:
@@ -130,6 +132,7 @@ nada, está el devcontainer:
 .devcontainer/dev.sh up         # levanta el contenedor y toma el adb del teléfono USB
 .devcontainer/dev.sh run        # compila (armeabi-v7a), instala y abre la aplicación
 .devcontainer/dev.sh logs       # logcat de la aplicación
+.devcontainer/dev.sh uitests    # levanta Appium en el contenedor y corre las pruebas de interfaz
 .devcontainer/dev.sh devolver   # apaga el contenedor y devuelve el adb a quien lo tenía
 ```
 

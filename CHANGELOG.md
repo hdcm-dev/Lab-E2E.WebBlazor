@@ -13,6 +13,16 @@ tiene su propio registro.
 
 ### Añadido
 
+- **`MovilidadUrbana.MAUI.UITests`** — 5 pruebas de interfaz con Appium (`Appium.WebDriver` 8.0.0,
+  driver UIAutomator2) sobre la app instalada en el teléfono, localizando por `AutomationId`
+  (`MobileBy.Id`): filtro sin resultados y su salida; alta inválida con errores; alta, edición y baja
+  con nombre único por corrida; paso 1 vacío; los tres pasos de la encuesta con «12,5» y el resumen.
+  Esperas por condición (hasta 60 s), teclado cerrado antes de tocar, `UiScrollable` para lo que
+  queda debajo del pliegue, y un `[SetUp]` que vuelve atrás si una prueba anterior dejó una página
+  apilada. Van en serie y no corren en CI. `dev.sh uitests` levanta el servidor de Appium dentro del
+  devcontainer —la imagen suma Node.js 22, Appium 3 y el driver— y corre la suite; `MainActivity`
+  lleva `[Register("ar.lab.movilidadurbana.MainActivity")]` para que Appium la lance. Evidencia en
+  `evidencia/2026-09-13-uitests/`.
 - **`MovilidadUrbana.MAUI`** — la aplicación Android: .NET MAUI 10 con XAML nativo y MVVM, dos
   módulos en pestañas —Localidades y Encuesta—. Es un proyecto **independiente**: trae sus propias
   capas `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` (ViewModels con

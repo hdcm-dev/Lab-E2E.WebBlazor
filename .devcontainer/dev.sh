@@ -8,6 +8,7 @@
 #   .devcontainer/dev.sh install    compila e instala
 #   .devcontainer/dev.sh run        compila, instala y abre la aplicación
 #   .devcontainer/dev.sh logs       logcat de la aplicación
+#   .devcontainer/dev.sh uitests    corre las pruebas de interfaz (Appium) contra la app instalada
 #   .devcontainer/dev.sh down       apaga el contenedor
 #   .devcontainer/dev.sh devolver   apaga y le devuelve el adb al contenedor que lo tenía
 #
@@ -78,6 +79,20 @@ cmd_run() {
 
 cmd_logs() { ensure_up; in_container "adb logcat -d --pid=\$(adb shell pidof -s $PKG) | tail -200"; }
 
+# Levanta el servidor de Appium dentro del contenedor (si no está), corre las pruebas de interfaz y
+# deja los resultados y las capturas en tests/MovilidadUrbana.MAUI.UITests/resultados/.
+cmd_uitests() {
+    ensure_up
+    if ! in_container "curl -fsS http://127.0.0.1:4723/status >/dev/null 2>&1"; then
+        # Desprendido del exec (-d): si se lanzara con & dentro del mismo exec, moriría al terminar este.
+        docker exec -d "$NAME" bash -lc "appium --log-level warn > /tmp/appium.log 2>&1"
+        for i in $(seq 1 30); do in_container "curl -fsS http://127.0.0.1:4723/status >/dev/null 2>&1" && break; sleep 1; done
+        in_container "curl -fsS http://127.0.0.1:4723/status >/dev/null" || { echo "Appium no arrancó; ver /tmp/appium.log en el contenedor" >&2; exit 3; }
+    fi
+    in_container "dotnet test tests/MovilidadUrbana.MAUI.UITests -c Release \
+        --logger 'trx;LogFileName=uitests.trx' --results-directory tests/MovilidadUrbana.MAUI.UITests/resultados"
+}
+
 cmd_down() {
     docker exec -u 0 "$NAME" adb kill-server >/dev/null 2>&1 || true
     docker rm -f "$NAME" >/dev/null 2>&1 || true
@@ -92,6 +107,6 @@ cmd_devolver() {
 }
 
 case "${1:-}" in
-    up|devices|build|install|run|logs|down|devolver) "cmd_$1" ;;
+    up|devices|build|install|run|logs|uitests|down|devolver) "cmd_$1" ;;
     *) sed -n '2,20p' "$0"; exit 1 ;;
 esac
