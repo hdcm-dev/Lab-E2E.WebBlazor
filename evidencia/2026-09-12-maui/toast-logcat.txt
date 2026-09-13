@@ -1,0 +1,2 @@
+09-12 22:11:16.305   407  1335 I BufferQueueProducer: [Toast#0](this:0xa4729000,id:1974,api:1,p:18788,c:407) connect(P): api=1 producer=(18788:ar.lab.movilidadurbana) producerControlledByApp=true
+09-12 22:11:18.000   916  1152 W NotificationService: Toast already killed. pkg=ar.lab.movilidadurbana callback=android.app.ITransientNotification$Stub$Proxy@3ba4e1b

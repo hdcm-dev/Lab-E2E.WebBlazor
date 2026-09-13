@@ -1,0 +1,5 @@
+moto e6 play
+9
+armeabi-v7a
+Physical size: 720x1440
+Physical density: 320

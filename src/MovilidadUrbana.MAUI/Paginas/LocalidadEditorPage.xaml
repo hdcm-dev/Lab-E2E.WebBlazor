@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MovilidadUrbana.MAUI.Presentacion.Localidades"
+             x:Class="MovilidadUrbana.MAUI.Paginas.LocalidadEditorPage"
+             x:DataType="vm:LocalidadEditorViewModel"
+             BackgroundColor="{StaticResource Lienzo}"
+             Title="{Binding Titulo}"
+             Shell.TabBarIsVisible="False">
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="20">
+
+                <Border Style="{StaticResource Banda}" IsVisible="{Binding Aviso, Converter={StaticResource TextoPresente}}">
+                    <Label Text="{Binding Aviso}" TextColor="{StaticResource TextoError}" AutomationId="aviso" />
+                </Border>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Nombre" Style="{StaticResource Rotulo}" />
+                    <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorNombre, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                        <Entry x:Name="CampoNombre" Text="{Binding Nombre}" Placeholder="Ej.: Goya" AutomationId="nombre"
+                               Keyboard="Text" ReturnType="Next" MaxLength="80" />
+                    </Border>
+                    <Label Text="{Binding ErrorNombre}" Style="{StaticResource Error}" IsVisible="{Binding ErrorNombre, Converter={StaticResource TextoPresente}}" />
+                    <Label Text="{Binding RequisitoDelNombre}" Style="{StaticResource Ayuda}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Provincia" Style="{StaticResource Rotulo}" />
+                    <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorProvincia, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                        <Grid ColumnDefinitions="*,Auto"><Picker ItemsSource="{Binding Provincias}" SelectedItem="{Binding Provincia}" Title="Elegir provincia" AutomationId="provincia" /><Label Grid.Column="1" Style="{StaticResource Desplegable}" /></Grid>
+                    </Border>
+                    <Label Text="{Binding ErrorProvincia}" Style="{StaticResource Error}" IsVisible="{Binding ErrorProvincia, Converter={StaticResource TextoPresente}}" />
+                    <Label Text="{Binding RequisitoDeLaProvincia}" Style="{StaticResource Ayuda}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Código postal" Style="{StaticResource Rotulo}" />
+                    <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorCodigoPostal, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                        <Entry Text="{Binding CodigoPostal}" Placeholder="Ej.: 3450" AutomationId="codigo-postal"
+                               Keyboard="Numeric" ReturnType="Next" MaxLength="8" />
+                    </Border>
+                    <Label Text="{Binding ErrorCodigoPostal}" Style="{StaticResource Error}" IsVisible="{Binding ErrorCodigoPostal, Converter={StaticResource TextoPresente}}" />
+                    <Label Text="{Binding RequisitoDelCodigoPostal}" Style="{StaticResource Ayuda}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Habitantes" Style="{StaticResource Rotulo}" />
+                    <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorHabitantes, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                        <Entry Text="{Binding Habitantes}" Placeholder="Ej.: 90000" AutomationId="habitantes"
+                               Keyboard="Numeric" ReturnType="Done" ReturnCommand="{Binding GuardarCommand}" MaxLength="9" />
+                    </Border>
+                    <Label Text="{Binding ErrorHabitantes}" Style="{StaticResource Error}" IsVisible="{Binding ErrorHabitantes, Converter={StaticResource TextoPresente}}" />
+                    <Label Text="{Binding RequisitoDeLosHabitantes}" Style="{StaticResource Ayuda}" />
+                </VerticalStackLayout>
+
+                <Button Text="Eliminar localidad" Style="{StaticResource BotonPeligro}" IsVisible="{Binding EsEdicion}"
+                        Command="{Binding EliminarCommand}" AutomationId="eliminar" HorizontalOptions="Start" Padding="0" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- La acción de guardar queda fija abajo: no se pierde detrás del teclado ni al desplazarse. -->
+        <Border x:Name="BarraInferior" Grid.Row="1" BackgroundColor="{StaticResource Superficie}" StrokeThickness="0" Padding="16,12">
+            <Button Text="Guardar" Style="{StaticResource BotonPrimario}" Command="{Binding GuardarCommand}" AutomationId="guardar" />
+        </Border>
+    </Grid>
+</ContentPage>

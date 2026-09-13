@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MovilidadUrbana.MAUI.Presentacion.Localidades"
+             x:Class="MovilidadUrbana.MAUI.Paginas.LocalidadesPage"
+             x:DataType="vm:LocalidadesViewModel"
+             Title="Localidades"
+             BackgroundColor="{StaticResource Lienzo}">
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Buscar y filtrar: arriba y siempre a mano, como pide una lista que crece. -->
+        <VerticalStackLayout Grid.Row="0" Padding="16,12,16,4" Spacing="8">
+            <Border Style="{StaticResource Campo}">
+                <SearchBar Text="{Binding Texto}" Placeholder="Nombre o código postal"
+                           AutomationId="buscar" BackgroundColor="Transparent"
+                           TextColor="{StaticResource TextoPrimario}" CancelButtonColor="{StaticResource Marca}" />
+            </Border>
+            <Border Style="{StaticResource Campo}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Picker ItemsSource="{Binding Provincias}" SelectedItem="{Binding Provincia}"
+                            Title="Provincia" AutomationId="filtro-provincia" />
+                    <Label Grid.Column="1" Style="{StaticResource Desplegable}" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+
+        <Label Grid.Row="1" Text="{Binding Resumen}" Style="{StaticResource Ayuda}" Margin="16,4,16,8"
+               IsVisible="{Binding EsCargando, Converter={StaticResource Negar}}" />
+
+        <RefreshView Grid.Row="2" Command="{Binding CargarCommand}" IsRefreshing="{Binding Refrescando}"
+                     RefreshColor="{StaticResource Marca}">
+            <CollectionView ItemsSource="{Binding Visibles}" SelectionMode="None" AutomationId="lista-localidades">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.Footer>
+                    <!-- Espacio para que el botón flotante no tape la última fila. -->
+                    <ContentView HeightRequest="88" />
+                </CollectionView.Footer>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LocalidadItem">
+                        <Border Style="{StaticResource Tarjeta}" Margin="16,0" Padding="16,12"
+                                SemanticProperties.Description="{Binding Nombre}"
+                                SemanticProperties.Hint="Toque para editar">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding EditarCommand, Source={RelativeSource AncestorType={x:Type vm:LocalidadesViewModel}}, x:DataType=vm:LocalidadesViewModel}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" MinimumHeightRequest="48">
+                                <Label Text="{Binding Nombre}" Style="{StaticResource Rotulo}" FontSize="16" />
+                                <Label Grid.Row="1" Text="{Binding Detalle}" Style="{StaticResource Ayuda}" />
+                                <Label Grid.Column="1" Grid.RowSpan="2" Text="{Binding HabitantesTexto}"
+                                       Style="{StaticResource Ayuda}" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <ContentView>
+                        <Grid Padding="32,48">
+                            <ActivityIndicator IsRunning="{Binding EsCargando}" IsVisible="{Binding EsCargando}"
+                                               Color="{StaticResource Marca}" VerticalOptions="Start" />
+                            <VerticalStackLayout IsVisible="{Binding EsVacio}" Spacing="12" AutomationId="estado-vacio">
+                                <Label Text="Todavía no hay localidades" Style="{StaticResource Titulo}" HorizontalTextAlignment="Center" />
+                                <Label Text="Cargue la primera para poder usarla en la encuesta." Style="{StaticResource Ayuda}" HorizontalTextAlignment="Center" />
+                                <Button Text="Agregar localidad" Style="{StaticResource BotonPrimario}" Command="{Binding AgregarCommand}" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout IsVisible="{Binding EsFiltradoSinResultados}" Spacing="12" AutomationId="estado-sin-resultados">
+                                <Label Text="Ninguna localidad coincide" Style="{StaticResource Titulo}" HorizontalTextAlignment="Center" />
+                                <Label Text="Pruebe con otro nombre o con otra provincia." Style="{StaticResource Ayuda}" HorizontalTextAlignment="Center" />
+                                <Button Text="Limpiar filtro" Style="{StaticResource BotonSecundario}" Command="{Binding LimpiarFiltroCommand}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </ContentView>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Acción principal de la pantalla: botón flotante de 56 dp abajo a la derecha, al alcance del pulgar. -->
+        <Button Grid.Row="2" ImageSource="agregar.png" Text="Agregar" Style="{StaticResource BotonPrimario}"
+                ContentLayout="Left,8" CornerRadius="28" HeightRequest="56" Padding="20,0"
+                HorizontalOptions="End" VerticalOptions="End" Margin="16"
+                Command="{Binding AgregarCommand}" AutomationId="agregar"
+                SemanticProperties.Description="Agregar localidad">
+            <Button.Shadow>
+                <Shadow Brush="Black" Opacity="0.25" Radius="8" Offset="0,3" />
+            </Button.Shadow>
+        </Button>
+    </Grid>
+</ContentPage>

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using MovilidadUrbana.Aplicacion.Encuestas;
+using MovilidadUrbana.ApiWeb.Aplicacion.Encuestas;
 using MovilidadUrbana.ApiWeb.Contratos;
-using MovilidadUrbana.Dominio.Reglas;
+using MovilidadUrbana.ApiWeb.Dominio.Reglas;
 
 namespace MovilidadUrbana.ApiWeb.Controllers;
 

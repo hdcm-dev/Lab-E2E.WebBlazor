@@ -13,6 +13,40 @@ tiene su propio registro.
 
 ### Añadido
 
+- **`MovilidadUrbana.MAUI`** — la aplicación Android: .NET MAUI 10 con XAML nativo y MVVM, dos
+  módulos en pestañas —Localidades y Encuesta—. Es un proyecto **independiente**: trae sus propias
+  capas `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` (ViewModels con
+  CommunityToolkit.Mvvm 8.4.2, navegación y avisos detrás de `INavegador` e `IAvisos`) y no referencia
+  a ningún otro proyecto. La base SQLite vive en el almacenamiento privado de la aplicación y la
+  sesión es la del dispositivo, guardada en `Preferences`. Lista con búsqueda, filtro por provincia y
+  estados vacío y sin coincidencias; alta, edición y baja con confirmación; asistente de tres pasos
+  con progreso, resumen y contador; campo decimal que acepta la coma; la barra de acciones se
+  mantiene encima del teclado también en la página apilada. Probada en un Motorola moto e6 play
+  (Android 9, armeabi-v7a) por USB, con capturas e índice en `evidencia/2026-09-12-maui/`.
+- **`MovilidadUrbana.MAUI.Tests`** — 18 casos NUnit sobre los ViewModels contra las capas reales y una
+  base SQLite por caso (las carpetas de capa se compilan como archivos enlazados, porque el proyecto
+  Android no se referencia sin el workload): carga, filtros y estados de la lista; errores por campo, alta, edición y baja
+  con confirmación; pasos, validación, «Anterior» que conserva, registro, resumen y reinicio; el error
+  que se borra al corregir el campo.
+- **`.devcontainer/`** — imagen con SDK .NET 10, JDK 17, Android SDK y el workload `maui-android`, y
+  `dev.sh` (`up`, `devices`, `build`, `install`, `run`, `logs`, `down`, `devolver`) para compilar e
+  instalar en el teléfono USB. Toma el adb del contenedor que lo tenía y lo devuelve al terminar.
+- **`android.yml`** — pruebas de los ViewModels y APK de Release como artefacto, con filtro de rutas.
+- **`Lab-E2E.WebBlazor.SinMaui.slnf`** — la solución sin el proyecto Android. `ci.yml` compila este
+  filtro, porque el runner no tiene el workload de MAUI, y suma las pruebas de los ViewModels.
+
+### Cambiado
+
+- **Tres aplicaciones independientes con todas sus capas.** `MovilidadUrbana.Web`,
+  `MovilidadUrbana.ApiWeb` y `MovilidadUrbana.MAUI` dejan de compartir proyectos: cada una lleva
+  `Dominio/`, `Aplicacion/` e `Infraestructura/` como carpetas y espacios de nombres propios
+  (`MovilidadUrbana.Web.*`, `MovilidadUrbana.ApiWeb.*`, `MovilidadUrbana.MAUI.*`) y no referencia a
+  ninguna otra. Los proyectos `MovilidadUrbana.Dominio`, `.Aplicacion` e `.Infraestructura` se
+  eliminan; el código se repite a propósito, porque cada aplicación tiene que poder estudiarse y
+  llevarse por separado. `MovilidadUrbana.UnitTests` referencia ahora la web. La solución queda en
+  once proyectos. Verificado: el filtro compila en Release con `-warnaserror`; 49 unitarias, 13 de la
+  API y 18 de los ViewModels en verde.
+
 - **`MovilidadUrbana.ApiWeb`** — la misma aplicación como API REST: `LocalidadesController` y
   `EncuestasController` sobre los mismos casos de uso, repositorios y base que la web. Sesión por
   encabezado `X-Sesion-Id` —el equivalente de la cookie—, `ValidationProblemDetails` (RFC 9457) con las
@@ -28,16 +62,13 @@ tiene su propio registro.
   11/11, una falsificación (200 en vez de 201 pone un caso en rojo) y una corrida real sobre Kestrel
   con el OpenAPI y el flujo por `curl`.
 
-### Cambiado
-
-- **Las capas de Movilidad Urbana pasan a proyectos propios**: `MovilidadUrbana.Dominio`,
-  `MovilidadUrbana.Aplicacion` y `MovilidadUrbana.Infraestructura`, con los espacios de nombres sin
-  el `.Web.`. Hacía falta para que la API y la web compartieran las reglas sin duplicarlas ni
-  referenciar un proyecto web desde otro. Cada capa registra sus servicios —`AgregarAplicacion()`,
-  `AgregarInfraestructura(cadena)`— y los dos `Program.cs` solo componen. `MovilidadUrbana.UnitTests`
-  referencia ahora `Dominio`, que es lo único que prueba. La web y sus 22 E2E no cambiaron de
-  comportamiento; `Infraestructura` referencia el framework de ASP.NET Core solo por el middleware de
-  sesión. La solución queda en doce proyectos.
+- `MiddlewareDeSesion` es un detalle HTTP de la web y vive en `MovilidadUrbana.Web/Sesiones/`; la
+  capa de infraestructura de cada aplicación ya no referencia `Microsoft.AspNetCore.App`.
+- **Las capas de Movilidad Urbana pasaron a proyectos propios** (`MovilidadUrbana.Dominio`,
+  `.Aplicacion`, `.Infraestructura`) durante el trabajo de la API, y en el mismo día volvieron a
+  cada aplicación como carpetas: ver «Tres aplicaciones independientes» más arriba. Lo que quedó de
+  ese paso es la separación en capas con registro propio —`AgregarAplicacion()`,
+  `AgregarInfraestructura(cadena)`— y los `Program.cs` que solo componen.
 
 - **Los proyectos mudados pierden el prefijo `E2E.Base`**: `WebBlazor.E2E.Base.HolaMundo` pasa a
   `WebBlazor.HolaMundo` y `WebBlazor.E2E.Base.Login` a `WebBlazor.Login`, y con ellos sus proyectos

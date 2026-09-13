@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sin permisos de red: la aplicación es totalmente independiente y su base vive en el teléfono.
+     En Debug el SDK agrega INTERNET por su cuenta para el depurador. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true" android:label="Movilidad Urbana"></application>
+</manifest>

@@ -1,8 +1,8 @@
 using System.Globalization;
-using MovilidadUrbana.Aplicacion;
+using MovilidadUrbana.ApiWeb.Aplicacion;
 using MovilidadUrbana.ApiWeb.Sesiones;
-using MovilidadUrbana.Infraestructura;
-using MovilidadUrbana.Infraestructura.Persistencia;
+using MovilidadUrbana.ApiWeb.Infraestructura;
+using MovilidadUrbana.ApiWeb.Infraestructura.Persistencia;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

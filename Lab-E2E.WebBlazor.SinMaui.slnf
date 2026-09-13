@@ -1,0 +1,17 @@
+{
+  "solution": {
+    "path": "Lab-E2E.WebBlazor.sln",
+    "projects": [
+      "src\\MovilidadUrbana.Web\\MovilidadUrbana.Web.csproj",
+      "tests\\MovilidadUrbana.E2ETests\\MovilidadUrbana.E2ETests.csproj",
+      "tests\\MovilidadUrbana.UnitTests\\MovilidadUrbana.UnitTests.csproj",
+      "src\\WebBlazor.HolaMundo\\WebBlazor.HolaMundo.csproj",
+      "src\\WebBlazor.Login\\WebBlazor.Login.csproj",
+      "tests\\WebBlazor.HolaMundo.E2ETests\\WebBlazor.HolaMundo.E2ETests.csproj",
+      "tests\\WebBlazor.Login.E2ETests\\WebBlazor.Login.E2ETests.csproj",
+      "src\\MovilidadUrbana.ApiWeb\\MovilidadUrbana.ApiWeb.csproj",
+      "tests\\MovilidadUrbana.ApiWeb.Tests\\MovilidadUrbana.ApiWeb.Tests.csproj",
+      "tests\\MovilidadUrbana.MAUI.Tests\\MovilidadUrbana.MAUI.Tests.csproj"
+    ]
+  }
+}

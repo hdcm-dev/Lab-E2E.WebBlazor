@@ -51,10 +51,12 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restaurar
-        run: dotnet restore Lab-E2E.WebBlazor.sln
+        # El filtro deja afuera la aplicación Android: compilarla pide el workload de MAUI, y de eso
+        # se ocupa android.yml. Las pruebas de sus ViewModels sí están en el filtro.
+        run: dotnet restore Lab-E2E.WebBlazor.SinMaui.slnf
 
       - name: Compilar con los avisos tratados como error
-        run: dotnet build Lab-E2E.WebBlazor.sln --configuration Release --no-restore -warnaserror
+        run: dotnet build Lab-E2E.WebBlazor.SinMaui.slnf --configuration Release --no-restore -warnaserror
 
       - name: Pruebas unitarias
         # Las reglas de dominio se verifican acá, en milisegundos y sin navegador. Si una regla
@@ -71,6 +73,13 @@ jobs:
           dotnet test tests/MovilidadUrbana.ApiWeb.Tests
           --configuration Release --no-build
           --logger "trx;LogFileName=api.trx" --results-directory resultados
+
+      - name: Pruebas de los ViewModels de Android
+        # Las capas de la app se compilan enlazadas en net10.0: se prueban sin emulador ni teléfono.
+        run: >-
+          dotnet test tests/MovilidadUrbana.MAUI.Tests
+          --configuration Release --no-build
+          --logger "trx;LogFileName=maui-viewmodels.trx" --results-directory resultados
 
       - name: Subir los resultados de las unitarias
         if: ${{ !cancelled() }}

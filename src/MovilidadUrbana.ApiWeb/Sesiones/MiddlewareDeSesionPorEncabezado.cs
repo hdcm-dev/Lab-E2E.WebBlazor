@@ -1,4 +1,4 @@
-using MovilidadUrbana.Infraestructura.Sesiones;
+using MovilidadUrbana.ApiWeb.Infraestructura.Sesiones;
 
 namespace MovilidadUrbana.ApiWeb.Sesiones;
 

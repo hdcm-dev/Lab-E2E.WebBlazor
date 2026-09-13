@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MovilidadUrbana.Dominio\MovilidadUrbana.Dominio.csproj" />
+    <ProjectReference Include="..\..\src\MovilidadUrbana.Web\MovilidadUrbana.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

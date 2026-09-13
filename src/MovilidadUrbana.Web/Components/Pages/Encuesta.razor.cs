@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Components;
-using MovilidadUrbana.Aplicacion.Encuestas;
-using MovilidadUrbana.Aplicacion.Localidades;
+using MovilidadUrbana.Web.Aplicacion.Encuestas;
+using MovilidadUrbana.Web.Aplicacion.Localidades;
 using MovilidadUrbana.Web.Components.Componentes;
-using MovilidadUrbana.Dominio.Entidades;
-using MovilidadUrbana.Dominio.Reglas;
+using MovilidadUrbana.Web.Dominio.Entidades;
+using MovilidadUrbana.Web.Dominio.Reglas;
 using MovilidadUrbana.Web.Servicios;
 
 namespace MovilidadUrbana.Web.Components.Pages;

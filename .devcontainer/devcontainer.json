@@ -1,0 +1,27 @@
+{
+  // Entorno para compilar y depurar MovilidadUrbana.MAUI en el teléfono conectado por USB, sin SDKs en el
+  // host. La receta de la imagen es la de GDA.Core.APP: comparten caché de Docker y la clave de adb.
+  "name": "Lab-E2E.WebBlazor — MAUI Android",
+  "build": { "dockerfile": "Dockerfile" },
+  "runArgs": ["--privileged", "--name", "lab-e2e-maui-dev"],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/work,type=bind",
+  "workspaceFolder": "/work",
+  "remoteUser": "dev",
+  "mounts": [
+    "source=/dev/bus/usb,target=/dev/bus/usb,type=bind",
+    "source=lab-maui-nuget,target=/home/dev/.nuget,type=volume",
+    // La clave RSA de adb que el teléfono ya autorizó: sin ella hay que aceptar el diálogo otra vez.
+    "source=gda-app-adbkeys,target=/home/dev/.android,type=volume",
+    // El keystore de Debug persiste: si se regenera, el APK nuevo no se instala sobre el anterior.
+    "source=lab-maui-keystore,target=/home/dev/.local/share/Xamarin,type=volume"
+  ],
+  // El servidor de adb va como root: el nodo USB del teléfono no es escribible para el usuario normal.
+  // Los volúmenes nombrados nacen con dueño root; el SDK escribe en ellos como dev.
+  "postCreateCommand": "sudo chown -R dev:dev /home/dev/.nuget /home/dev/.local /home/dev/.android",
+  "postStartCommand": "sudo -E HOME=/home/dev adb start-server",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-dotnettools.dotnet-maui", "ms-dotnettools.csdevkit"]
+    }
+  }
+}

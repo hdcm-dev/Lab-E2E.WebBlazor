@@ -26,37 +26,41 @@ reimplementan ninguno en línea. Ver [Diseño](#diseño).
 
 ## Estructura
 
-Movilidad Urbana está repartida en **cuatro proyectos por capa de Clean Architecture** y dos cabezas
-—la web Blazor y una API REST— que comparten las tres capas de abajo. Las dependencias apuntan
-siempre hacia adentro. Al lado viven dos proyectos web más simples, Hola Mundo y Login:
+Movilidad Urbana son **tres proyectos independientes** —la web Blazor, una API REST y una aplicación
+Android— que tratan la misma temática pero no comparten código: cada uno trae **todas sus capas** de
+Clean Architecture como carpetas y espacios de nombres propios (`Dominio/`, `Aplicacion/`,
+`Infraestructura/`, más la presentación), y no referencia a ningún otro proyecto de la solución. El
+código se repite a propósito: cada proyecto tiene que poder estudiarse, compilarse y llevarse por
+separado. Dentro de cada uno, las dependencias apuntan siempre hacia adentro. Al lado viven dos
+proyectos web más simples, Hola Mundo y Login:
 
 ```
 Lab-E2E.WebBlazor.sln
-src/MovilidadUrbana.Dominio/          Entidades y reglas de negocio. No depende de nada.
-  Entidades/                          Localidad, RespuestaDeEncuesta, Sesion
-  Reglas/                             ReglasDeLocalidad, ReglasDeEncuesta
-  Catalogos.cs                        Provincias, medios, frecuencias y motivos
-src/MovilidadUrbana.Aplicacion/       Casos de uso. Depende solo de Dominio.
-  Abstracciones/                      IRepositorioDeLocalidades, IRepositorioDeEncuestas, IContextoDeSesion
-  Localidades/, Encuestas/            Servicio, modelo y política de cada uno
-  Resultado.cs                        Salida de un caso de uso: aviso y errores por campo
-  ServiciosDeAplicacion.cs            AgregarAplicacion(): registra los casos de uso
-src/MovilidadUrbana.Infraestructura/  Implementa las abstracciones de Aplicacion.
-  Persistencia/                       EF Core sobre SQLite, repositorios y siembra inicial
-  Sesiones/                           Cookie de sesión y su middleware
-  ServiciosDeInfraestructura.cs       AgregarInfraestructura(cadena): registra persistencia y sesión
-src/MovilidadUrbana.Web/              Presentación Blazor. Depende de Aplicacion e Infraestructura.
+src/MovilidadUrbana.Web/              La web Blazor. Independiente: trae sus capas.
+  Dominio/                            Entidades, reglas y catálogos. No depende de nada.
+  Aplicacion/                         Casos de uso: servicios, modelos, políticas, Resultado
+  Infraestructura/                    EF Core sobre SQLite, repositorios, siembra y contexto de sesión
   Components/                         App.razor, Routes.razor, Layout/, Componentes/, Pages/
+  Sesiones/                           La cookie de sesión y su middleware
   Theme/, Servicios/, wwwroot/        Íconos; diálogos, foco y versión; tokens, patrones y js/
-  Program.cs                          Composición: elige la cadena de conexión y compone las capas
-src/MovilidadUrbana.ApiWeb/           Presentación REST sobre las mismas capas.
+  Program.cs                          Composición: AgregarInfraestructura + AgregarAplicacion
+src/MovilidadUrbana.ApiWeb/           La API REST. Independiente: trae sus capas.
+  Dominio/, Aplicacion/, Infraestructura/   Las mismas tres capas, en MovilidadUrbana.ApiWeb.*
   Controllers/                        LocalidadesController, EncuestasController
   Contratos/                          DTOs de entrada y salida
   Sesiones/                           La sesión por encabezado X-Sesion-Id
   Program.cs                          Composición: controllers, ProblemDetails y OpenAPI
+src/MovilidadUrbana.MAUI/             La app Android (XAML nativo + MVVM). Independiente: trae sus capas.
+  Dominio/, Aplicacion/, Infraestructura/   Las mismas tres capas, en MovilidadUrbana.MAUI.*
+  Presentacion/                       ViewModels (CommunityToolkit.Mvvm) y sus abstracciones INavegador/IAvisos
+  Paginas/                            LocalidadesPage, LocalidadEditorPage, EncuestaPage
+  Servicios/                          Sesión del dispositivo, navegación con Shell, avisos, teclado
+  Controles/, Convertidores/          EntradaDecimal y los convertidores de las vistas
+  MauiProgram.cs                      Composición: la base SQLite en el teléfono + las mismas capas
 tests/MovilidadUrbana.E2ETests/       22 casos Playwright sobre la web + su fixture
-tests/MovilidadUrbana.UnitTests/      49 casos sobre las reglas de dominio, sin navegador
+tests/MovilidadUrbana.UnitTests/      49 casos sobre las reglas de dominio de la web, sin navegador
 tests/MovilidadUrbana.ApiWeb.Tests/   13 casos sobre la API en proceso, con WebApplicationFactory
+tests/MovilidadUrbana.MAUI.Tests/     18 casos sobre los ViewModels de Android, con sus capas enlazadas
 src/WebBlazor.HolaMundo/              La superficie más simple: un formulario interactivo y sus estados
 src/WebBlazor.Login/                  La misma superficie detrás de un acceso por cookies
 tests/WebBlazor.HolaMundo.E2ETests/   1 caso, sin fixture: la aplicación la levanta quien corre la prueba
@@ -66,21 +70,23 @@ scripts/
   publicar.sh           Publica el binario autocontenido que usa CI, en `publicacion/`
   pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local); el proyecto se elige con PROYECTO
 pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
-.github/workflows/      CI, un workflow de E2E por proyecto web y verificación de entornos
+.github/workflows/      CI, un workflow de E2E por proyecto web, el APK de Android y verificación de entornos
+.devcontainer/          Contenedor para compilar y depurar la app Android en el teléfono USB (dev.sh)
+Lab-E2E.WebBlazor.SinMaui.slnf  La solución sin la app Android: lo que compila CI sin el workload de MAUI
 evidencia/              Registros de corridas que respaldan lo que afirman las guías
 ```
 
-Son doce proyectos. De Movilidad Urbana, tres capas, dos cabezas y tres proyectos de prueba; de
-Hola Mundo y Login, cada uno su web y su E2E. Las tres aplicaciones web tienen grados de
+Son once proyectos. De Movilidad Urbana, tres aplicaciones independientes y cuatro proyectos de
+prueba; de Hola Mundo y Login, cada uno su web y su E2E. Las tres aplicaciones web tienen grados de
 complejidad distintos a propósito —Hola Mundo, Login y Movilidad Urbana, en ese orden—, para que la
 temática se pueda estudiar de a un escalón. Hola Mundo y Login llegaron desde
 `Lab-E2E.WebBlazor.Base`, que se retiró.
 
 ### La API
 
-`MovilidadUrbana.ApiWeb` es la misma aplicación sin interfaz: dos controllers sobre los mismos casos
-de uso, repositorios y base que la web. Lo que la web resuelve con formularios, la API lo resuelve con
-los estándares de HTTP:
+`MovilidadUrbana.ApiWeb` es la misma aplicación sin interfaz: dos controllers sobre casos de uso,
+repositorios y base equivalentes a los de la web, pero propios (el proyecto es independiente). Lo que
+la web resuelve con formularios, la API lo resuelve con los estándares de HTTP:
 
 | Aspecto | Cómo |
 | --- | --- |
@@ -97,6 +103,40 @@ dotnet run --project src/MovilidadUrbana.ApiWeb          # http://localhost:5250
 curl -i http://localhost:5250/api/v1/localidades          # devuelve X-Sesion-Id
 curl -H "X-Sesion-Id: <el que vino>" http://localhost:5250/api/v1/encuestas/contador
 ```
+
+### La aplicación Android
+
+`MovilidadUrbana.MAUI` es la tercera aplicación: la misma temática en .NET MAUI para Android, con
+XAML nativo y MVVM. Tiene dos módulos, uno por pestaña —**Localidades** y **Encuesta**—, que hacen el papel
+de los dos controllers de la API. Es **totalmente independiente**: la base SQLite vive en el
+almacenamiento privado de la aplicación y no habla con ningún servidor.
+
+| Aspecto | Cómo |
+| --- | --- |
+| Capas | Propias del proyecto, en `Dominio/`, `Aplicacion/` e `Infraestructura/` (`MovilidadUrbana.MAUI.*`); `MauiProgram` compone `AgregarInfraestructura` y `AgregarAplicacion`. La validación es la del servicio de aplicación: los mensajes de error son los mismos que en la web y la API |
+| ViewModels | En `Presentacion/`, con CommunityToolkit.Mvvm. La plataforma entra por `INavegador` e `IAvisos`, así se prueban sin teléfono |
+| Teclado | La ventana usa `AdjustResize`; en la página apilada del editor, donde Shell no redimensiona, `TecladoEnPantalla` mide dónde quedó la barra de acciones y la corre encima del teclado |
+| Base | `movilidad.db` en `FileSystem.AppDataDirectory`, creada al arrancar con el mismo `PreparadorDeBaseDeDatos` |
+| Sesión | El dispositivo es una sola sesión: su identificador se genera la primera vez y queda en `Preferences`. Los datos sobreviven a cerrar la aplicación |
+| Localidades | Lista con búsqueda por nombre o código postal y filtro por provincia; estados vacío y «sin coincidencias» con su salida; alta, edición y baja con confirmación; error junto a cada campo |
+| Encuesta | Asistente de tres pasos con progreso, validación al avanzar, «Anterior» que conserva lo cargado, resumen al registrar y contador |
+| Diseño | La paleta de `Tokens.css`, objetivos táctiles de 48 dp, acción principal fija abajo, el borde del campo en rojo cuando tiene error, y el error se borra al corregir el campo |
+| Pruebas | `dotnet test tests/MovilidadUrbana.MAUI.Tests`: 18 casos sobre los ViewModels, contra las capas reales y una base SQLite por caso. El proyecto Android no se puede referenciar sin el workload, así que la prueba compila `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` como archivos enlazados |
+
+Compilar la aplicación pide el workload `maui-android`, JDK 17 y el SDK de Android. Para no instalar
+nada, está el devcontainer:
+
+```bash
+.devcontainer/dev.sh up         # levanta el contenedor y toma el adb del teléfono USB
+.devcontainer/dev.sh run        # compila (armeabi-v7a), instala y abre la aplicación
+.devcontainer/dev.sh logs       # logcat de la aplicación
+.devcontainer/dev.sh devolver   # apaga el contenedor y devuelve el adb a quien lo tenía
+```
+
+`ABI=android-arm64 .devcontainer/dev.sh run` compila para teléfonos de 64 bits. El mismo contenedor
+se abre desde VS Code con **Dev Containers: Reopen in Container** (`.devcontainer/devcontainer.json`).
+La solución completa incluye el proyecto Android; `Lab-E2E.WebBlazor.SinMaui.slnf` es la misma
+solución sin él, y es la que compila CI. El APK lo construye [`android.yml`](.github/workflows/android.yml).
 
 Los archivos que no pertenecen a ningún proyecto están agrupados en carpetas de solución
 —`github-workflow`, `scripts` y `Solution Items`—, para poder abrirlos desde el Explorador de
@@ -162,11 +202,11 @@ que es lo que hizo aparecer la barra de filtros del ABM.
    de aplicación —con sus propias pruebas unitarias—, así que anotar el modelo de pantalla sería
    exactamente el anti-patrón «transcribir la política de validación en la vista». Se conserva lo
    que la regla protege: error por campo, asociado al control y anunciado, y requisito derivado de
-   la política en [PoliticaDeLocalidades](src/MovilidadUrbana.Aplicacion/Localidades/PoliticaDeLocalidades.cs)
-   y [PoliticaDeEncuestas](src/MovilidadUrbana.Aplicacion/Encuestas/PoliticaDeEncuestas.cs).
+   la política en [PoliticaDeLocalidades](src/MovilidadUrbana.Web/Aplicacion/Localidades/PoliticaDeLocalidades.cs)
+   y [PoliticaDeEncuestas](src/MovilidadUrbana.Web/Aplicacion/Encuestas/PoliticaDeEncuestas.cs).
 3. **El paso de revisión del asistente es el estado de éxito, no un cuarto paso.** `TotalDePasos`
    es una regla de dominio con pruebas propias; la ficha clave/valor de
-   [ResumenDeEncuesta](src/MovilidadUrbana.Aplicacion/Encuestas/ResumenDeEncuesta.cs) se
+   [ResumenDeEncuesta](src/MovilidadUrbana.Web/Aplicacion/Encuestas/ResumenDeEncuesta.cs) se
    recorre —no se escribe a mano— y se muestra al registrar.
 4. **Anchos de contenido en `ch`.** El catálogo no tiene token de ancho de contenido y promover uno
    nuevo no es decisión de este producto, así que las tres medidas que hacían falta se expresan en
@@ -262,6 +302,8 @@ ejecución**). Para la configuración móvil, definí la variable de entorno `EM
 
 ```bash
 dotnet test tests/MovilidadUrbana.UnitTests                    # reglas de dominio, sin navegador
+dotnet test tests/MovilidadUrbana.ApiWeb.Tests                 # la API en proceso
+dotnet test tests/MovilidadUrbana.MAUI.Tests                   # los ViewModels de Android, sin teléfono
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings
 dotnet test tests/MovilidadUrbana.E2ETests --settings pruebas.runsettings -- Playwright.BrowserName=firefox
 ```
@@ -326,7 +368,7 @@ En el ejemplo estático cada prueba tenía su `localStorage`. Acá hay una únic
 las pruebas —incluidas las que corren en paralelo— la comparten.
 
 La solución es que la aplicación reparta un **espacio de datos por sesión**: una cookie que emite
-[MiddlewareDeSesion](src/MovilidadUrbana.Infraestructura/Sesiones/MiddlewareDeSesion.cs), y por
+[MiddlewareDeSesion](src/MovilidadUrbana.Web/Sesiones/MiddlewareDeSesion.cs), y por
 la que filtran todos los repositorios. Cada prueba escribe esa cookie con un valor propio antes de
 navegar y recibe su juego de localidades recién sembrado, sin ver nada de las demás. Es lo que
 permite correr las clases de prueba en paralelo y que la corrida de chromium termine en segundos.
@@ -401,6 +443,12 @@ complejidad que su proyecto necesita, en escalera, para que se puedan estudiar d
 | [`e2e-holamundo.yml`](.github/workflows/e2e-holamundo.yml) | Hola Mundo | Punto de partida: un job y un navegador que compila, levanta la aplicación y prueba |
 | [`e2e-login.yml`](.github/workflows/e2e-login.yml) | Login | Publica una vez y reparte la aplicación como artefacto a una matriz de navegadores |
 | [`e2e.yml`](.github/workflows/e2e.yml) | Movilidad Urbana | Reporte unificado, invocable desde otros workflows, regresión nocturna y prueba contra un entorno desplegado |
+
+La aplicación Android tiene el suyo, [`android.yml`](.github/workflows/android.yml): corre las
+pruebas de los ViewModels, instala el workload `maui-android` y JDK 17, publica el APK en Release y lo
+deja como artefacto `movilidad-urbana-apk` por 14 días. Se dispara cuando cambian la aplicación o las
+capas que usa. El APK va firmado con la clave de depuración del runner: sirve para instalarlo en un
+teléfono de prueba, no para una tienda.
 
 Los dos primeros se disparan cuando cambia su proyecto —`push` a `main` o pull request, con filtro
 de rutas— y a pedido. A `e2e.yml` lo invoca `ci.yml`.
@@ -592,6 +640,27 @@ $ scripts/pruebas.sh webkit
 
 La corrida móvil es la que ejercita las tarjetas apiladas: debajo de los 768px la tabla se oculta y
 las acciones de fila se activan sobre la tarjeta.
+
+El 2026-09-12, con las tres aplicaciones independientes y la app Android:
+
+```
+$ scripts/dotnet.sh dotnet build Lab-E2E.WebBlazor.SinMaui.slnf --configuration Release -warnaserror
+  Build succeeded.  0 Error(s)
+
+$ scripts/dotnet.sh dotnet test tests/MovilidadUrbana.UnitTests --configuration Release --no-build
+  Passed! - Failed: 0, Passed: 49, Skipped: 0, Total: 49
+$ scripts/dotnet.sh dotnet test tests/MovilidadUrbana.ApiWeb.Tests --configuration Release --no-build
+  Passed! - Failed: 0, Passed: 13, Skipped: 0, Total: 13
+$ scripts/dotnet.sh dotnet test tests/MovilidadUrbana.MAUI.Tests --configuration Release --no-build
+  Passed! - Failed: 0, Passed: 18, Skipped: 0, Total: 18
+
+$ .devcontainer/dev.sh build      # imagen lab-e2e-maui-dev:net10, APK Debug android-arm
+  0 Errores
+```
+
+La aplicación Android se instaló y recorrió en un Motorola moto e6 play (Android 9, armeabi-v7a) por
+USB: alta, edición, baja, filtros, los tres pasos de la encuesta, el resumen y el teclado. Las
+capturas y su índice están en [`evidencia/2026-09-12-maui/`](evidencia/2026-09-12-maui/README.md).
 
 Un detalle del entorno, que no es del laboratorio: en esta máquina el límite de instancias de
 `inotify` del kernel (`fs.inotify.max_user_instances = 128`) estaba agotado, y la aplicación moría

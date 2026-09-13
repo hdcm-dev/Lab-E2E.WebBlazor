@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Pruebas de los ViewModels de la aplicación Android contra sus capas reales y una base SQLite
+       propia de cada caso. Sin MAUI ni teléfono: el proyecto Android es net10.0-android y no se puede
+       referenciar sin el workload, así que sus capas se compilan acá como archivos enlazados. Lo que
+       queda afuera es solo lo que toca la plataforma: Paginas/, Servicios/, Controles/ y MauiProgram. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Dominio\**\*.cs" LinkBase="MAUI\Dominio" />
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Aplicacion\**\*.cs" LinkBase="MAUI\Aplicacion" />
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Infraestructura\**\*.cs" LinkBase="MAUI\Infraestructura" />
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Presentacion\**\*.cs" LinkBase="MAUI\Presentacion" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+</Project>

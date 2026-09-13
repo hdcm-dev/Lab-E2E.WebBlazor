@@ -1,9 +1,9 @@
 using System.Globalization;
-using MovilidadUrbana.Aplicacion;
-using MovilidadUrbana.Infraestructura;
+using MovilidadUrbana.Web.Aplicacion;
+using MovilidadUrbana.Web.Infraestructura;
 using MovilidadUrbana.Web.Components;
-using MovilidadUrbana.Infraestructura.Persistencia;
-using MovilidadUrbana.Infraestructura.Sesiones;
+using MovilidadUrbana.Web.Infraestructura.Persistencia;
+using MovilidadUrbana.Web.Sesiones;
 using MovilidadUrbana.Web.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);

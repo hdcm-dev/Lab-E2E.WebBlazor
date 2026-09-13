@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using MovilidadUrbana.Aplicacion.Abstracciones;
-using MovilidadUrbana.Aplicacion.Localidades;
+using MovilidadUrbana.ApiWeb.Aplicacion.Abstracciones;
+using MovilidadUrbana.ApiWeb.Aplicacion.Localidades;
 using MovilidadUrbana.ApiWeb.Contratos;
-using MovilidadUrbana.Dominio.Entidades;
+using MovilidadUrbana.ApiWeb.Dominio.Entidades;
 
 namespace MovilidadUrbana.ApiWeb.Controllers;
 

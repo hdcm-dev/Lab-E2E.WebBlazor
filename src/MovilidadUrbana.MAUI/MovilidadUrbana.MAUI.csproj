@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- La aplicación Android de Movilidad Urbana: XAML nativo + MVVM, con la base SQLite dentro del
+       teléfono. Es un proyecto independiente: trae sus propias capas —Dominio, Aplicacion,
+       Infraestructura y Presentacion— como carpetas y espacios de nombres, y no referencia a ningún
+       otro proyecto de la solución ni habla con ningún servidor.
+       Solo Android: el laboratorio se construye en Linux, donde iOS y Mac Catalyst no compilan. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MovilidadUrbana.MAUI</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <ApplicationTitle>Movilidad Urbana</ApplicationTitle>
+    <ApplicationId>ar.lab.movilidadurbana</ApplicationId>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <!-- AndroidX de .NET 10 exige API 23 como mínimo. -->
+    <SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0F6E56" />
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0F6E56" BaseSize="128,128" />
+    <MauiImage Include="Resources\Images\*" />
+    <MauiFont Include="Resources\Fonts\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MovilidadUrbana.MAUI.Presentacion.Encuestas"
+             xmlns:ctl="clr-namespace:MovilidadUrbana.MAUI.Controles"
+             xmlns:app="clr-namespace:MovilidadUrbana.MAUI.Aplicacion.Encuestas"
+             x:Class="MovilidadUrbana.MAUI.Paginas.EncuestaPage"
+             x:DataType="vm:EncuestaViewModel"
+             BackgroundColor="{StaticResource Lienzo}"
+             Title="Encuesta de movilidad">
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Encabezado: dónde estoy y cuánto falta. -->
+        <Border Grid.Row="0" BackgroundColor="{StaticResource Superficie}" StrokeThickness="0" Padding="16,12">
+            <VerticalStackLayout Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="{Binding EtiquetaDelPaso}" Style="{StaticResource Ayuda}" AutomationId="etiqueta-paso" />
+                    <Label Grid.Column="1" Style="{StaticResource Ayuda}" AutomationId="contador">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Registradas: " />
+                                <Span Text="{Binding Registradas}" FontFamily="OpenSansSemibold" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </Grid>
+                <Label Text="{Binding TituloDelPaso}" Style="{StaticResource Titulo}" />
+                <ProgressBar Progress="{Binding Progreso}" ProgressColor="{StaticResource Marca}" />
+            </VerticalStackLayout>
+        </Border>
+
+        <ScrollView Grid.Row="1" x:Name="Desplazamiento">
+            <VerticalStackLayout Padding="16" Spacing="20">
+
+                <Border Style="{StaticResource Banda}" IsVisible="{Binding Aviso, Converter={StaticResource TextoPresente}}">
+                    <Label Text="{Binding Aviso}" TextColor="{StaticResource TextoError}" AutomationId="aviso" />
+                </Border>
+
+                <!-- Paso 1 -->
+                <VerticalStackLayout Spacing="20" IsVisible="{Binding MostrarPaso1}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Nombre y apellido" Style="{StaticResource Rotulo}" />
+                        <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorNombre, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                            <Entry Text="{Binding Nombre}" Placeholder="Ej.: Ana Pérez" AutomationId="nombre" ReturnType="Next" MaxLength="80" />
+                        </Border>
+                        <Label Text="{Binding ErrorNombre}" Style="{StaticResource Error}" IsVisible="{Binding ErrorNombre, Converter={StaticResource TextoPresente}}" />
+                        <Label Text="{Binding RequisitoDelNombre}" Style="{StaticResource Ayuda}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Edad" Style="{StaticResource Rotulo}" />
+                        <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorEdad, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                            <Entry Text="{Binding Edad}" Placeholder="Años cumplidos" AutomationId="edad" Keyboard="Numeric" MaxLength="3" />
+                        </Border>
+                        <Label Text="{Binding ErrorEdad}" Style="{StaticResource Error}" IsVisible="{Binding ErrorEdad, Converter={StaticResource TextoPresente}}" />
+                        <Label Text="{Binding RequisitoDeLaEdad}" Style="{StaticResource Ayuda}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Localidad donde vive" Style="{StaticResource Rotulo}" />
+                        <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorLocalidad, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                            <Grid ColumnDefinitions="*,Auto"><Picker ItemsSource="{Binding Localidades}" SelectedItem="{Binding Localidad}" Title="Elegir localidad" AutomationId="localidad" /><Label Grid.Column="1" Style="{StaticResource Desplegable}" /></Grid>
+                        </Border>
+                        <Label Text="{Binding ErrorLocalidad}" Style="{StaticResource Error}" IsVisible="{Binding ErrorLocalidad, Converter={StaticResource TextoPresente}}" />
+                        <Label Text="{Binding RequisitoDeLaLocalidad}" Style="{StaticResource Ayuda}" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Paso 2 -->
+                <VerticalStackLayout Spacing="20" IsVisible="{Binding MostrarPaso2}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="¿Qué medios utiliza?" Style="{StaticResource Rotulo}" />
+                        <Label Text="{Binding RequisitoDeLosMedios}" Style="{StaticResource Ayuda}" />
+                        <Label Text="{Binding ErrorMedios}" Style="{StaticResource Error}" IsVisible="{Binding ErrorMedios, Converter={StaticResource TextoPresente}}" />
+                        <Border Style="{StaticResource Tarjeta}" Padding="4,0">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Medios}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:OpcionElegible">
+                                        <Grid ColumnDefinitions="Auto,*" MinimumHeightRequest="48" AutomationId="{Binding Clave}">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding AlternarCommand}" />
+                                            </Grid.GestureRecognizers>
+                                            <CheckBox IsChecked="{Binding Elegida}" Color="{StaticResource Marca}" VerticalOptions="Center" />
+                                            <Label Grid.Column="1" Text="{Binding Etiqueta}" FontSize="16" VerticalOptions="Center"
+                                                   TextColor="{StaticResource TextoPrimario}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="¿Con qué frecuencia?" Style="{StaticResource Rotulo}" />
+                        <Label Text="{Binding RequisitoDeLaFrecuencia}" Style="{StaticResource Ayuda}" />
+                        <Label Text="{Binding ErrorFrecuencia}" Style="{StaticResource Error}" IsVisible="{Binding ErrorFrecuencia, Converter={StaticResource TextoPresente}}" />
+                        <Border Style="{StaticResource Tarjeta}" Padding="4,0">
+                            <VerticalStackLayout RadioButtonGroup.GroupName="frecuencia"
+                                                 RadioButtonGroup.SelectedValue="{Binding Frecuencia}"
+                                                 BindableLayout.ItemsSource="{Binding Frecuencias}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:Opcion">
+                                        <RadioButton Value="{Binding Clave}" Content="{Binding Etiqueta}" MinimumHeightRequest="48"
+                                                     TextColor="{StaticResource TextoPrimario}" FontSize="16" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Paso 3 -->
+                <VerticalStackLayout Spacing="20" IsVisible="{Binding MostrarPaso3}">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Distancia diaria (km)" Style="{StaticResource Rotulo}" />
+                            <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorDistancia, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                                <ctl:EntradaDecimal Text="{Binding Distancia}" Placeholder="Ej.: 12,5" AutomationId="distancia" MaxLength="6" />
+                            </Border>
+                            <Label Text="{Binding ErrorDistancia}" Style="{StaticResource Error}" IsVisible="{Binding ErrorDistancia, Converter={StaticResource TextoPresente}}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Tiempo de viaje (min)" Style="{StaticResource Rotulo}" />
+                            <Border Style="{StaticResource Campo}"><Border.Triggers><DataTrigger TargetType="Border" Binding="{Binding ErrorMinutos, Converter={StaticResource TextoPresente}}" Value="True"><Setter Property="Stroke" Value="{StaticResource TextoError}" /><Setter Property="StrokeThickness" Value="2" /></DataTrigger></Border.Triggers>
+                                <Entry Text="{Binding Minutos}" Placeholder="Ej.: 45" AutomationId="minutos" Keyboard="Numeric" MaxLength="3" />
+                            </Border>
+                            <Label Text="{Binding ErrorMinutos}" Style="{StaticResource Error}" IsVisible="{Binding ErrorMinutos, Converter={StaticResource TextoPresente}}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding RequisitoDeLaDistancia}" Style="{StaticResource Ayuda}" />
+                        <Label Text="{Binding RequisitoDeLosMinutos}" Style="{StaticResource Ayuda}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Motivo principal" Style="{StaticResource Rotulo}" />
+                        <Label Text="{Binding RequisitoDelMotivo}" Style="{StaticResource Ayuda}" />
+                        <Label Text="{Binding ErrorMotivo}" Style="{StaticResource Error}" IsVisible="{Binding ErrorMotivo, Converter={StaticResource TextoPresente}}" />
+                        <Border Style="{StaticResource Tarjeta}" Padding="4,0">
+                            <VerticalStackLayout RadioButtonGroup.GroupName="motivo"
+                                                 RadioButtonGroup.SelectedValue="{Binding Motivo}"
+                                                 BindableLayout.ItemsSource="{Binding Motivos}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:Opcion">
+                                        <RadioButton Value="{Binding Clave}" Content="{Binding Etiqueta}" MinimumHeightRequest="48"
+                                                     TextColor="{StaticResource TextoPrimario}" FontSize="16" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Éxito: el resumen de lo registrado. -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding Completada}" AutomationId="encuesta-completada">
+                    <Label Text="La encuesta quedó registrada. Este es el resumen de sus respuestas." Style="{StaticResource Ayuda}" FontSize="15" />
+                    <Border Style="{StaticResource Tarjeta}">
+                        <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Resumen}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="app:CampoDeResumen">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Etiqueta}" Style="{StaticResource Ayuda}" />
+                                        <Label Text="{Binding Valor}" FontSize="16" TextColor="{StaticResource TextoPrimario}" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+                    <Button Text="Cargar otra encuesta" Style="{StaticResource BotonPrimario}" Command="{Binding NuevaEncuestaCommand}" AutomationId="nueva-encuesta" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Navegación del asistente, fija abajo. -->
+        <Border Grid.Row="2" BackgroundColor="{StaticResource Superficie}" StrokeThickness="0" Padding="16,12"
+                IsVisible="{Binding MostrarNavegacion}">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Text="Anterior" Style="{StaticResource BotonSecundario}" Command="{Binding AnteriorCommand}"
+                        IsEnabled="{Binding EsPrimerPaso, Converter={StaticResource Negar}}" AutomationId="anterior" />
+                <Button Grid.Column="1" Text="Siguiente" Style="{StaticResource BotonPrimario}" Command="{Binding SiguienteCommand}"
+                        IsVisible="{Binding MostrarSiguiente}" AutomationId="siguiente" />
+                <Button Grid.Column="1" Text="Registrar" Style="{StaticResource BotonPrimario}" Command="{Binding RegistrarCommand}"
+                        IsVisible="{Binding MostrarRegistrar}" AutomationId="registrar" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>
