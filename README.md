@@ -99,6 +99,10 @@ el contrato JSON de la API, los `data-testid` y los `AutomationId`, y los coment
 didáctica y las guías los citan textualmente. Los nombres de las pruebas también quedan en español:
 describen comportamiento del dominio, no piezas de código.
 
+La regla completa, con la tabla de decisión y el procedimiento para renombrar una solución, está en
+[`Guides/Nomenclatura-Convensiones-Arquitecture-Dot-Net.md`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion/blob/main/Guides/Nomenclatura-Convensiones-Arquitecture-Dot-Net.md)
+de la documentación.
+
 ### La API
 
 `MovilidadUrbana.ApiWeb` es la misma aplicación sin interfaz: dos controllers sobre casos de uso,
@@ -253,7 +257,7 @@ separada del código.
 | Carpeta | Qué contiene |
 | --- | --- |
 | [`Guides/E2E-Guide/`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion/tree/main/Guides/E2E-Guide) | Pruebas de extremo a extremo: la guía de estudio, la receta para montar un ABM, los tres casos de diseño y el marco conceptual de la superficie verificable |
-| [`Guides/`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion/tree/main/Guides) | Ramas, integración y releases: estándares del modelo de ramas, las dos guías prácticas y la de GitHub Actions |
+| [`Guides/`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion/tree/main/Guides) | Ramas, integración y releases: estándares del modelo de ramas, las dos guías prácticas, la de GitHub Actions y la convención de nombres (`Nomenclatura-Convensiones-Arquitecture-Dot-Net.md`), con el procedimiento de renombre que se aplicó acá |
 
 Los documentos siguen citando el código de este repositorio por ruta, así que se leen mejor con
 los dos clonados como carpetas hermanas.

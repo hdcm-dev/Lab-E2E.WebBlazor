@@ -27,6 +27,8 @@ tiene su propio registro.
   `FiltradoSinResultados`), que son vocabulario de las guías. Los proyectos conservan sus nombres.
   No cambian el texto visible, las URL, el contrato JSON de la API, los `data-testid`, los
   `AutomationId` ni los comentarios. La regla queda declarada en el README («Convención de nombres»).
+  La guía completa, con el procedimiento de renombre, está en la documentación:
+  `Guides/Nomenclatura-Convensiones-Arquitecture-Dot-Net.md`.
 - Consecuencias que hubo que resolver y que quedan para quien repita el ejercicio: la entidad `Sesion`
   pasó a `Session`, y con ella la tabla, así que las bases SQLite de corridas anteriores hay que
   borrarlas (`EnsureCreated` no migra); las dos capas exponen su propio `DependencyInjection` y
