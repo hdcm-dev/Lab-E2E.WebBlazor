@@ -76,7 +76,7 @@
     /// <summary>Rótulo de cada paso, en orden. Su cantidad es el total de pasos.</summary>
     [Parameter, EditorRequired] public IReadOnlyList<string> Labels { get; set; } = default!;
 
-    /// <summary>Los pasos, declarados con <see cref="PasoDeAsistente" />.</summary>
+    /// <summary>Los pasos, declarados con <see cref="WizardStep" />.</summary>
     [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
 
     /// <summary>Pedido de cambio de paso. La superficie decide si lo concede.</summary>

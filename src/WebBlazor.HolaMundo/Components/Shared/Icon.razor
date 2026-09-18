@@ -15,10 +15,10 @@ else
 }
 
 @code {
-    /// <summary>Trazo del ícono, tomado de <see cref="Iconos" />.</summary>
+    /// <summary>Trazo del ícono, tomado de <see cref="Icons" />.</summary>
     [Parameter, EditorRequired] public string Nombre { get; set; } = default!;
 
-    /// <summary>Tamaño en píxeles; sale de <see cref="RolesDeIcono" />.</summary>
+    /// <summary>Tamaño en píxeles; sale de <see cref="IconRoles" />.</summary>
     [Parameter] public int Size { get; set; } = IconRoles.Inline;
 
     /// <summary>Con título el ícono es significativo; sin título, decorativo.</summary>

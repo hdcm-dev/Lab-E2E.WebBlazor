@@ -5,7 +5,7 @@ namespace MovilidadUrbana.MAUI.Application.Localidades;
 /// <summary>
 /// Requisitos del ABM enunciados para la persona, derivados de las reglas del dominio. Existe
 /// para que la pantalla no transcriba la política: si un límite cambia en
-/// <see cref="ReglasDeLocalidad" />, el requisito que se muestra cambia con él.
+/// <see cref="LocalidadRules" />, el requisito que se muestra cambia con él.
 ///
 /// Se muestran <b>antes</b> del intento; el mensaje de error que aparece al fallar lo decide el
 /// servicio de aplicación.

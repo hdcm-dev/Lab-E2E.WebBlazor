@@ -2,7 +2,7 @@ using Microsoft.JSInterop;
 
 namespace MovilidadUrbana.Web.Services;
 
-/// <inheritdoc cref="IServicioDeFoco" />
+/// <inheritdoc cref="IFocusService" />
 public sealed class FocusService(IJSRuntime js) : IFocusService
 {
     public Task FocusMainContentAsync() =>

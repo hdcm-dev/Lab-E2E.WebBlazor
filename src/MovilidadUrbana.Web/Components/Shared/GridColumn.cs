@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Rendering;
 namespace MovilidadUrbana.Web.Components.Shared;
 
 /// <summary>
-/// Declaración de una columna de <see cref="Grilla{TItem}" />. No emite marcado: se registra en la
+/// Declaración de una columna de <see cref="Grid{TItem}" />. No emite marcado: se registra en la
 /// grilla, que es la que dibuja la tabla y las tarjetas apiladas con las mismas columnas.
 /// </summary>
 /// <typeparam name="TItem">Tipo de cada elemento de la colección.</typeparam>

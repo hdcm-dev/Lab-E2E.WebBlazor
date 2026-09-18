@@ -5,7 +5,7 @@ namespace MovilidadUrbana.Web.Infrastructure.Sessions;
 /// <summary>
 /// Implementación con alcance de ámbito: una petición HTTP, o un circuito de Blazor.
 ///
-/// El valor lo establece <see cref="MiddlewareDeSesion"/> durante la petición y, ya en el
+/// El valor lo establece <see cref="SessionMiddleware"/> durante la petición y, ya en el
 /// circuito interactivo, el componente raíz `Routes`, que lo recibe como parámetro desde
 /// `App.razor`. El identificador provisorio del constructor evita que un ámbito sin cookie
 /// termine leyendo o escribiendo en un espacio de datos compartido.

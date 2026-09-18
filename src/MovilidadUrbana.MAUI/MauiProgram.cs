@@ -63,7 +63,7 @@ public static class MauiProgram
         return app;
     }
 
-    /// <summary>Ver <see cref="Controles.EntradaDecimal"/>. Se engancha a la clave Keyboard para correr después de ella.</summary>
+    /// <summary>Ver <see cref="Controls.DecimalEntry"/>. Se engancha a la clave Keyboard para correr después de ella.</summary>
     private static void AceptarComaDecimal()
     {
 #if ANDROID

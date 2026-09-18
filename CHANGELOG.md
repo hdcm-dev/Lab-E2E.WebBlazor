@@ -38,7 +38,11 @@ tiene su propio registro.
   consigue el árbol de accesibilidad. Recién instalada en Debug, la app tuvo el hilo principal ocupado
   unos 21 s (`Skipped 1272 frames`) y la sesión fallaba antes de empezar.
 
-Verificado: la solución filtrada compila en Release con `-warnaserror`; 49 unitarias, 13 de la API,
+- Las referencias `<see cref="…"/>` de los comentarios XML se renombraron en un segundo paso: la
+  herramienta de renombre protege los comentarios y las dejó con los nombres viejos. El build local
+  incremental no lo mostró; la CI, que compila desde cero, falló con `CS1574` (commit 946d023).
+
+Verificado: la solución filtrada compila en Release con `-warnaserror --no-incremental`; 49 unitarias, 13 de la API,
 18 de los ViewModels, 22 E2E de Movilidad Urbana, 1 de Hola Mundo y 10 de Login en verde; el APK
 compila y la suite Appium pasó 5/5 en el teléfono.
 

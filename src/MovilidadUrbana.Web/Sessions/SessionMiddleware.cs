@@ -6,7 +6,7 @@ namespace MovilidadUrbana.Web.Sessions;
 /// depender de ASP.NET Core, lo que impedía usarla desde la aplicación Android.
 ///
 /// Asigna a cada visitante un identificador de sesión en una cookie y lo publica en el
-/// <see cref="ContextoDeSesion"/> de la petición.
+/// <see cref="SessionContext"/> de la petición.
 ///
 /// Es lo que permite que las pruebas E2E se aíslen entre sí: la prueba escribe la cookie con un
 /// valor propio antes de navegar y así trabaja sobre su propio conjunto de datos, aunque el

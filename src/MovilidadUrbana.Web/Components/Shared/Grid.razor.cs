@@ -22,7 +22,7 @@ public partial class Grid<TItem> : ComponentBase
     /// <summary>Texto del <c>&lt;caption&gt;</c>: dice qué compara la tabla, para quien no la ve.</summary>
     [Parameter, EditorRequired] public string AccessibleTitle { get; set; } = default!;
 
-    /// <summary>Declaración de las columnas, con <see cref="ColumnaDeGrilla{TItem}" />.</summary>
+    /// <summary>Declaración de las columnas, con <see cref="GridColumn{TItem}" />.</summary>
     [Parameter, EditorRequired] public RenderFragment Columns { get; set; } = default!;
 
     /// <summary>Acciones de cada fila. Lo que el estado no admite no se dibuja.</summary>

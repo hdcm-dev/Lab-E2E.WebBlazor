@@ -16,7 +16,7 @@ public partial class Encuesta : ComponentBase
 {
     private static readonly IReadOnlyDictionary<string, string> NoErrors = new Dictionary<string, string>();
 
-    /// <summary>Un rótulo por cada paso de <see cref="ReglasDeEncuesta.TotalDePasos" />.</summary>
+    /// <summary>Un rótulo por cada paso de <see cref="EncuestaRules.TotalDePasos" />.</summary>
     private static readonly string[] StepLabels =
     [
         "Datos de la persona",

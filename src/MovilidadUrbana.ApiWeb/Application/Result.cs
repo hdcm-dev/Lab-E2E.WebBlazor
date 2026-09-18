@@ -2,7 +2,7 @@ namespace MovilidadUrbana.ApiWeb.Application;
 
 /// <summary>
 /// Resultado de un caso de uso: si salió bien, el aviso a mostrar y los errores por campo.
-/// Las claves de <see cref="Errores"/> son los nombres de campo que la pantalla conoce
+/// Las claves de <see cref="Errors"/> son los nombres de campo que la pantalla conoce
 /// (`nombre`, `provincia`, …), para que la vista solo tenga que ubicarlos.
 /// </summary>
 public sealed record Result(bool IsSuccess, string Message, IReadOnlyDictionary<string, string> Errors)

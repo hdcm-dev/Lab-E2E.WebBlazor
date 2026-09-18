@@ -4,7 +4,7 @@ namespace MovilidadUrbana.ApiWeb.Application.Encuestas;
 
 /// <summary>
 /// Requisitos de la encuesta enunciados para la persona, derivados de
-/// <see cref="ReglasDeEncuesta" />. Ninguno se escribe a mano en la vista: los rangos son los
+/// <see cref="EncuestaRules" />. Ninguno se escribe a mano en la vista: los rangos son los
 /// mismos que decide la validación.
 /// </summary>
 public static class EncuestaPolicy
