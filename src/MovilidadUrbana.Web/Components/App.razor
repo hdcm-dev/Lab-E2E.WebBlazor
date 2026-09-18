@@ -1,4 +1,4 @@
-@inject MovilidadUrbana.Web.Infraestructura.Sesiones.ContextoDeSesion Sesion
+@inject MovilidadUrbana.Web.Infrastructure.Sessions.SessionContext Session
 <!DOCTYPE html>
 <html lang="es-AR">
 
@@ -20,7 +20,7 @@
     @* `App.razor` se renderiza en el servidor con la petición HTTP a mano, así que es el único
        lugar donde se puede leer la cookie de sesión. De acá en adelante el identificador viaja
        como parámetro del componente raíz hasta el circuito interactivo. *@
-    <Routes @rendermode="InteractiveServer" SesionId="@Sesion.Id" />
+    <Routes @rendermode="InteractiveServer" SessionId="@Session.Id" />
     <script src="@Assets["js/mq-dialogo.js"]"></script>
     <script src="@Assets["js/mq-foco.js"]"></script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>

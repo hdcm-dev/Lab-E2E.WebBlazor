@@ -1,0 +1,54 @@
+@* Barra lateral del shell de trabajo. Los destinos viven acá y en ningún otro
+   lado: una superficie no dibuja su propia navegación. El ítem vigente se marca
+   con `aria-current="page"`, que es lo que lo anuncia como tal. *@
+
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<nav class="mq-shell-sidebar" aria-label="Navegación principal">
+    <span class="mq-identidad">
+        <Icon Nombre="@Icons.Brand" Size="IconRoles.Navigation" />
+        Hola Mundo
+    </span>
+
+    <div class="mq-nav">
+        @foreach (var navTarget in NavTargets)
+        {
+            <a class="mq-nav__item" href="@navTarget.Route"
+               aria-current="@(IsCurrent(navTarget.Route) ? "page" : null)">
+                <Icon Nombre="@navTarget.Icon" />
+                @navTarget.Label
+            </a>
+        }
+    </div>
+</nav>
+
+@code {
+    private sealed record NavTarget(string Route, string Label, string Icon);
+
+    private static readonly NavTarget[] NavTargets =
+    [
+        new("", "Inicio", Icons.Home),
+        new("HolaMundo", "Hola Mundo", Icons.Message)
+    ];
+
+    protected override void OnInitialized() =>
+        Navigation.LocationChanged += OnNavigate;
+
+    private void OnNavigate(object? origen, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e) =>
+        InvokeAsync(StateHasChanged);
+
+    private bool IsCurrent(string ruta)
+    {
+        var actual = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var corte = actual.IndexOfAny(['?', '#']);
+        if (corte >= 0) { actual = actual[..corte]; }
+
+        return ruta.Length == 0
+            ? actual.Length == 0
+            : actual.Equals(ruta, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // El componente suscribe a un servicio: libera la suscripción con el circuito.
+    public void Dispose() => Navigation.LocationChanged -= OnNavigate;
+}

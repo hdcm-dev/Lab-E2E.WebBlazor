@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Components;
-using MovilidadUrbana.Web.Aplicacion.Encuestas;
-using MovilidadUrbana.Web.Aplicacion.Localidades;
-using MovilidadUrbana.Web.Components.Componentes;
-using MovilidadUrbana.Web.Dominio.Entidades;
-using MovilidadUrbana.Web.Dominio.Reglas;
-using MovilidadUrbana.Web.Servicios;
+using MovilidadUrbana.Web.Application.Encuestas;
+using MovilidadUrbana.Web.Application.Localidades;
+using MovilidadUrbana.Web.Components.Shared;
+using MovilidadUrbana.Web.Domain.Entities;
+using MovilidadUrbana.Web.Domain.Rules;
+using MovilidadUrbana.Web.Services;
 
 namespace MovilidadUrbana.Web.Components.Pages;
 
@@ -14,10 +14,10 @@ namespace MovilidadUrbana.Web.Components.Pages;
 /// </summary>
 public partial class Encuesta : ComponentBase
 {
-    private static readonly IReadOnlyDictionary<string, string> SinErrores = new Dictionary<string, string>();
+    private static readonly IReadOnlyDictionary<string, string> NoErrors = new Dictionary<string, string>();
 
     /// <summary>Un rótulo por cada paso de <see cref="ReglasDeEncuesta.TotalDePasos" />.</summary>
-    private static readonly string[] RotulosDePaso =
+    private static readonly string[] StepLabels =
     [
         "Datos de la persona",
         "Medios que utiliza para viajar",
@@ -25,30 +25,30 @@ public partial class Encuesta : ComponentBase
     ];
 
     private IReadOnlyList<Localidad> _localidades = [];
-    private ModeloDeEncuesta _modelo = new();
-    private IReadOnlyDictionary<string, string> _errores = SinErrores;
+    private EncuestaModel _model = new();
+    private IReadOnlyDictionary<string, string> _errors = NoErrors;
     private RespuestaDeEncuesta? _respuesta;
-    private string? _aviso;
-    private string _anuncio = string.Empty;
+    private string? _notice;
+    private string _announcement = string.Empty;
     private int _paso = 1;
     private int _pasoMaximoAlcanzado = 1;
     private int _registradas;
-    private bool _procesando;
+    private bool _busy;
 
     /// <summary>Paso pedido por la dirección. El paso es direccionable para poder verificarse.</summary>
     [Parameter] public int? Paso { get; set; }
 
-    [Inject] private ServicioDeEncuestas ServicioDeEncuestas { get; set; } = default!;
+    [Inject] private EncuestaService EncuestaService { get; set; } = default!;
 
-    [Inject] private ServicioDeLocalidades ServicioDeLocalidades { get; set; } = default!;
+    [Inject] private LocalidadService LocalidadService { get; set; } = default!;
 
-    [Inject] private NavigationManager Navegacion { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
-    [Inject] private IServicioDeFoco Foco { get; set; } = default!;
+    [Inject] private IFocusService Foco { get; set; } = default!;
 
     [Inject] private ILogger<Encuesta> Registro { get; set; } = default!;
 
-    private IReadOnlyList<string> Rotulos => RotulosDePaso;
+    private IReadOnlyList<string> Labels => StepLabels;
 
     /// <summary>
     /// El error de los medios es del conjunto, así que lo cita el <c>fieldset</c> y no una casilla.
@@ -59,8 +59,8 @@ public partial class Encuesta : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         // El desplegable se alimenta del ABM: las dos pantallas comparten el mismo almacén.
-        _localidades = await ServicioDeLocalidades.ListarAsync();
-        _registradas = await ServicioDeEncuestas.ContarAsync();
+        _localidades = await LocalidadService.GetAllAsync();
+        _registradas = await EncuestaService.CountAsync();
     }
 
     /// <summary>
@@ -72,85 +72,85 @@ public partial class Encuesta : ComponentBase
     {
         if (_respuesta is not null) return;
 
-        var pedido = Math.Clamp(Paso ?? 1, 1, ReglasDeEncuesta.TotalDePasos);
-        _paso = Math.Min(pedido, _pasoMaximoAlcanzado);
+        var request = Math.Clamp(Paso ?? 1, 1, EncuestaRules.TotalDePasos);
+        _paso = Math.Min(request, _pasoMaximoAlcanzado);
     }
 
-    private string? Error(string campo) => _errores.TryGetValue(campo, out var mensaje) ? mensaje : null;
+    private string? Error(string campo) => _errors.TryGetValue(campo, out var mensaje) ? mensaje : null;
 
     /// <summary>Envío del formulario: equivale a pedir el paso siguiente.</summary>
-    private Task AvanzarAsync() => _paso == ReglasDeEncuesta.TotalDePasos
-        ? FinalizarAsync()
-        : IrAlPasoAsync(_paso + 1);
+    private Task AdvanceAsync() => _paso == EncuestaRules.TotalDePasos
+        ? FinishAsync()
+        : GoToStepAsync(_paso + 1);
 
-    private async Task IrAlPasoAsync(int destino)
+    private async Task GoToStepAsync(int navTarget)
     {
-        if (destino < 1 || destino > ReglasDeEncuesta.TotalDePasos) return;
+        if (navTarget < 1 || navTarget > EncuestaRules.TotalDePasos) return;
 
         // Solo se avanza con el paso actual válido. Hacia atrás nunca se valida.
-        if (destino > _paso && !ValidarPasoActual()) return;
+        if (navTarget > _paso && !ValidarPasoActual()) return;
 
-        _aviso = null;
-        _errores = SinErrores;
-        _paso = destino;
+        _notice = null;
+        _errors = NoErrors;
+        _paso = navTarget;
         _pasoMaximoAlcanzado = Math.Max(_pasoMaximoAlcanzado, _paso);
-        _anuncio = $"Paso {_paso} de {ReglasDeEncuesta.TotalDePasos}: {RotulosDePaso[_paso - 1]}";
+        _announcement = $"Paso {_paso} de {EncuestaRules.TotalDePasos}: {StepLabels[_paso - 1]}";
 
         // La dirección refleja el paso y reemplaza la entrada del historial: el botón de
         // retroceso no tiene que devolver a un limbo.
-        Navegacion.NavigateTo(RutaDelPaso(_paso), replace: true);
-        await Foco.AlContenidoPrincipalAsync();
+        Navigation.NavigateTo(StepRoute(_paso), replace: true);
+        await Foco.FocusMainContentAsync();
     }
 
-    private async Task FinalizarAsync()
+    private async Task FinishAsync()
     {
-        if (_procesando) return;
+        if (_busy) return;
         if (!ValidarPasoActual()) return;
 
-        _procesando = true;
+        _busy = true;
 
         try
         {
-            _respuesta = await ServicioDeEncuestas.RegistrarAsync(_modelo);
-            _registradas = await ServicioDeEncuestas.ContarAsync();
-            _anuncio = "Encuesta registrada.";
+            _respuesta = await EncuestaService.RegistrarAsync(_model);
+            _registradas = await EncuestaService.CountAsync();
+            _announcement = "Encuesta registrada.";
         }
         catch (Exception excepcion)
         {
             Registro.LogError(excepcion, "No se pudo registrar la encuesta.");
-            _aviso = "No pudimos registrar la encuesta. Volvé a intentar en unos segundos.";
+            _notice = "No pudimos registrar la encuesta. Volvé a intentar en unos segundos.";
         }
         finally
         {
-            _procesando = false;
+            _busy = false;
         }
     }
 
     private bool ValidarPasoActual()
     {
-        _aviso = null;
-        _errores = ServicioDeEncuestas.ValidarPaso(_paso, _modelo);
+        _notice = null;
+        _errors = EncuestaService.ValidarPaso(_paso, _model);
 
-        if (_errores.Count == 0) return true;
+        if (_errors.Count == 0) return true;
 
-        _aviso = "Complete los datos del paso antes de continuar.";
-        _anuncio = _aviso;
+        _notice = "Complete los datos del paso antes de continuar.";
+        _announcement = _notice;
         return false;
     }
 
-    private async Task ReiniciarAsync()
+    private async Task ResetAsync()
     {
-        _modelo = new ModeloDeEncuesta();
-        _errores = SinErrores;
+        _model = new EncuestaModel();
+        _errors = NoErrors;
         _respuesta = null;
-        _aviso = null;
+        _notice = null;
         _paso = 1;
         _pasoMaximoAlcanzado = 1;
-        _anuncio = $"Paso 1 de {ReglasDeEncuesta.TotalDePasos}: {RotulosDePaso[0]}";
+        _announcement = $"Paso 1 de {EncuestaRules.TotalDePasos}: {StepLabels[0]}";
 
-        Navegacion.NavigateTo(RutaDelPaso(1), replace: true);
-        await Foco.AlContenidoPrincipalAsync();
+        Navigation.NavigateTo(StepRoute(1), replace: true);
+        await Foco.FocusMainContentAsync();
     }
 
-    private static string RutaDelPaso(int paso) => paso == 1 ? "/encuesta" : $"/encuesta/{paso}";
+    private static string StepRoute(int paso) => paso == 1 ? "/encuesta" : $"/encuesta/{paso}";
 }

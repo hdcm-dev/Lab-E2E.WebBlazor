@@ -2,13 +2,13 @@ using AndroidSpecific = Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpe
 
 namespace MovilidadUrbana.MAUI;
 
-public partial class App : Application
+public partial class App : Microsoft.Maui.Controls.Application
 {
     private readonly IServiceProvider _servicios;
 
-    public App(IServiceProvider servicios)
+    public App(IServiceProvider services)
     {
-        _servicios = servicios;
+        _servicios = services;
         InitializeComponent();
         // La paleta es clara, como la web: no se deriva un tema oscuro que nadie diseñó.
         UserAppTheme = AppTheme.Light;

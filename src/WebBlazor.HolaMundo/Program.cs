@@ -1,16 +1,16 @@
 using WebBlazor.HolaMundo.Components;
-using WebBlazor.HolaMundo.Servicios;
+using WebBlazor.HolaMundo.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region servicios
+#region services
 // Punto de composición: todo servicio se registra acá y en ningún otro archivo.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // La identidad de versión se resuelve una sola vez, en el host: la superficie no
 // la compone ni la lee de una constante de la vista.
-builder.Services.AddSingleton<IIdentidadDeVersion, IdentidadDeVersion>();
+builder.Services.AddSingleton<IVersionIdentity, VersionIdentity>();
 #endregion
 
 var app = builder.Build();

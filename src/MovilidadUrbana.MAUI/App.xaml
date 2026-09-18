@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:conv="clr-namespace:MovilidadUrbana.MAUI.Convertidores"
+             xmlns:conv="clr-namespace:MovilidadUrbana.MAUI.Converters"
              x:Class="MovilidadUrbana.MAUI.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -10,8 +10,8 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Movilidad.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <conv:TextoPresenteConverter x:Key="TextoPresente" />
-            <conv:NegarConverter x:Key="Negar" />
+            <conv:IsNotNullOrEmptyConverter x:Key="TextoPresente" />
+            <conv:InvertedBoolConverter x:Key="Negar" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

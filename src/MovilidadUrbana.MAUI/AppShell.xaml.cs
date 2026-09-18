@@ -1,15 +1,15 @@
-using MovilidadUrbana.MAUI.Paginas;
-using MovilidadUrbana.MAUI.Servicios;
+using MovilidadUrbana.MAUI.Pages;
+using MovilidadUrbana.MAUI.Services;
 
 namespace MovilidadUrbana.MAUI;
 
 public partial class AppShell : Shell
 {
-    public AppShell(IServiceProvider servicios)
+    public AppShell(IServiceProvider services)
     {
         InitializeComponent();
-        Localidades.ContentTemplate = new DataTemplate(() => servicios.GetRequiredService<LocalidadesPage>());
-        Encuesta.ContentTemplate = new DataTemplate(() => servicios.GetRequiredService<EncuestaPage>());
-        Routing.RegisterRoute(NavegadorDeShell.RutaDelEditor, typeof(LocalidadEditorPage));
+        Localidades.ContentTemplate = new DataTemplate(() => services.GetRequiredService<LocalidadesPage>());
+        Encuesta.ContentTemplate = new DataTemplate(() => services.GetRequiredService<EncuestaPage>());
+        Routing.RegisterRoute(ShellNavigationService.EditorRoute, typeof(LocalidadEditorPage));
     }
 }

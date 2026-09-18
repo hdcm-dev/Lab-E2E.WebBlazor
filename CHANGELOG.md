@@ -9,6 +9,39 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-09-18
+
+### Cambiado
+
+- **Convención de nombres: arquitectura en inglés, dominio en español.** Lo que viene de la
+  arquitectura y de los estándares pasa a inglés: carpetas y espacios de nombres (`Domain`,
+  `Application`, `Infrastructure`, `Presentation`, `Services`, `Pages`, `Components/Shared`), el rol de
+  cada clase como sufijo (`LocalidadService`, `ILocalidadRepository`, `LocalidadRules`,
+  `LocalidadPolicy`, `EncuestaModel`, `LocalidadRequest`, `EncuestasController`), las operaciones de
+  patrón y de framework (`GetAllAsync`, `GetByIdAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`,
+  `SaveAsync`, `AddApplication`, `AddInfrastructure`) y las piezas técnicas (`Result`, `AppDbContext`,
+  `SessionContext`, `SessionMiddleware`, `DatabaseInitializer`, `Grid`, `Dialog`, `Wizard`,
+  `ShellNavigationService`). El dominio queda en español: `Localidad`, `Encuesta`, `Provincia`,
+  `CodigoPostal`, `Habitantes`, los catálogos, las reglas (`NombreValido`), las acciones propias
+  (`RegistrarAsync`, `ValidarPaso`) y los estados de superficie (`Vacio`, `Indisponible`,
+  `FiltradoSinResultados`), que son vocabulario de las guías. Los proyectos conservan sus nombres.
+  No cambian el texto visible, las URL, el contrato JSON de la API, los `data-testid`, los
+  `AutomationId` ni los comentarios. La regla queda declarada en el README («Convención de nombres»).
+- Consecuencias que hubo que resolver y que quedan para quien repita el ejercicio: la entidad `Sesion`
+  pasó a `Session`, y con ella la tabla, así que las bases SQLite de corridas anteriores hay que
+  borrarlas (`EnsureCreated` no migra); las dos capas exponen su propio `DependencyInjection` y
+  `Program.cs` califica la que usa; el espacio de nombres `MovilidadUrbana.MAUI.Application` tapa a la
+  clase `Application` de MAUI, así que `App` hereda de `Microsoft.Maui.Controls.Application`; y los
+  nombres que generan `[ObservableProperty]` y `[RelayCommand]`, los elementos con prefijo del XAML y
+  los bindings anidados (`{Binding …, Source={RelativeSource …}}`) se renombraron junto con su origen.
+- `MovilidadUrbana.MAUI.UITests`: la espera de la primera pantalla reintenta mientras UIAutomator2 no
+  consigue el árbol de accesibilidad. Recién instalada en Debug, la app tuvo el hilo principal ocupado
+  unos 21 s (`Skipped 1272 frames`) y la sesión fallaba antes de empezar.
+
+Verificado: la solución filtrada compila en Release con `-warnaserror`; 49 unitarias, 13 de la API,
+18 de los ViewModels, 22 E2E de Movilidad Urbana, 1 de Hola Mundo y 10 de Login en verde; el APK
+compila y la suite Appium pasó 5/5 en el teléfono.
+
 ## [Sin publicar] - 2026-09-12
 
 ### Añadido

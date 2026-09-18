@@ -11,55 +11,55 @@
         <p class="mq-caption">Tres pasos. Se puede volver atrás sin perder lo cargado.</p>
     </div>
     <span class="mq-ml-auto">
-        <Insignia Testid="contador-encuestas">Registradas: @_registradas</Insignia>
+        <Badge Testid="contador-encuestas">Registradas: @_registradas</Badge>
     </span>
 </div>
 
-<p class="mq-sr-only" role="status" aria-live="polite">@_anuncio</p>
+<p class="mq-sr-only" role="status" aria-live="polite">@_announcement</p>
 
-@if (_aviso is { } aviso)
+@if (_notice is { } notice)
 {
     <div class="mq-mb-6">
-        <Banda Tono="TonoDeBanda.Error" Testid="aviso">@aviso</Banda>
+        <Band Tone="BandTone.Error" Testid="aviso">@notice</Band>
     </div>
 }
 
 @if (_respuesta is null)
 {
-    <Asistente PasoActual="_paso" Rotulos="Rotulos" AlCambiarPaso="IrAlPasoAsync"
-               AlConfirmar="FinalizarAsync" RotuloDeConfirmacion="Registrar la encuesta"
-               RotuloEnProceso="Registrando…" Procesando="_procesando">
-        <EditForm Model="_modelo" OnSubmit="AvanzarAsync" data-testid="formulario">
-            <PasoDeAsistente Numero="1">
+    <Wizard CurrentStep="_paso" Labels="Labels" OnStepChange="GoToStepAsync"
+               OnConfirm="FinishAsync" ConfirmLabel="Registrar la encuesta"
+               BusyLabel="Registrando…" Busy="_busy">
+        <EditForm Model="_model" OnSubmit="AdvanceAsync" data-testid="formulario">
+            <WizardStep Number="1">
                 <div class="mq-grilla-campos">
-                    <Campo Id="nombre" Rotulo="Nombre y apellido" TestidError="error-nombre"
-                           Requisito="@PoliticaDeEncuestas.RequisitoDelNombre" Error="@Error("nombre")">
+                    <FormField Id="nombre" Label="Nombre y apellido" ErrorTestid="error-nombre"
+                           Requirement="@EncuestaPolicy.RequisitoDelNombre" Error="@Error("nombre")">
                         <Control Context="campo">
-                            <input class="@campo.ClaseDeInput" id="@campo.Id" type="text"
+                            <input class="@campo.InputClass" id="@campo.Id" type="text"
                                    data-testid="campo-nombre" autocomplete="name"
-                                   maxlength="@ReglasDeEncuesta.LargoMaximoDelNombre"
-                                   aria-describedby="@campo.Descriptores" value="@_modelo.Nombre"
-                                   @oninput="argumentos => _modelo.Nombre = argumentos.Value?.ToString() ?? string.Empty" />
+                                   maxlength="@EncuestaRules.LargoMaximoDelNombre"
+                                   aria-describedby="@campo.DescribedBy" value="@_model.Nombre"
+                                   @oninput="argumentos => _model.Nombre = argumentos.Value?.ToString() ?? string.Empty" />
                         </Control>
-                    </Campo>
+                    </FormField>
 
-                    <Campo Id="edad" Rotulo="Edad" TestidError="error-edad"
-                           Requisito="@PoliticaDeEncuestas.RequisitoDeLaEdad" Error="@Error("edad")">
+                    <FormField Id="edad" Label="Edad" ErrorTestid="error-edad"
+                           Requirement="@EncuestaPolicy.RequisitoDeLaEdad" Error="@Error("edad")">
                         <Control Context="campo">
-                            <input class="@campo.ClaseDeInput" id="@campo.Id" type="number"
-                                   data-testid="campo-edad" min="@ReglasDeEncuesta.EdadMinima"
-                                   max="@ReglasDeEncuesta.EdadMaxima" step="1"
-                                   aria-describedby="@campo.Descriptores"
-                                   @bind="_modelo.Edad" @bind:event="oninput" />
+                            <input class="@campo.InputClass" id="@campo.Id" type="number"
+                                   data-testid="campo-edad" min="@EncuestaRules.EdadMinima"
+                                   max="@EncuestaRules.EdadMaxima" step="1"
+                                   aria-describedby="@campo.DescribedBy"
+                                   @bind="_model.Edad" @bind:event="oninput" />
                         </Control>
-                    </Campo>
+                    </FormField>
 
-                    <Campo Id="localidad" Rotulo="Localidad" TestidError="error-localidad"
-                           Requisito="@PoliticaDeEncuestas.RequisitoDeLaLocalidad" Error="@Error("localidad")">
+                    <FormField Id="localidad" Label="Localidad" ErrorTestid="error-localidad"
+                           Requirement="@EncuestaPolicy.RequisitoDeLaLocalidad" Error="@Error("localidad")">
                         <Control Context="campo">
-                            <select class="@campo.ClaseDeSelect" id="@campo.Id"
+                            <select class="@campo.SelectClass" id="@campo.Id"
                                     data-testid="campo-localidad"
-                                    aria-describedby="@campo.Descriptores" @bind="_modelo.Localidad">
+                                    aria-describedby="@campo.DescribedBy" @bind="_model.Localidad">
                                 <option value="">Seleccione…</option>
                                 @foreach (var localidad in _localidades)
                                 {
@@ -67,23 +67,23 @@
                                 }
                             </select>
                         </Control>
-                    </Campo>
+                    </FormField>
                 </div>
-            </PasoDeAsistente>
+            </WizardStep>
 
-            <PasoDeAsistente Numero="2">
+            <WizardStep Number="2">
                 @* Grupo de casillas: el rótulo del grupo es la leyenda, y el error se asocia al
                    grupo entero porque la regla es del conjunto, no de una casilla. *@
                 <fieldset aria-describedby="@DescriptoresDeLosMedios">
                     <legend>¿Qué medios utiliza para viajar?</legend>
-                    <span class="mq-requisito" id="medios-requisito">@PoliticaDeEncuestas.RequisitoDeLosMedios</span>
+                    <span class="mq-requisito" id="medios-requisito">@EncuestaPolicy.RequisitoDeLosMedios</span>
                     <div class="mq-opciones" data-testid="grupo-medios">
                         @foreach (var medio in Catalogos.Medios)
                         {
                             <div class="mq-opcion">
                                 <input type="checkbox" id="medio-@medio.Clave" data-testid="medio-@medio.Clave"
-                                       checked="@_modelo.Medios.Contains(medio.Clave)"
-                                       @onchange="argumentos => _modelo.AlternarMedio(medio.Clave, (bool)(argumentos.Value ?? false))" />
+                                       checked="@_model.Medios.Contains(medio.Clave)"
+                                       @onchange="argumentos => _model.AlternarMedio(medio.Clave, (bool)(argumentos.Value ?? false))" />
                                 <label for="medio-@medio.Clave">@medio.Etiqueta</label>
                             </div>
                         }
@@ -95,12 +95,12 @@
                 </fieldset>
 
                 <div class="mq-mt-6 mq-ancho-38">
-                    <Campo Id="frecuencia" Rotulo="Frecuencia de uso" TestidError="error-frecuencia"
-                           Requisito="@PoliticaDeEncuestas.RequisitoDeLaFrecuencia" Error="@Error("frecuencia")">
+                    <FormField Id="frecuencia" Label="Frecuencia de uso" ErrorTestid="error-frecuencia"
+                           Requirement="@EncuestaPolicy.RequisitoDeLaFrecuencia" Error="@Error("frecuencia")">
                         <Control Context="campo">
-                            <select class="@campo.ClaseDeSelect" id="@campo.Id"
+                            <select class="@campo.SelectClass" id="@campo.Id"
                                     data-testid="campo-frecuencia"
-                                    aria-describedby="@campo.Descriptores" @bind="_modelo.Frecuencia">
+                                    aria-describedby="@campo.DescribedBy" @bind="_model.Frecuencia">
                                 <option value="">Seleccione…</option>
                                 @foreach (var frecuencia in Catalogos.Frecuencias)
                                 {
@@ -108,39 +108,39 @@
                                 }
                             </select>
                         </Control>
-                    </Campo>
+                    </FormField>
                 </div>
-            </PasoDeAsistente>
+            </WizardStep>
 
-            <PasoDeAsistente Numero="3">
+            <WizardStep Number="3">
                 <div class="mq-grilla-campos">
-                    <Campo Id="distancia" Rotulo="Distancia diaria (km)" TestidError="error-distancia"
-                           Requisito="@PoliticaDeEncuestas.RequisitoDeLaDistancia" Error="@Error("distancia")">
+                    <FormField Id="distancia" Label="Distancia diaria (km)" ErrorTestid="error-distancia"
+                           Requirement="@EncuestaPolicy.RequisitoDeLaDistancia" Error="@Error("distancia")">
                         <Control Context="campo">
-                            <input class="@campo.ClaseDeInput" id="@campo.Id" type="number"
-                                   data-testid="campo-distancia" min="@ReglasDeEncuesta.DistanciaMinima"
-                                   max="@ReglasDeEncuesta.DistanciaMaxima" step="0.1"
-                                   aria-describedby="@campo.Descriptores"
-                                   @bind="_modelo.Distancia" @bind:event="oninput" />
+                            <input class="@campo.InputClass" id="@campo.Id" type="number"
+                                   data-testid="campo-distancia" min="@EncuestaRules.DistanciaMinima"
+                                   max="@EncuestaRules.DistanciaMaxima" step="0.1"
+                                   aria-describedby="@campo.DescribedBy"
+                                   @bind="_model.Distancia" @bind:event="oninput" />
                         </Control>
-                    </Campo>
+                    </FormField>
 
-                    <Campo Id="minutos" Rotulo="Tiempo de viaje (minutos)" TestidError="error-minutos"
-                           Requisito="@PoliticaDeEncuestas.RequisitoDeLosMinutos" Error="@Error("minutos")">
+                    <FormField Id="minutos" Label="Tiempo de viaje (minutos)" ErrorTestid="error-minutos"
+                           Requirement="@EncuestaPolicy.RequisitoDeLosMinutos" Error="@Error("minutos")">
                         <Control Context="campo">
-                            <input class="@campo.ClaseDeInput" id="@campo.Id" type="number"
-                                   data-testid="campo-minutos" min="@ReglasDeEncuesta.MinutosMinimos"
-                                   max="@ReglasDeEncuesta.MinutosMaximos" step="1"
-                                   aria-describedby="@campo.Descriptores"
-                                   @bind="_modelo.Minutos" @bind:event="oninput" />
+                            <input class="@campo.InputClass" id="@campo.Id" type="number"
+                                   data-testid="campo-minutos" min="@EncuestaRules.MinutosMinimos"
+                                   max="@EncuestaRules.MinutosMaximos" step="1"
+                                   aria-describedby="@campo.DescribedBy"
+                                   @bind="_model.Minutos" @bind:event="oninput" />
                         </Control>
-                    </Campo>
+                    </FormField>
 
-                    <Campo Id="motivo" Rotulo="Motivo principal" TestidError="error-motivo"
-                           Requisito="@PoliticaDeEncuestas.RequisitoDelMotivo" Error="@Error("motivo")">
+                    <FormField Id="motivo" Label="Motivo principal" ErrorTestid="error-motivo"
+                           Requirement="@EncuestaPolicy.RequisitoDelMotivo" Error="@Error("motivo")">
                         <Control Context="campo">
-                            <select class="@campo.ClaseDeSelect" id="@campo.Id" data-testid="campo-motivo"
-                                    aria-describedby="@campo.Descriptores" @bind="_modelo.Motivo">
+                            <select class="@campo.SelectClass" id="@campo.Id" data-testid="campo-motivo"
+                                    aria-describedby="@campo.DescribedBy" @bind="_model.Motivo">
                                 <option value="">Seleccione…</option>
                                 @foreach (var motivo in Catalogos.Motivos)
                                 {
@@ -148,11 +148,11 @@
                                 }
                             </select>
                         </Control>
-                    </Campo>
+                    </FormField>
                 </div>
-            </PasoDeAsistente>
+            </WizardStep>
         </EditForm>
-    </Asistente>
+    </Wizard>
 }
 else
 {
@@ -163,9 +163,9 @@ else
     <div class="mq-panel">
         <div class="mq-panel__cuerpo">
             <section data-testid="resumen">
-                <Banda Tono="TonoDeBanda.Exito" Testid="mensaje-envio">
+                <Band Tone="BandTone.Exito" Testid="mensaje-envio">
                     Encuesta registrada. ¡Gracias por participar!
-                </Banda>
+                </Band>
                 <dl class="mq-kv mq-mt-5">
                     @foreach (var campo in ResumenDeEncuesta.De(_respuesta))
                     {
@@ -180,7 +180,7 @@ else
         <div class="mq-panel__pie">
             <span></span>
             <button type="button" class="mq-btn mq-btn--primario" data-testid="boton-reiniciar"
-                    @onclick="ReiniciarAsync">Cargar otra encuesta</button>
+                    @onclick="ResetAsync">Cargar otra encuesta</button>
         </div>
     </div>
 }

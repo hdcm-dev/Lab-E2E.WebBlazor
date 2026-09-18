@@ -1,0 +1,47 @@
+@* Barra lateral del shell de trabajo: identidad arriba, navegación al medio, ítem activo con
+   fondo de marca. Debajo del punto de quiebre pasa a navegación superior. *@
+@implements IDisposable
+@inject NavigationManager Navigation
+
+<nav class="mq-shell-sidebar" aria-label="Navegación principal">
+    <a class="mq-identidad" href="" data-testid="marca">
+        <Icon Nombre="@Icons.Brand" Size="IconRoles.Navigation" />
+        Movilidad Urbana
+    </a>
+
+    <div class="mq-nav">
+        @foreach (var navTarget in NavTargets)
+        {
+            var active = IsActive(navTarget.Route);
+            <a class="mq-nav-item @(active ? "mq-nav-item--activo" : null)" href="@navTarget.Route"
+               aria-current="@(active ? "page" : null)" data-testid="@navTarget.Testid">
+                <Icon Nombre="@navTarget.Icon" Size="IconRoles.Card" />
+                @navTarget.Texto
+            </a>
+        }
+    </div>
+</nav>
+
+@code {
+    private sealed record NavTarget(string Route, string Texto, string Icon, string Testid);
+
+    private static readonly NavTarget[] NavTargets =
+    [
+        new("", "Inicio", Icons.Home, "nav-inicio"),
+        new("localidades", "Localidades", Icons.Localidad, "nav-localidades"),
+        new("encuesta", "Encuesta", Icons.Encuesta, "nav-encuesta")
+    ];
+
+    protected override void OnInitialized() => Navigation.LocationChanged += OnNavigate;
+
+    private void OnNavigate(object? origen, LocationChangedEventArgs argumentos) =>
+        InvokeAsync(StateHasChanged);
+
+    private bool IsActive(string ruta)
+    {
+        var actual = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?')[0].Trim('/');
+        return string.Equals(actual, ruta, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void Dispose() => Navigation.LocationChanged -= OnNavigate;
+}

@@ -21,15 +21,15 @@ Los tokens del catálogo viven en
 [wwwroot/css/Tokens.css](src/MovilidadUrbana.Web/wwwroot/css/Tokens.css) y los patrones en
 [Componentes.css](src/MovilidadUrbana.Web/wwwroot/css/Componentes.css); cada patrón del catálogo
 —grilla, asistente, diálogo, insignia, banda, estado vacío— es un componente Razor propio de
-[Components/Componentes/](src/MovilidadUrbana.Web/Components/Componentes/), y las páginas no
+[Components/Shared/](src/MovilidadUrbana.Web/Components/Shared/), y las páginas no
 reimplementan ninguno en línea. Ver [Diseño](#diseño).
 
 ## Estructura
 
 Movilidad Urbana son **tres proyectos independientes** —la web Blazor, una API REST y una aplicación
 Android— que tratan la misma temática pero no comparten código: cada uno trae **todas sus capas** de
-Clean Architecture como carpetas y espacios de nombres propios (`Dominio/`, `Aplicacion/`,
-`Infraestructura/`, más la presentación), y no referencia a ningún otro proyecto de la solución. El
+Clean Architecture como carpetas y espacios de nombres propios (`Domain/`, `Application/`,
+`Infrastructure/`, más la presentación), y no referencia a ningún otro proyecto de la solución. El
 código se repite a propósito: cada proyecto tiene que poder estudiarse, compilarse y llevarse por
 separado. Dentro de cada uno, las dependencias apuntan siempre hacia adentro. Al lado viven dos
 proyectos web más simples, Hola Mundo y Login:
@@ -37,25 +37,25 @@ proyectos web más simples, Hola Mundo y Login:
 ```
 Lab-E2E.WebBlazor.sln
 src/MovilidadUrbana.Web/              La web Blazor. Independiente: trae sus capas.
-  Dominio/                            Entidades, reglas y catálogos. No depende de nada.
-  Aplicacion/                         Casos de uso: servicios, modelos, políticas, Resultado
-  Infraestructura/                    EF Core sobre SQLite, repositorios, siembra y contexto de sesión
-  Components/                         App.razor, Routes.razor, Layout/, Componentes/, Pages/
-  Sesiones/                           La cookie de sesión y su middleware
-  Theme/, Servicios/, wwwroot/        Íconos; diálogos, foco y versión; tokens, patrones y js/
-  Program.cs                          Composición: AgregarInfraestructura + AgregarAplicacion
+  Domain/                             Entidades, reglas y catálogos. No depende de nada.
+  Application/                        Casos de uso: servicios, modelos, políticas, Result
+  Infrastructure/                     EF Core sobre SQLite, repositorios, siembra y contexto de sesión
+  Components/                         App.razor, Routes.razor, Layout/, Shared/, Pages/
+  Sessions/                           La cookie de sesión y su middleware
+  Theme/, Services/, wwwroot/         Íconos; diálogos, foco y versión; tokens, patrones y js/
+  Program.cs                          Composición: AddInfrastructure + AddApplication
 src/MovilidadUrbana.ApiWeb/           La API REST. Independiente: trae sus capas.
-  Dominio/, Aplicacion/, Infraestructura/   Las mismas tres capas, en MovilidadUrbana.ApiWeb.*
+  Domain/, Application/, Infrastructure/   Las mismas tres capas, en MovilidadUrbana.ApiWeb.*
   Controllers/                        LocalidadesController, EncuestasController
-  Contratos/                          DTOs de entrada y salida
-  Sesiones/                           La sesión por encabezado X-Sesion-Id
+  Contracts/                          DTOs de entrada y salida
+  Sessions/                           La sesión por encabezado X-Sesion-Id
   Program.cs                          Composición: controllers, ProblemDetails y OpenAPI
 src/MovilidadUrbana.MAUI/             La app Android (XAML nativo + MVVM). Independiente: trae sus capas.
-  Dominio/, Aplicacion/, Infraestructura/   Las mismas tres capas, en MovilidadUrbana.MAUI.*
-  Presentacion/                       ViewModels (CommunityToolkit.Mvvm) y sus abstracciones INavegador/IAvisos
-  Paginas/                            LocalidadesPage, LocalidadEditorPage, EncuestaPage
-  Servicios/                          Sesión del dispositivo, navegación con Shell, avisos, teclado
-  Controles/, Convertidores/          EntradaDecimal y los convertidores de las vistas
+  Domain/, Application/, Infrastructure/   Las mismas tres capas, en MovilidadUrbana.MAUI.*
+  Presentation/                       ViewModels (CommunityToolkit.Mvvm) y sus abstracciones INavigationService/IAlertService
+  Pages/                              LocalidadesPage, LocalidadEditorPage, EncuestaPage
+  Services/                           Sesión del dispositivo, navegación con Shell, avisos, teclado
+  Controls/, Converters/              DecimalEntry y los convertidores de las vistas
   MauiProgram.cs                      Composición: la base SQLite en el teléfono + las mismas capas
 tests/MovilidadUrbana.E2ETests/       22 casos Playwright sobre la web + su fixture
 tests/MovilidadUrbana.UnitTests/      49 casos sobre las reglas de dominio de la web, sin navegador
@@ -82,6 +82,22 @@ prueba; de Hola Mundo y Login, cada uno su web y su E2E. Las tres aplicaciones w
 complejidad distintos a propósito —Hola Mundo, Login y Movilidad Urbana, en ese orden—, para que la
 temática se pueda estudiar de a un escalón. Hola Mundo y Login llegaron desde
 `Lab-E2E.WebBlazor.Base`, que se retiró.
+
+### Convención de nombres
+
+El código mezcla dos idiomas con una regla fija, la habitual en equipos hispanohablantes:
+
+| En inglés | En español |
+| --- | --- |
+| Lo que viene de la arquitectura y de los estándares: carpetas y espacios de nombres (`Domain`, `Application`, `Infrastructure`, `Presentation`, `Services`, `Pages`), el rol de cada clase como sufijo (`…Controller`, `…Service`, `…Repository`, `…Policy`, `…Rules`, `…Model`, `…ViewModel`, `…Dto`, `…Tests`), las operaciones de patrón y de framework (`GetAllAsync`, `GetByIdAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`, `SaveAsync`) y las piezas técnicas (`Grid`, `Dialog`, `SessionMiddleware`, `DatabaseInitializer`) | Lo que viene del dominio del problema: `Localidad`, `Encuesta`, `Provincia`, `CodigoPostal`, `Habitantes`, los catálogos, las reglas de negocio (`NombreValido`, `EdadValida`) y las acciones propias del caso (`RegistrarAsync`, `ValidarPaso`, `AlternarMedio`) |
+
+Así quedan nombres como `EncuestasController`, `LocalidadService`, `ILocalidadRepository`,
+`LocalidadRules` o `EncuestaViewModel`: el sufijo dice qué es la clase y el prefijo, de qué trata.
+
+Lo que no es código no se tradujo: el texto que ve la persona, las URL (`/localidades`, `/encuesta/{Paso}`),
+el contrato JSON de la API, los `data-testid` y los `AutomationId`, y los comentarios, que son prosa
+didáctica y las guías los citan textualmente. Los nombres de las pruebas también quedan en español:
+describen comportamiento del dominio, no piezas de código.
 
 ### La API
 
@@ -114,15 +130,15 @@ almacenamiento privado de la aplicación y no habla con ningún servidor.
 
 | Aspecto | Cómo |
 | --- | --- |
-| Capas | Propias del proyecto, en `Dominio/`, `Aplicacion/` e `Infraestructura/` (`MovilidadUrbana.MAUI.*`); `MauiProgram` compone `AgregarInfraestructura` y `AgregarAplicacion`. La validación es la del servicio de aplicación: los mensajes de error son los mismos que en la web y la API |
-| ViewModels | En `Presentacion/`, con CommunityToolkit.Mvvm. La plataforma entra por `INavegador` e `IAvisos`, así se prueban sin teléfono |
-| Teclado | La ventana usa `AdjustResize`; en la página apilada del editor, donde Shell no redimensiona, `TecladoEnPantalla` mide dónde quedó la barra de acciones y la corre encima del teclado |
-| Base | `movilidad.db` en `FileSystem.AppDataDirectory`, creada al arrancar con el mismo `PreparadorDeBaseDeDatos` |
+| Capas | Propias del proyecto, en `Domain/`, `Application/` e `Infrastructure/` (`MovilidadUrbana.MAUI.*`); `MauiProgram` compone `AddInfrastructure` y `AddApplication`. La validación es la del servicio de aplicación: los mensajes de error son los mismos que en la web y la API |
+| ViewModels | En `Presentation/`, con CommunityToolkit.Mvvm. La plataforma entra por `INavigationService` e `IAlertService`, así se prueban sin teléfono |
+| Teclado | La ventana usa `AdjustResize`; en la página apilada del editor, donde Shell no redimensiona, `OnScreenKeyboard` mide dónde quedó la barra de acciones y la corre encima del teclado |
+| Base | `movilidad.db` en `FileSystem.AppDataDirectory`, creada al arrancar con el mismo `DatabaseInitializer` |
 | Sesión | El dispositivo es una sola sesión: su identificador se genera la primera vez y queda en `Preferences`. Los datos sobreviven a cerrar la aplicación |
 | Localidades | Lista con búsqueda por nombre o código postal y filtro por provincia; estados vacío y «sin coincidencias» con su salida; alta, edición y baja con confirmación; error junto a cada campo |
 | Encuesta | Asistente de tres pasos con progreso, validación al avanzar, «Anterior» que conserva lo cargado, resumen al registrar y contador |
 | Diseño | La paleta de `Tokens.css`, objetivos táctiles de 48 dp, acción principal fija abajo, el borde del campo en rojo cuando tiene error, y el error se borra al corregir el campo |
-| Pruebas | `dotnet test tests/MovilidadUrbana.MAUI.Tests`: 18 casos sobre los ViewModels, contra las capas reales y una base SQLite por caso. El proyecto Android no se puede referenciar sin el workload, así que la prueba compila `Dominio/`, `Aplicacion/`, `Infraestructura/` y `Presentacion/` como archivos enlazados |
+| Pruebas | `dotnet test tests/MovilidadUrbana.MAUI.Tests`: 18 casos sobre los ViewModels, contra las capas reales y una base SQLite por caso. El proyecto Android no se puede referenciar sin el workload, así que la prueba compila `Domain/`, `Application/`, `Infrastructure/` y `Presentation/` como archivos enlazados |
 | Pruebas de interfaz | `.devcontainer/dev.sh uitests`: 5 casos con **Appium** (driver UIAutomator2) sobre la app instalada en el teléfono, localizando por `AutomationId`. Filtro sin resultados; alta inválida; alta, edición y baja; paso 1 vacío; los tres pasos con «12,5» y el resumen. Cada prueba deja los datos como los encontró; van en serie; no corren en CI porque necesitan el dispositivo |
 
 Compilar la aplicación pide el workload `maui-android`, JDK 17 y el SDK de Android. Para no instalar
@@ -160,19 +176,19 @@ que hereda de él. Los valores visuales salen del catálogo
 
 | Patrón del catálogo | Componente | Qué concentra |
 | --- | --- | --- |
-| §4.1 Navegación lateral | [BarraLateral](src/MovilidadUrbana.Web/Components/Componentes/BarraLateral.razor) | Identidad, ítems con ícono, ítem activo con `aria-current="page"` |
-| §4.2 Tarjeta de acceso | `.mq-tarjeta-entrada` en [Inicio](src/MovilidadUrbana.Web/Components/Pages/Inicio.razor) | Toda la tarjeta es el área activable, con el foco en el contenedor |
-| §4.3 Grilla de listado | [Grilla](src/MovilidadUrbana.Web/Components/Componentes/Grilla.razor) + [ColumnaDeGrilla](src/MovilidadUrbana.Web/Components/Componentes/ColumnaDeGrilla.cs) | Tabla con `caption` y `scope`, tarjetas apiladas, y los cuatro estados del ciclo de datos |
-| §4.4 Formulario de edición | [Campo](src/MovilidadUrbana.Web/Components/Componentes/Campo.razor) | Rótulo visible, requisito antes del intento y error asociado por `aria-describedby` |
-| §4.5 Asistente | [Asistente](src/MovilidadUrbana.Web/Components/Componentes/Asistente.razor) + [PasoDeAsistente](src/MovilidadUrbana.Web/Components/Componentes/PasoDeAsistente.razor) | Círculo, conector y rótulo por paso; tres estados de paso; contador y región activa |
-| §4.8 Insignia | [Insignia](src/MovilidadUrbana.Web/Components/Componentes/Insignia.razor) | Par texto + tint; el texto siempre se imprime |
-| §5 Estados | [EstadoVacio](src/MovilidadUrbana.Web/Components/Componentes/EstadoVacio.razor), [EstadoIndisponible](src/MovilidadUrbana.Web/Components/Componentes/EstadoIndisponible.razor), [Esqueleto](src/MovilidadUrbana.Web/Components/Componentes/Esqueleto.razor), [Banda](src/MovilidadUrbana.Web/Components/Componentes/Banda.razor) | Vacío, filtrado sin resultados, cargando, indisponible y bandas de resultado |
-| §5.4 del template Blazor · diálogo | [Dialogo](src/MovilidadUrbana.Web/Components/Componentes/Dialogo.razor) + [DialogoHost](src/MovilidadUrbana.Web/Components/Componentes/DialogoHost.razor) | `<dialog>` nativo, host único en el layout, dos grados de confirmación |
-| §6 Iconografía | [Icono](src/MovilidadUrbana.Web/Components/Componentes/Icono.razor) + [Iconos](src/MovilidadUrbana.Web/Theme/Iconos.cs) | SVG inline con `currentColor`, grilla de 24, trazo 1.75 |
-| Identidad de versión | [SelloDeVersion](src/MovilidadUrbana.Web/Components/Componentes/SelloDeVersion.razor) | Versión resuelta en el host, no compuesta en la vista |
+| §4.1 Navegación lateral | [Sidebar](src/MovilidadUrbana.Web/Components/Shared/Sidebar.razor) | Identidad, ítems con ícono, ítem activo con `aria-current="page"` |
+| §4.2 Tarjeta de acceso | `.mq-tarjeta-entrada` en [Inicio](src/MovilidadUrbana.Web/Components/Pages/Home.razor) | Toda la tarjeta es el área activable, con el foco en el contenedor |
+| §4.3 Grilla de listado | [Grilla](src/MovilidadUrbana.Web/Components/Shared/Grid.razor) + [GridColumn](src/MovilidadUrbana.Web/Components/Shared/GridColumn.cs) | Tabla con `caption` y `scope`, tarjetas apiladas, y los cuatro estados del ciclo de datos |
+| §4.4 Formulario de edición | [Campo](src/MovilidadUrbana.Web/Components/Shared/FormField.razor) | Rótulo visible, requisito antes del intento y error asociado por `aria-describedby` |
+| §4.5 Asistente | [Asistente](src/MovilidadUrbana.Web/Components/Shared/Wizard.razor) + [WizardStep](src/MovilidadUrbana.Web/Components/Shared/WizardStep.razor) | Círculo, conector y rótulo por paso; tres estados de paso; contador y región activa |
+| §4.8 Insignia | [Insignia](src/MovilidadUrbana.Web/Components/Shared/Badge.razor) | Par texto + tint; el texto siempre se imprime |
+| §5 Estados | [EmptyState](src/MovilidadUrbana.Web/Components/Shared/EmptyState.razor), [UnavailableState](src/MovilidadUrbana.Web/Components/Shared/UnavailableState.razor), [Esqueleto](src/MovilidadUrbana.Web/Components/Shared/Skeleton.razor), [Banda](src/MovilidadUrbana.Web/Components/Shared/Band.razor) | Vacío, filtrado sin resultados, cargando, indisponible y bandas de resultado |
+| §5.4 del template Blazor · diálogo | [Dialogo](src/MovilidadUrbana.Web/Components/Shared/Dialog.razor) + [DialogHost](src/MovilidadUrbana.Web/Components/Shared/DialogHost.razor) | `<dialog>` nativo, host único en el layout, dos grados de confirmación |
+| §6 Iconografía | [Icono](src/MovilidadUrbana.Web/Components/Shared/Icon.razor) + [Iconos](src/MovilidadUrbana.Web/Theme/Icons.cs) | SVG inline con `currentColor`, grilla de 24, trazo 1.75 |
+| Identidad de versión | [VersionStamp](src/MovilidadUrbana.Web/Components/Shared/VersionStamp.razor) | Versión resuelta en el host, no compuesta en la vista |
 
 El estado de cada superficie es un
-[`EstadoDeSuperficie`](src/MovilidadUrbana.Web/Components/Componentes/EstadoDeSuperficie.cs) con un
+[`SurfaceState`](src/MovilidadUrbana.Web/Components/Shared/SurfaceState.cs) con un
 bloque `@if` por estado: es la realización del `data-mq-estado` de la maqueta, con el mismo
 vocabulario. `Vacio` y `FiltradoSinResultados` son estados distintos y ofrecen acciones distintas,
 que es lo que hizo aparecer la barra de filtros del ABM.
@@ -201,15 +217,15 @@ que es lo que hizo aparecer la barra de filtros del ABM.
    [«El estado es del servidor»](#2-el-estado-es-del-servidor-así-que-hay-que-aislarlo); no hay
    superficies de identidad que necesiten quedar en SSR estático.
 2. **`EditForm` sin `DataAnnotationsValidator`.** El template decide anotaciones más
-   `ValidationMessage` por campo. Acá la política vive en `Dominio/Reglas` y la valida el servicio
+   `ValidationMessage` por campo. Acá la política vive en `Domain/Reglas` y la valida el servicio
    de aplicación —con sus propias pruebas unitarias—, así que anotar el modelo de pantalla sería
    exactamente el anti-patrón «transcribir la política de validación en la vista». Se conserva lo
    que la regla protege: error por campo, asociado al control y anunciado, y requisito derivado de
-   la política en [PoliticaDeLocalidades](src/MovilidadUrbana.Web/Aplicacion/Localidades/PoliticaDeLocalidades.cs)
-   y [PoliticaDeEncuestas](src/MovilidadUrbana.Web/Aplicacion/Encuestas/PoliticaDeEncuestas.cs).
+   la política en [LocalidadPolicy](src/MovilidadUrbana.Web/Application/Localidades/LocalidadPolicy.cs)
+   y [EncuestaPolicy](src/MovilidadUrbana.Web/Application/Encuestas/EncuestaPolicy.cs).
 3. **El paso de revisión del asistente es el estado de éxito, no un cuarto paso.** `TotalDePasos`
    es una regla de dominio con pruebas propias; la ficha clave/valor de
-   [ResumenDeEncuesta](src/MovilidadUrbana.Web/Aplicacion/Encuestas/ResumenDeEncuesta.cs) se
+   [ResumenDeEncuesta](src/MovilidadUrbana.Web/Application/Encuestas/ResumenDeEncuesta.cs) se
    recorre —no se escribe a mano— y se muestra al registrar.
 4. **Anchos de contenido en `ch`.** El catálogo no tiene token de ancho de contenido y promover uno
    nuevo no es decisión de este producto, así que las tres medidas que hacían falta se expresan en
@@ -361,8 +377,8 @@ click que llegue antes de la conexión se pierde sin dejar rastro, y el síntoma
 falla de manera intermitente y solo en las máquinas cargadas.
 
 [MainLayout.razor](src/MovilidadUrbana.Web/Components/Layout/MainLayout.razor) publica un testigo
-con `RendererInfo.IsInteractive`, y `EsperarInteractivoAsync` de
-[PruebaE2E.cs](tests/MovilidadUrbana.E2ETests/Infraestructura/PruebaE2E.cs) lo espera antes de
+con `RendererInfo.IsInteractive`, y `WaitForInteractiveAsync` de
+[E2ETestBase.cs](tests/MovilidadUrbana.E2ETests/Infrastructure/E2ETestBase.cs) lo espera antes de
 tocar nada.
 
 ### 2. El estado es del servidor, así que hay que aislarlo
@@ -371,7 +387,7 @@ En el ejemplo estático cada prueba tenía su `localStorage`. Acá hay una únic
 las pruebas —incluidas las que corren en paralelo— la comparten.
 
 La solución es que la aplicación reparta un **espacio de datos por sesión**: una cookie que emite
-[MiddlewareDeSesion](src/MovilidadUrbana.Web/Sesiones/MiddlewareDeSesion.cs), y por
+[SessionMiddleware](src/MovilidadUrbana.Web/Sessions/SessionMiddleware.cs), y por
 la que filtran todos los repositorios. Cada prueba escribe esa cookie con un valor propio antes de
 navegar y recibe su juego de localidades recién sembrado, sin ver nada de las demás. Es lo que
 permite correr las clases de prueba en paralelo y que la corrida de chromium termine en segundos.
@@ -394,7 +410,7 @@ Windows, sin extensión en Linux y macOS— y, si no, arranca con `dotnet Movili
 El nombre fijo de Linux era justamente lo que hacía fallar el descubrimiento en Windows.
 
 Quien las levanta y las baja es
-[ServidorDeLaAplicacion](tests/MovilidadUrbana.E2ETests/Infraestructura/ServidorDeLaAplicacion.cs),
+[TestAppServer](tests/MovilidadUrbana.E2ETests/Infrastructure/TestAppServer.cs),
 un `[SetUpFixture]` de NUnit: el binding de .NET no tiene el equivalente del bloque `webServer` que
 ofrece el runner de JavaScript, así que el ciclo de vida del servidor se maneja a mano.
 
@@ -409,7 +425,7 @@ carpeta de la publicación.
 En la versión estática hubo que corregir dos defectos alrededor del modal de Bootstrap: el click
 que llegaba durante la animación de apertura y el orden del manejador de `data-bs-dismiss`. Acá el
 diálogo es el `<dialog>` nativo, abierto y cerrado por el
-[servicio de diálogos](src/MovilidadUrbana.Web/Servicios/ServicioDeDialogos.cs) con la
+[servicio de diálogos](src/MovilidadUrbana.Web/Services/DialogService.cs) con la
 interoperabilidad mínima de [mq-dialogo.js](src/MovilidadUrbana.Web/wwwroot/js/mq-dialogo.js): el
 confinamiento de foco y el cierre por Escape los trae el navegador, no hay animación de apertura
 que esperar y esa clase de carrera no existe.

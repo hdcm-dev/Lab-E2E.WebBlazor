@@ -3,28 +3,28 @@ namespace MovilidadUrbana.MAUI.Tests;
 [TestFixture]
 public class LocalidadEditorViewModelTests
 {
-    private Entorno _entorno = default!;
+    private TestEnvironment _entorno = default!;
 
-    [SetUp] public void Crear() => _entorno = new Entorno();
-    [TearDown] public void Limpiar() => _entorno.Dispose();
+    [SetUp] public void Create() => _entorno = new TestEnvironment();
+    [TearDown] public void Clear() => _entorno.Dispose();
 
     [Test]
     [Description("Con campos inválidos muestra un error por campo y no vuelve a la lista")]
     public async Task GuardarInvalidoMuestraErrores()
     {
         var vm = _entorno.Editor();
-        vm.Preparar(null);
+        vm.Initialize(null);
         vm.Nombre = "Go";
         vm.CodigoPostal = "12";
 
-        await vm.GuardarCommand.ExecuteAsync(null);
+        await vm.SaveCommand.ExecuteAsync(null);
 
-        Assert.That(vm.ErrorNombre, Is.Not.Null);
-        Assert.That(vm.ErrorProvincia, Is.Not.Null);
-        Assert.That(vm.ErrorCodigoPostal, Is.Not.Null);
-        Assert.That(vm.ErrorHabitantes, Is.Not.Null);
-        Assert.That(vm.Aviso, Is.Not.Null);
-        Assert.That(_entorno.Navegador.Vueltas, Is.Zero);
+        Assert.That(vm.NombreError, Is.Not.Null);
+        Assert.That(vm.ProvinciaError, Is.Not.Null);
+        Assert.That(vm.CodigoPostalError, Is.Not.Null);
+        Assert.That(vm.HabitantesError, Is.Not.Null);
+        Assert.That(vm.Notice, Is.Not.Null);
+        Assert.That(_entorno.Navegador.GoBackCount, Is.Zero);
     }
 
     [Test]
@@ -32,13 +32,13 @@ public class LocalidadEditorViewModelTests
     public async Task CorregirUnCampoBorraSuError()
     {
         var vm = _entorno.Editor();
-        vm.Preparar(null);
-        await vm.GuardarCommand.ExecuteAsync(null);
+        vm.Initialize(null);
+        await vm.SaveCommand.ExecuteAsync(null);
 
         vm.Provincia = "Corrientes";
 
-        Assert.That(vm.ErrorProvincia, Is.Null);
-        Assert.That(vm.ErrorNombre, Is.Not.Null);
+        Assert.That(vm.ProvinciaError, Is.Null);
+        Assert.That(vm.NombreError, Is.Not.Null);
     }
 
     [Test]
@@ -46,14 +46,14 @@ public class LocalidadEditorViewModelTests
     public async Task GuardarNuevaAvisaYVuelve()
     {
         var vm = _entorno.Editor();
-        vm.Preparar(null);
+        vm.Initialize(null);
         vm.Nombre = "Goya"; vm.Provincia = "Corrientes"; vm.CodigoPostal = "3450"; vm.Habitantes = "90.000";
 
-        await vm.GuardarCommand.ExecuteAsync(null);
+        await vm.SaveCommand.ExecuteAsync(null);
 
-        Assert.That(_entorno.Avisos.Mostrados, Is.EqualTo(new[] { "Se agregó la localidad Goya." }));
-        Assert.That(_entorno.Navegador.Vueltas, Is.EqualTo(1));
-        Assert.That((await _entorno.Localidades.ListarAsync()).Single(l => l.Nombre == "Goya").Habitantes, Is.EqualTo(90000));
+        Assert.That(_entorno.Avisos.Shown, Is.EqualTo(new[] { "Se agregó la localidad Goya." }));
+        Assert.That(_entorno.Navegador.GoBackCount, Is.EqualTo(1));
+        Assert.That((await _entorno.Localidades.GetAllAsync()).Single(l => l.Nombre == "Goya").Habitantes, Is.EqualTo(90000));
     }
 
     [Test]
@@ -61,15 +61,15 @@ public class LocalidadEditorViewModelTests
     public async Task ModificarActualiza()
     {
         var lista = _entorno.Lista();
-        await lista.CargarCommand.ExecuteAsync(null);
+        await lista.LoadCommand.ExecuteAsync(null);
         var vm = _entorno.Editor();
-        vm.Preparar(lista.Visibles[0]);
+        vm.Initialize(lista.Visible[0]);
 
         vm.Nombre = "Corrientes Capital";
-        await vm.GuardarCommand.ExecuteAsync(null);
+        await vm.SaveCommand.ExecuteAsync(null);
 
-        Assert.That(vm.EsEdicion, Is.True);
-        Assert.That((await _entorno.Localidades.ListarAsync()).Select(l => l.Nombre), Does.Contain("Corrientes Capital"));
+        Assert.That(vm.IsEdit, Is.True);
+        Assert.That((await _entorno.Localidades.GetAllAsync()).Select(l => l.Nombre), Does.Contain("Corrientes Capital"));
     }
 
     [Test]
@@ -77,15 +77,15 @@ public class LocalidadEditorViewModelTests
     public async Task EliminarCanceladoNoBorra()
     {
         var lista = _entorno.Lista();
-        await lista.CargarCommand.ExecuteAsync(null);
+        await lista.LoadCommand.ExecuteAsync(null);
         var vm = _entorno.Editor();
-        vm.Preparar(lista.Visibles[0]);
-        _entorno.Avisos.RespuestaAConfirmar = false;
+        vm.Initialize(lista.Visible[0]);
+        _entorno.Avisos.ConfirmResult = false;
 
-        await vm.EliminarCommand.ExecuteAsync(null);
+        await vm.DeleteCommand.ExecuteAsync(null);
 
-        Assert.That(await _entorno.Localidades.ListarAsync(), Has.Count.EqualTo(2));
-        Assert.That(_entorno.Navegador.Vueltas, Is.Zero);
+        Assert.That(await _entorno.Localidades.GetAllAsync(), Has.Count.EqualTo(2));
+        Assert.That(_entorno.Navegador.GoBackCount, Is.Zero);
     }
 
     [Test]
@@ -93,14 +93,14 @@ public class LocalidadEditorViewModelTests
     public async Task EliminarConfirmadoBorra()
     {
         var lista = _entorno.Lista();
-        await lista.CargarCommand.ExecuteAsync(null);
+        await lista.LoadCommand.ExecuteAsync(null);
         var vm = _entorno.Editor();
-        vm.Preparar(lista.Visibles[0]);
+        vm.Initialize(lista.Visible[0]);
 
-        await vm.EliminarCommand.ExecuteAsync(null);
+        await vm.DeleteCommand.ExecuteAsync(null);
 
-        Assert.That(await _entorno.Localidades.ListarAsync(), Has.Count.EqualTo(1));
-        Assert.That(_entorno.Avisos.Mostrados.Single(), Does.StartWith("Se eliminó la localidad"));
-        Assert.That(_entorno.Navegador.Vueltas, Is.EqualTo(1));
+        Assert.That(await _entorno.Localidades.GetAllAsync(), Has.Count.EqualTo(1));
+        Assert.That(_entorno.Avisos.Shown.Single(), Does.StartWith("Se eliminó la localidad"));
+        Assert.That(_entorno.Navegador.GoBackCount, Is.EqualTo(1));
     }
 }

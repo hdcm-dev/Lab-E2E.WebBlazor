@@ -1,0 +1,21 @@
+@* Un paso del asistente: se dibuja solo cuando es el paso vigente. Conserva su encabezado, para
+   que la superficie no quede sin estructura semántica al cambiar de paso. *@
+
+@if (Wizard.CurrentStep == Number)
+{
+    <section data-testid="paso-@Number" aria-labelledby="@TitleId">
+        <h2 id="@TitleId">@Wizard.StepLabel(Number)</h2>
+        <div class="mq-mt-5">@ChildContent</div>
+    </section>
+}
+
+@code {
+    [CascadingParameter] private Wizard Wizard { get; set; } = default!;
+
+    /// <summary>Número del paso, contado desde 1.</summary>
+    [Parameter, EditorRequired] public int Number { get; set; }
+
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    private string TitleId => $"paso-{Number}-titulo";
+}

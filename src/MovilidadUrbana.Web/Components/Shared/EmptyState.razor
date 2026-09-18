@@ -1,0 +1,38 @@
+@* Estado vacío: no es un adorno, es una invitación a actuar. La acción se ofrece como enlace
+   cuando lleva a otra superficie y como botón cuando actúa acá mismo. *@
+
+<section class="mq-vacio" aria-labelledby="@TitleId" data-testid="@Testid">
+    <Icon Nombre="@Icons.Empty" Size="IconRoles.Navigation" />
+    <h2 id="@TitleId">@Title</h2>
+    <p class="mq-caption">@Body</p>
+    @if (ActionHref is not null)
+    {
+        <a class="mq-btn mq-btn--primario mq-mt-5" href="@ActionHref">@ActionLabel</a>
+    }
+    else if (OnAction.HasDelegate)
+    {
+        <button type="button" class="mq-btn mq-btn--secundario mq-mt-5" data-testid="@ActionTestid"
+                @onclick="OnAction">@ActionLabel</button>
+    }
+</section>
+
+@code {
+    // Identificador derivado del título: tiene que ser el mismo en el prerenderizado y en
+    // el circuito, así que no puede salir de un valor nuevo por render.
+    private string TitleId => "vacio-" + string.Concat(Title.Where(char.IsLetterOrDigit)).ToLowerInvariant();
+
+    [Parameter, EditorRequired] public string Title { get; set; } = default!;
+
+    [Parameter, EditorRequired] public string Body { get; set; } = default!;
+
+    /// <summary>Rótulo de la acción siguiente. Nombra la acción exacta.</summary>
+    [Parameter] public string? ActionLabel { get; set; }
+
+    [Parameter] public string? ActionHref { get; set; }
+
+    [Parameter] public EventCallback OnAction { get; set; }
+
+    [Parameter] public string? Testid { get; set; }
+
+    [Parameter] public string? ActionTestid { get; set; }
+}

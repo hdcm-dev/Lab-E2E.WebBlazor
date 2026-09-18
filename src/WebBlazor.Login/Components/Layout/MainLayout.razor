@@ -4,11 +4,11 @@
 @inherits LayoutComponentBase
 
 <div class="mq-shell">
-    <BarraLateral />
+    <Sidebar />
 
     <div class="mq-shell-contenido">
         <main id="mq-main" tabindex="-1">@Body</main>
-        <SelloDeVersion Ubicacion="UbicacionDelSello.Pie" />
+        <VersionStamp Placement="StampPlacement.Pie" />
     </div>
 </div>
 

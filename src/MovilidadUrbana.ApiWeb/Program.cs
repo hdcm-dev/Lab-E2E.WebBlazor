@@ -1,8 +1,8 @@
 using System.Globalization;
-using MovilidadUrbana.ApiWeb.Aplicacion;
-using MovilidadUrbana.ApiWeb.Sesiones;
-using MovilidadUrbana.ApiWeb.Infraestructura;
-using MovilidadUrbana.ApiWeb.Infraestructura.Persistencia;
+using MovilidadUrbana.ApiWeb.Application;
+using MovilidadUrbana.ApiWeb.Sessions;
+using MovilidadUrbana.ApiWeb.Infrastructure;
+using MovilidadUrbana.ApiWeb.Infrastructure.Persistence;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,10 +13,10 @@ CultureInfo.DefaultThreadCurrentCulture = cultura;
 CultureInfo.DefaultThreadCurrentUICulture = cultura;
 
 // --- Infraestructura y aplicación: las mismas capas que la web ---------------------------------
-var cadenaDeConexion = builder.Configuration.GetConnectionString("BaseDeDatos")
-    ?? ServiciosDeInfraestructura.CadenaDeConexionPorDefecto;
-builder.Services.AgregarInfraestructura(cadenaDeConexion);
-builder.Services.AgregarAplicacion();
+var connectionString = builder.Configuration.GetConnectionString("BaseDeDatos")
+    ?? MovilidadUrbana.ApiWeb.Infrastructure.DependencyInjection.DefaultConnectionString;
+builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddApplication();
 
 // --- Presentación REST ------------------------------------------------------------------------
 builder.Services.AddControllers();
@@ -25,7 +25,7 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-PreparadorDeBaseDeDatos.Preparar(app.Services);
+DatabaseInitializer.Initialize(app.Services);
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -41,7 +41,7 @@ if (app.Environment.IsDevelopment())
         .WithDefaultHttpClient(ScalarTarget.Shell, ScalarClient.Curl));
 }
 
-app.UseMiddleware<MiddlewareDeSesionPorEncabezado>();
+app.UseMiddleware<SessionHeaderMiddleware>();
 app.MapControllers();
 
 app.Run();

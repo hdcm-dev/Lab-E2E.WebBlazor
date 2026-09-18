@@ -1,0 +1,26 @@
+@* Ícono SVG en línea: hereda el color por `currentColor`, escala con el tamaño de su rol y no
+   depende de ninguna red. Sin título es decorativo; con título tiene significado propio. *@
+
+@if (string.IsNullOrEmpty(Title))
+{
+    <svg xmlns="http://www.w3.org/2000/svg" width="@Size" height="@Size" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+         stroke-linejoin="round" aria-hidden="true" focusable="false">@((MarkupString)Nombre)</svg>
+}
+else
+{
+    <svg xmlns="http://www.w3.org/2000/svg" width="@Size" height="@Size" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+         stroke-linejoin="round" role="img" focusable="false"><title>@Title</title>@((MarkupString)Nombre)</svg>
+}
+
+@code {
+    /// <summary>Trazo del ícono, tomado de <see cref="Theme.Iconos" />.</summary>
+    [Parameter, EditorRequired] public string Nombre { get; set; } = default!;
+
+    /// <summary>Tamaño en píxeles, nombrado por su rol en <see cref="Theme.RolesDeIcono" />.</summary>
+    [Parameter] public int Size { get; set; } = IconRoles.Inline;
+
+    /// <summary>Con título el ícono es significativo; sin título, decorativo.</summary>
+    [Parameter] public string? Title { get; set; }
+}

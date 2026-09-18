@@ -1,20 +1,20 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using WebBlazor.Login.Components;
 using WebBlazor.Login.Endpoints;
-using WebBlazor.Login.Servicios;
+using WebBlazor.Login.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region servicios
+#region services
 // Punto de composición: todo servicio se registra acá y en ningún otro archivo.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // La identidad de versión se resuelve una sola vez, en el host.
-builder.Services.AddSingleton<IIdentidadDeVersion, IdentidadDeVersion>();
+builder.Services.AddSingleton<IVersionIdentity, VersionIdentity>();
 
 // Quién decide si un ingreso se acepta: la superficie no lo decide.
-builder.Services.AddScoped<IServicioDeIdentidad, ServicioDeIdentidad>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
 #endregion
 
 #region Autentificación - login - esquema basado en cookies
@@ -22,7 +22,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.Cookie.Name = "auth_token"; //default Cookie
-        options.LoginPath = IdentidadEndpoints.SuperficieDeAcceso;
+        options.LoginPath = IdentityEndpoints.SuperficieDeAcceso;
         options.AccessDeniedPath = "/Error";
         options.ReturnUrlParameter = "returnurl";
         //
@@ -59,7 +59,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
-#region Identidad
+#region Account
 // El ingreso y la salida son acciones del ciclo de request, no del circuito.
 app.MapearIdentidad();
 #endregion

@@ -1,10 +1,10 @@
 using System.Globalization;
-using MovilidadUrbana.Web.Aplicacion;
-using MovilidadUrbana.Web.Infraestructura;
+using MovilidadUrbana.Web.Application;
+using MovilidadUrbana.Web.Infrastructure;
 using MovilidadUrbana.Web.Components;
-using MovilidadUrbana.Web.Infraestructura.Persistencia;
-using MovilidadUrbana.Web.Sesiones;
-using MovilidadUrbana.Web.Servicios;
+using MovilidadUrbana.Web.Infrastructure.Persistence;
+using MovilidadUrbana.Web.Sessions;
+using MovilidadUrbana.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,24 +19,24 @@ builder.Services.AddRazorComponents()
 
 // --- Infraestructura y aplicación ------------------------------------------------------------
 // Cada capa registra lo suyo; este archivo solo decide la cadena de conexión y las compone.
-var cadenaDeConexion = builder.Configuration.GetConnectionString("BaseDeDatos")
-    ?? ServiciosDeInfraestructura.CadenaDeConexionPorDefecto;
-builder.Services.AgregarInfraestructura(cadenaDeConexion);
-builder.Services.AgregarAplicacion();
+var connectionString = builder.Configuration.GetConnectionString("BaseDeDatos")
+    ?? MovilidadUrbana.Web.Infrastructure.DependencyInjection.DefaultConnectionString;
+builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddApplication();
 
 // --- Presentación ----------------------------------------------------------------------------
 // La identidad de versión se resuelve una sola vez, acá: la cadena que ve la persona en el sello
 // es la misma que queda registrada en el diagnóstico.
-builder.Services.AddSingleton<IIdentidadDeVersion>(
-    IdentidadDeVersion.DelEnsamblado(System.Reflection.Assembly.GetEntryAssembly()));
+builder.Services.AddSingleton<IVersionIdentity>(
+    VersionIdentity.FromAssembly(System.Reflection.Assembly.GetEntryAssembly()));
 
 // Estado de interfaz del circuito: ni un almacenamiento de navegador improvisado.
-builder.Services.AddScoped<IServicioDeDialogos, ServicioDeDialogos>();
-builder.Services.AddScoped<IServicioDeFoco, ServicioDeFoco>();
+builder.Services.AddScoped<IDialogService, DialogService>();
+builder.Services.AddScoped<IFocusService, FocusService>();
 
 var app = builder.Build();
 
-PreparadorDeBaseDeDatos.Preparar(app.Services);
+DatabaseInitializer.Initialize(app.Services);
 
 if (!app.Environment.IsDevelopment())
 {
@@ -44,7 +44,7 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStatusCodePagesWithReExecute("/no-encontrado", createScopeForStatusCodePages: true);
 
-app.UseMiddleware<MiddlewareDeSesion>();
+app.UseMiddleware<SessionMiddleware>();
 app.UseAntiforgery();
 
 app.MapStaticAssets();

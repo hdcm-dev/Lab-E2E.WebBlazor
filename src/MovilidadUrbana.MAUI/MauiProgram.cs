@@ -1,13 +1,13 @@
 using System.Globalization;
 using Microsoft.Extensions.Logging;
-using MovilidadUrbana.MAUI.Aplicacion;
-using MovilidadUrbana.MAUI.Infraestructura;
-using MovilidadUrbana.MAUI.Infraestructura.Persistencia;
-using MovilidadUrbana.MAUI.Paginas;
-using MovilidadUrbana.MAUI.Presentacion.Abstracciones;
-using MovilidadUrbana.MAUI.Presentacion.Encuestas;
-using MovilidadUrbana.MAUI.Presentacion.Localidades;
-using MovilidadUrbana.MAUI.Servicios;
+using MovilidadUrbana.MAUI.Application;
+using MovilidadUrbana.MAUI.Infrastructure;
+using MovilidadUrbana.MAUI.Infrastructure.Persistence;
+using MovilidadUrbana.MAUI.Pages;
+using MovilidadUrbana.MAUI.Presentation.Abstractions;
+using MovilidadUrbana.MAUI.Presentation.Encuestas;
+using MovilidadUrbana.MAUI.Presentation.Localidades;
+using MovilidadUrbana.MAUI.Services;
 
 namespace MovilidadUrbana.MAUI;
 
@@ -38,17 +38,17 @@ public static class MauiProgram
         AceptarComaDecimal();
 
         var archivo = Path.Combine(FileSystem.AppDataDirectory, "movilidad.db");
-        builder.Services.AgregarInfraestructura($"Data Source={archivo};Default Timeout=30");
-        builder.Services.AgregarAplicacion();
+        builder.Services.AddInfrastructure($"Data Source={archivo};Default Timeout=30");
+        builder.Services.AddApplication();
 
-        builder.Services.AddSingleton<SesionDelDispositivo>();
-        builder.Services.AddSingleton<INavegador, NavegadorDeShell>();
-        builder.Services.AddSingleton<IAvisos, AvisosDelSistema>();
+        builder.Services.AddSingleton<DeviceSession>();
+        builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+        builder.Services.AddSingleton<IAlertService, AlertService>();
 
         // Los ViewModels toman los servicios del ámbito del dispositivo, que ya tiene la sesión puesta.
-        builder.Services.AddTransient(sp => sp.GetRequiredService<SesionDelDispositivo>().Crear<LocalidadesViewModel>());
-        builder.Services.AddTransient(sp => sp.GetRequiredService<SesionDelDispositivo>().Crear<LocalidadEditorViewModel>());
-        builder.Services.AddSingleton(sp => sp.GetRequiredService<SesionDelDispositivo>().Crear<EncuestaViewModel>());
+        builder.Services.AddTransient(sp => sp.GetRequiredService<DeviceSession>().Create<LocalidadesViewModel>());
+        builder.Services.AddTransient(sp => sp.GetRequiredService<DeviceSession>().Create<LocalidadEditorViewModel>());
+        builder.Services.AddSingleton(sp => sp.GetRequiredService<DeviceSession>().Create<EncuestaViewModel>());
 
         builder.Services.AddTransient<LocalidadesPage>();
         builder.Services.AddTransient<LocalidadEditorPage>();
@@ -59,7 +59,7 @@ public static class MauiProgram
 #endif
 
         var app = builder.Build();
-        PreparadorDeBaseDeDatos.Preparar(app.Services);
+        DatabaseInitializer.Initialize(app.Services);
         return app;
     }
 
@@ -69,7 +69,7 @@ public static class MauiProgram
 #if ANDROID
         Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(nameof(Entry.Keyboard), (h, v) =>
         {
-            if (v is not Controles.EntradaDecimal) return;
+            if (v is not Controls.DecimalEntry) return;
             h.PlatformView.InputType = Android.Text.InputTypes.ClassNumber | Android.Text.InputTypes.NumberFlagDecimal;
             h.PlatformView.KeyListener = Android.Text.Method.DigitsKeyListener.GetInstance("0123456789,.");
         });

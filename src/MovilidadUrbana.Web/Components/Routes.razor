@@ -1,6 +1,6 @@
-@using MovilidadUrbana.Web.Infraestructura.Sesiones
+@using MovilidadUrbana.Web.Infrastructure.Sessions
 
-<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NoEncontrado)">
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="datosDeRuta">
         <RouteView RouteData="datosDeRuta" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="datosDeRuta" Selector="#mq-main" />
@@ -14,14 +14,14 @@
     /// render estático y el interactivo. Debe ser serializable: por eso es un `string`.
     /// </summary>
     [Parameter]
-    public string? SesionId { get; set; }
+    public string? SessionId { get; set; }
 
     [Inject]
-    private ContextoDeSesion Contexto { get; set; } = default!;
+    private SessionContext Contexto { get; set; } = default!;
 
     // Antes de que se renderice cualquier página: los servicios del circuito ya ven la sesión correcta.
     protected override void OnParametersSet()
     {
-        if (SesionId is not null) Contexto.Establecer(SesionId);
+        if (SessionId is not null) Contexto.Set(SessionId);
     }
 }

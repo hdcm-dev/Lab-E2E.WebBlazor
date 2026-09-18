@@ -24,10 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Dominio\**\*.cs" LinkBase="MAUI\Dominio" />
-    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Aplicacion\**\*.cs" LinkBase="MAUI\Aplicacion" />
-    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Infraestructura\**\*.cs" LinkBase="MAUI\Infraestructura" />
-    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Presentacion\**\*.cs" LinkBase="MAUI\Presentacion" />
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Domain\**\*.cs" LinkBase="MAUI\Domain" />
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Application\**\*.cs" LinkBase="MAUI\Application" />
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Infrastructure\**\*.cs" LinkBase="MAUI\Infrastructure" />
+    <Compile Include="..\..\src\MovilidadUrbana.MAUI\Presentation\**\*.cs" LinkBase="MAUI\Presentation" />
   </ItemGroup>
 
   <ItemGroup>

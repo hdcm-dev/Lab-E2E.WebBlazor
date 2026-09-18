@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Components;
-using MovilidadUrbana.Web.Aplicacion.Localidades;
-using MovilidadUrbana.Web.Components.Componentes;
-using MovilidadUrbana.Web.Dominio.Entidades;
-using MovilidadUrbana.Web.Servicios;
+using MovilidadUrbana.Web.Application.Localidades;
+using MovilidadUrbana.Web.Components.Shared;
+using MovilidadUrbana.Web.Domain.Entities;
+using MovilidadUrbana.Web.Services;
 
 namespace MovilidadUrbana.Web.Components.Pages;
 
@@ -12,50 +12,50 @@ namespace MovilidadUrbana.Web.Components.Pages;
 /// </summary>
 public partial class Localidades : ComponentBase
 {
-    private static readonly IReadOnlyDictionary<string, string> SinErrores = new Dictionary<string, string>();
+    private static readonly IReadOnlyDictionary<string, string> NoErrors = new Dictionary<string, string>();
 
-    private IReadOnlyList<Localidad> _todas = [];
-    private IReadOnlyList<Localidad> _visibles = [];
-    private ModeloDeLocalidad _modelo = new();
-    private IReadOnlyDictionary<string, string> _errores = SinErrores;
-    private (string Mensaje, TonoDeBanda Tono)? _aviso;
-    private EstadoDeSuperficie _estado = EstadoDeSuperficie.Cargando;
+    private IReadOnlyList<Localidad> _all = [];
+    private IReadOnlyList<Localidad> _visible = [];
+    private LocalidadModel _model = new();
+    private IReadOnlyDictionary<string, string> _errors = NoErrors;
+    private (string Message, BandTone Tone)? _notice;
+    private SurfaceState _state = SurfaceState.Cargando;
     private ElementReference _campoDelNombre;
     private string _texto = string.Empty;
     private string _provincia = string.Empty;
-    private string _anuncio = string.Empty;
-    private bool _procesando;
+    private string _announcement = string.Empty;
+    private bool _busy;
 
-    [Inject] private ServicioDeLocalidades Servicio { get; set; } = default!;
+    [Inject] private LocalidadService Servicio { get; set; } = default!;
 
-    [Inject] private IServicioDeDialogos Dialogos { get; set; } = default!;
+    [Inject] private IDialogService Dialogs { get; set; } = default!;
 
     [Inject] private ILogger<Localidades> Registro { get; set; } = default!;
 
-    private bool HayFiltro => _texto.Length > 0 || _provincia.Length > 0;
+    private bool HasFilter => _texto.Length > 0 || _provincia.Length > 0;
 
-    protected override Task OnInitializedAsync() => CargarAsync();
+    protected override Task OnInitializedAsync() => LoadAsync();
 
     /// <summary>
     /// Trae la colección. La carga es idempotente y sin efectos, que es la condición para que el
     /// prerenderizado la corra dos veces sin consecuencias.
     /// </summary>
-    private async Task CargarAsync()
+    private async Task LoadAsync()
     {
-        _estado = EstadoDeSuperficie.Cargando;
-        _anuncio = "Cargando las localidades.";
+        _state = SurfaceState.Cargando;
+        _announcement = "Cargando las localidades.";
 
         try
         {
-            _todas = await Servicio.ListarAsync();
-            Refiltrar();
+            _all = await Servicio.GetAllAsync();
+            ApplyFilter();
         }
         catch (Exception excepcion)
         {
             // El detalle va al diagnóstico; a la pantalla va qué pasó y qué se puede hacer.
             Registro.LogError(excepcion, "No se pudieron traer las localidades.");
-            _estado = EstadoDeSuperficie.Indisponible;
-            _anuncio = "No pudimos traer las localidades.";
+            _state = SurfaceState.Indisponible;
+            _announcement = "No pudimos traer las localidades.";
         }
     }
 
@@ -63,43 +63,43 @@ public partial class Localidades : ComponentBase
     /// Vacío de colección y vacío de filtrado son estados distintos, con acciones distintas:
     /// confundirlos le ofrece a la persona la acción equivocada.
     /// </summary>
-    private void Refiltrar()
+    private void ApplyFilter()
     {
-        _visibles = _todas
+        _visible = _all
             .Where(localidad => _provincia.Length == 0 || localidad.Provincia == _provincia)
             .Where(localidad => _texto.Length == 0
                                 || localidad.Nombre.Contains(_texto, StringComparison.OrdinalIgnoreCase)
                                 || localidad.CodigoPostal.Contains(_texto, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        _estado = _todas.Count == 0 ? EstadoDeSuperficie.Vacio
-            : _visibles.Count == 0 ? EstadoDeSuperficie.FiltradoSinResultados
-            : EstadoDeSuperficie.ConDatos;
+        _state = _all.Count == 0 ? SurfaceState.Vacio
+            : _visible.Count == 0 ? SurfaceState.FiltradoSinResultados
+            : SurfaceState.ConDatos;
 
-        _anuncio = _estado switch
+        _announcement = _state switch
         {
-            EstadoDeSuperficie.Vacio => "Todavía no hay localidades.",
-            EstadoDeSuperficie.FiltradoSinResultados => "Ninguna localidad coincide con el filtro.",
-            _ => $"Se muestran {_visibles.Count} localidades de {_todas.Count}."
+            SurfaceState.Vacio => "Todavía no hay localidades.",
+            SurfaceState.FiltradoSinResultados => "Ninguna localidad coincide con el filtro.",
+            _ => $"Se muestran {_visible.Count} localidades de {_all.Count}."
         };
     }
 
-    private void AlBuscar(ChangeEventArgs argumentos)
+    private void OnSearch(ChangeEventArgs argumentos)
     {
         _texto = argumentos.Value?.ToString() ?? string.Empty;
-        Refiltrar();
+        ApplyFilter();
     }
 
-    private void LimpiarElFiltro()
+    private void ClearFilter()
     {
         _texto = string.Empty;
         _provincia = string.Empty;
-        Refiltrar();
+        ApplyFilter();
     }
 
-    private string? Error(string campo) => _errores.TryGetValue(campo, out var mensaje) ? mensaje : null;
+    private string? Error(string campo) => _errors.TryGetValue(campo, out var mensaje) ? mensaje : null;
 
-    private static string Iniciales(string nombre)
+    private static string Initials(string nombre)
     {
         var palabras = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -111,43 +111,43 @@ public partial class Localidades : ComponentBase
         };
     }
 
-    private async Task GuardarAsync()
+    private async Task SaveAsync()
     {
         // La bandera se setea antes del `await`: la ventana entre el click y la ida al servidor
         // alcanza para un segundo envío.
-        if (_procesando) return;
-        _procesando = true;
+        if (_busy) return;
+        _busy = true;
 
         try
         {
-            var resultado = await Servicio.GuardarAsync(_modelo);
-            _errores = resultado.Errores;
+            var result = await Servicio.SaveAsync(_model);
+            _errors = result.Errors;
 
-            if (!resultado.EsCorrecto)
+            if (!result.IsSuccess)
             {
-                _aviso = (resultado.Mensaje, TonoDeBanda.Error);
-                _anuncio = resultado.Mensaje;
+                _notice = (result.Message, BandTone.Error);
+                _announcement = result.Message;
                 return;
             }
 
-            _aviso = (resultado.Mensaje, TonoDeBanda.Exito);
-            _modelo = new ModeloDeLocalidad();
-            await CargarAsync();
+            _notice = (result.Message, BandTone.Exito);
+            _model = new LocalidadModel();
+            await LoadAsync();
         }
         catch (Exception excepcion)
         {
             Registro.LogError(excepcion, "No se pudo guardar la localidad.");
-            _aviso = ("No pudimos guardar la localidad. Volvé a intentar en unos segundos.", TonoDeBanda.Error);
+            _notice = ("No pudimos guardar la localidad. Volvé a intentar en unos segundos.", BandTone.Error);
         }
         finally
         {
-            _procesando = false;
+            _busy = false;
         }
     }
 
-    private void Editar(Localidad localidad)
+    private void Edit(Localidad localidad)
     {
-        _modelo = new ModeloDeLocalidad
+        _model = new LocalidadModel
         {
             Id = localidad.Id,
             Nombre = localidad.Nombre,
@@ -155,15 +155,15 @@ public partial class Localidades : ComponentBase
             CodigoPostal = localidad.CodigoPostal,
             Habitantes = localidad.Habitantes
         };
-        _errores = SinErrores;
-        _aviso = null;
+        _errors = NoErrors;
+        _notice = null;
     }
 
-    private void Cancelar()
+    private void Cancel()
     {
-        _modelo = new ModeloDeLocalidad();
-        _errores = SinErrores;
-        _aviso = null;
+        _model = new LocalidadModel();
+        _errors = NoErrors;
+        _notice = null;
     }
 
     /// <summary>
@@ -171,46 +171,46 @@ public partial class Localidades : ComponentBase
     /// respuestas de encuesta guardan el nombre de la localidad y no su clave—, así que se
     /// confirma sin escritura.
     /// </summary>
-    private async Task PedirBajaAsync(Localidad localidad)
+    private async Task ConfirmDeleteAsync(Localidad localidad)
     {
-        var confirmada = await Dialogos.ConfirmarAsync(new PedidoDeConfirmacion(
-            Titulo: $"Dar de baja la localidad {localidad.Nombre}",
+        var confirmada = await Dialogs.ConfirmAsync(new ConfirmationRequest(
+            Title: $"Dar de baja la localidad {localidad.Nombre}",
             Aviso: "La operación no se deshace. Las encuestas ya registradas conservan el nombre de la localidad.",
             RotuloDeAccion: "Dar de baja"));
 
         if (!confirmada) return;
 
-        await DarDeBajaAsync(localidad.Id);
+        await DeleteAsync(localidad.Id);
     }
 
-    private async Task DarDeBajaAsync(int id)
+    private async Task DeleteAsync(int id)
     {
-        if (_procesando) return;
-        _procesando = true;
+        if (_busy) return;
+        _busy = true;
 
         try
         {
             // Si se estaba editando justo la localidad dada de baja, el formulario vuelve a modo alta.
-            if (_modelo.Id == id)
+            if (_model.Id == id)
             {
-                _modelo = new ModeloDeLocalidad();
-                _errores = SinErrores;
+                _model = new LocalidadModel();
+                _errors = NoErrors;
             }
 
-            var resultado = await Servicio.EliminarAsync(id);
-            _aviso = (resultado.Mensaje, resultado.EsCorrecto ? TonoDeBanda.Exito : TonoDeBanda.Error);
-            await CargarAsync();
+            var result = await Servicio.DeleteAsync(id);
+            _notice = (result.Message, result.IsSuccess ? BandTone.Exito : BandTone.Error);
+            await LoadAsync();
         }
         catch (Exception excepcion)
         {
             Registro.LogError(excepcion, "No se pudo dar de baja la localidad.");
-            _aviso = ("No pudimos dar de baja la localidad. Volvé a intentar en unos segundos.", TonoDeBanda.Error);
+            _notice = ("No pudimos dar de baja la localidad. Volvé a intentar en unos segundos.", BandTone.Error);
         }
         finally
         {
-            _procesando = false;
+            _busy = false;
         }
     }
 
-    private async Task EnfocarElNombreAsync() => await _campoDelNombre.FocusAsync();
+    private async Task FocusNameAsync() => await _campoDelNombre.FocusAsync();
 }

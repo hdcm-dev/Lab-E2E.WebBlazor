@@ -1,15 +1,15 @@
-using MovilidadUrbana.MAUI.Presentacion;
-using MovilidadUrbana.MAUI.Presentacion.Localidades;
+using MovilidadUrbana.MAUI.Presentation;
+using MovilidadUrbana.MAUI.Presentation.Localidades;
 
 namespace MovilidadUrbana.MAUI.Tests;
 
 [TestFixture]
 public class LocalidadesViewModelTests
 {
-    private Entorno _entorno = default!;
+    private TestEnvironment _entorno = default!;
 
-    [SetUp] public void Crear() => _entorno = new Entorno();
-    [TearDown] public void Limpiar() => _entorno.Dispose();
+    [SetUp] public void Create() => _entorno = new TestEnvironment();
+    [TearDown] public void Clear() => _entorno.Dispose();
 
     [Test]
     [Description("Al cargar muestra las localidades sembradas, ordenadas por nombre")]
@@ -17,11 +17,11 @@ public class LocalidadesViewModelTests
     {
         var vm = _entorno.Lista();
 
-        await vm.CargarCommand.ExecuteAsync(null);
+        await vm.LoadCommand.ExecuteAsync(null);
 
-        Assert.That(vm.Visibles.Select(l => l.Nombre), Is.EqualTo(new[] { "Corrientes", "Resistencia" }));
-        Assert.That(vm.Estado, Is.EqualTo(EstadoDeLista.ConDatos));
-        Assert.That(vm.Visibles[0].HabitantesTexto, Is.EqualTo("346.334 hab."));
+        Assert.That(vm.Visible.Select(l => l.Nombre), Is.EqualTo(new[] { "Corrientes", "Resistencia" }));
+        Assert.That(vm.State, Is.EqualTo(ListState.ConDatos));
+        Assert.That(vm.Visible[0].HabitantesTexto, Is.EqualTo("346.334 hab."));
     }
 
     [Test]
@@ -29,14 +29,14 @@ public class LocalidadesViewModelTests
     public async Task FiltrarSinCoincidenciasYLimpiar()
     {
         var vm = _entorno.Lista();
-        await vm.CargarCommand.ExecuteAsync(null);
+        await vm.LoadCommand.ExecuteAsync(null);
 
-        vm.Texto = "zzz";
-        Assert.That(vm.Estado, Is.EqualTo(EstadoDeLista.FiltradoSinResultados));
+        vm.SearchText = "zzz";
+        Assert.That(vm.State, Is.EqualTo(ListState.FiltradoSinResultados));
 
-        vm.LimpiarFiltroCommand.Execute(null);
-        Assert.That(vm.Estado, Is.EqualTo(EstadoDeLista.ConDatos));
-        Assert.That(vm.Visibles, Has.Count.EqualTo(2));
+        vm.ClearFilterCommand.Execute(null);
+        Assert.That(vm.State, Is.EqualTo(ListState.ConDatos));
+        Assert.That(vm.Visible, Has.Count.EqualTo(2));
     }
 
     [Test]
@@ -44,14 +44,14 @@ public class LocalidadesViewModelTests
     public async Task FiltraPorProvinciaYPorCodigoPostal()
     {
         var vm = _entorno.Lista();
-        await vm.CargarCommand.ExecuteAsync(null);
+        await vm.LoadCommand.ExecuteAsync(null);
 
         vm.Provincia = "Chaco";
-        Assert.That(vm.Visibles.Select(l => l.Nombre), Is.EqualTo(new[] { "Resistencia" }));
+        Assert.That(vm.Visible.Select(l => l.Nombre), Is.EqualTo(new[] { "Resistencia" }));
 
-        vm.Provincia = LocalidadesViewModel.TodasLasProvincias;
-        vm.Texto = "3400";
-        Assert.That(vm.Visibles.Select(l => l.Nombre), Is.EqualTo(new[] { "Corrientes" }));
+        vm.Provincia = LocalidadesViewModel.AllProvincias;
+        vm.SearchText = "3400";
+        Assert.That(vm.Visible.Select(l => l.Nombre), Is.EqualTo(new[] { "Corrientes" }));
         Assert.That(vm.Resumen, Is.EqualTo("1 de 2 localidades"));
     }
 
@@ -59,13 +59,13 @@ public class LocalidadesViewModelTests
     [Description("Sin ninguna localidad el estado es Vacio, distinto de FiltradoSinResultados")]
     public async Task SinLocalidadesEsVacio()
     {
-        foreach (var l in await _entorno.Localidades.ListarAsync()) await _entorno.Localidades.EliminarAsync(l.Id);
+        foreach (var l in await _entorno.Localidades.GetAllAsync()) await _entorno.Localidades.DeleteAsync(l.Id);
         var vm = _entorno.Lista();
 
-        await vm.CargarCommand.ExecuteAsync(null);
+        await vm.LoadCommand.ExecuteAsync(null);
 
-        Assert.That(vm.Estado, Is.EqualTo(EstadoDeLista.Vacio));
-        Assert.That(vm.EsVacio, Is.True);
+        Assert.That(vm.State, Is.EqualTo(ListState.Vacio));
+        Assert.That(vm.IsEmpty, Is.True);
     }
 
     [Test]
@@ -73,13 +73,13 @@ public class LocalidadesViewModelTests
     public async Task AbreElEditor()
     {
         var vm = _entorno.Lista();
-        await vm.CargarCommand.ExecuteAsync(null);
+        await vm.LoadCommand.ExecuteAsync(null);
 
-        await vm.AgregarCommand.ExecuteAsync(null);
-        await vm.EditarCommand.ExecuteAsync(vm.Visibles[1]);
+        await vm.AddCommand.ExecuteAsync(null);
+        await vm.EditCommand.ExecuteAsync(vm.Visible[1]);
 
-        Assert.That(_entorno.Navegador.EditoresAbiertos, Has.Count.EqualTo(2));
-        Assert.That(_entorno.Navegador.EditoresAbiertos[0], Is.Null);
-        Assert.That(_entorno.Navegador.EditoresAbiertos[1]!.Nombre, Is.EqualTo("Resistencia"));
+        Assert.That(_entorno.Navegador.OpenedEditors, Has.Count.EqualTo(2));
+        Assert.That(_entorno.Navegador.OpenedEditors[0], Is.Null);
+        Assert.That(_entorno.Navegador.OpenedEditors[1]!.Nombre, Is.EqualTo("Resistencia"));
     }
 }

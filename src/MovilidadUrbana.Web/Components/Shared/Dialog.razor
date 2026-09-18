@@ -1,0 +1,28 @@
+@* Ventana modal de confirmación, sobre el <dialog> nativo. Cancelar antes de la acción; la
+   acción nombra su verbo exacto; el aviso de consecuencia es la descripción del campo cuando la
+   confirmación es escrita. *@
+
+<dialog class="mq-dialogo" @ref="_element" aria-labelledby="@TitleId" data-testid="dialogo">
+    <h2 id="@TitleId" data-testid="dialogo-titulo">@Request.Title</h2>
+
+    <Band Tone="BandTone.Atencion" Id="@NoticeId">@Request.Aviso</Band>
+
+    @if (Request.PideEscritura)
+    {
+        <FormField Id="@FieldId" Label="@(Request.RotuloDelCampo ?? string.Empty)">
+            <Control Context="campo">
+                <input class="@campo.InputClass" id="@campo.Id" type="text" autocomplete="off"
+                       aria-describedby="@NoticeId" data-testid="dialogo-confirmacion"
+                       value="@_typed"
+                       @oninput="argumentos => _typed = argumentos.Value?.ToString() ?? string.Empty" />
+            </Control>
+        </FormField>
+    }
+
+    <div class="mq-acciones-pie">
+        <button type="button" class="mq-btn mq-btn--secundario" data-testid="boton-cancelar-dialogo"
+                @onclick="() => CerrarAsync(false)">Cancelar</button>
+        <button type="button" class="mq-btn @ActionClass" data-testid="boton-confirmar-dialogo"
+                disabled="@(!IsEnabled)" @onclick="() => CerrarAsync(true)">@Request.RotuloDeAccion</button>
+    </div>
+</dialog>

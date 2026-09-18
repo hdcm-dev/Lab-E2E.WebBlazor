@@ -1,0 +1,26 @@
+@* Banda de resultado de una acción. El rol lo decide el tono: un error interrumpe la lectura
+   («alert»), un acuse no («status»). *@
+
+<p class="mq-banda mq-banda--@Tone.ToString().ToLowerInvariant()" role="@Role" id="@Id" data-testid="@Testid">
+    <Icon Nombre="@ToneIcon" />
+    <span>@ChildContent</span>
+</p>
+
+@code {
+    [Parameter] public BandTone Tone { get; set; } = BandTone.Info;
+
+    /// <summary>Identificador, para que un control pueda citar la banda en `aria-describedby`.</summary>
+    [Parameter] public string? Id { get; set; }
+
+    [Parameter] public string? Testid { get; set; }
+
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+
+    private string Role => Tone is BandTone.Error ? "alert" : "status";
+
+    private string ToneIcon => Tone switch
+    {
+        BandTone.Exito => Icons.Tilde,
+        _ => Icons.Alert
+    };
+}

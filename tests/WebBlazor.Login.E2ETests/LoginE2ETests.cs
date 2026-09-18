@@ -15,7 +15,7 @@ namespace WebBlazor.Login.E2ETests;
 /// </remarks>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
-public class LoginE2ETests : PruebaDeSuperficie
+public class LoginE2ETests : SurfaceTestBase
 {
     // El estado conocido del que parten estos casos es *sin sesión*, que es con lo
     // que arranca todo contexto nuevo de Playwright. El [SetUp] solo abre la pantalla.
@@ -88,7 +88,7 @@ public class LoginE2ETests : PruebaDeSuperficie
     [Description("Lo que falta no se intenta: el navegador retiene el envío incompleto")]
     public async Task UnEnvioIncompletoNoSale()
     {
-        await Page.GetByTestId("campo-usuario").FillAsync(Identificador);
+        await Page.GetByTestId("campo-usuario").FillAsync(Identifier);
         await Page.GetByTestId("boton-ingresar").ClickAsync();
 
         // Los campos son nativos y llevan `required`: el requisito se enuncia antes

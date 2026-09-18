@@ -3,7 +3,7 @@ using Microsoft.Playwright;
 namespace MovilidadUrbana.E2ETests;
 
 [TestFixture]
-public class LocalidadesTests : PruebaE2E
+public class LocalidadesTests : E2ETestBase
 {
     [SetUp]
     public async Task AbrirElAbmAsync() => await IrAAsync("/localidades");
@@ -168,7 +168,7 @@ public class LocalidadesTests : PruebaE2E
         // Otra sesión, mismo servidor y misma base: no ve nada de lo anterior.
         await Context.ClearCookiesAsync();
         var otra = await Context.NewPageAsync();
-        await otra.GotoAsync($"{ServidorDeLaAplicacion.UrlBase}/localidades");
+        await otra.GotoAsync($"{TestAppServer.UrlBase}/localidades");
         await Expect(otra.GetByTestId("fila")).ToHaveCountAsync(2);
         await Expect(otra.GetByTestId("cuerpo-tabla")).Not.ToContainTextAsync("Mercedes");
     }

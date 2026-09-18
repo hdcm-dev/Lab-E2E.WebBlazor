@@ -13,9 +13,9 @@
 
 @* El identificador no es información del sistema: es lo que permite encontrar el episodio en el
    diagnóstico sin exponer la traza. *@
-@if (HayIdentificador)
+@if (HasIdentifier)
 {
-    <p class="mq-caption mq-mb-6">Identificador de la petición: <code>@Identificador</code></p>
+    <p class="mq-caption mq-mb-6">Identificador de la petición: <code>@Identifier</code></p>
 }
 
 <a class="mq-btn mq-btn--primario" href="">Volver al inicio</a>
@@ -24,10 +24,10 @@
     [CascadingParameter]
     private HttpContext? ContextoHttp { get; set; }
 
-    private string? Identificador { get; set; }
+    private string? Identifier { get; set; }
 
-    private bool HayIdentificador => !string.IsNullOrEmpty(Identificador);
+    private bool HasIdentifier => !string.IsNullOrEmpty(Identifier);
 
     protected override void OnInitialized() =>
-        Identificador = Activity.Current?.Id ?? ContextoHttp?.TraceIdentifier;
+        Identifier = Activity.Current?.Id ?? ContextoHttp?.TraceIdentifier;
 }

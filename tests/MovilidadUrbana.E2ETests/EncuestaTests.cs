@@ -3,7 +3,7 @@ using Microsoft.Playwright;
 namespace MovilidadUrbana.E2ETests;
 
 [TestFixture]
-public class EncuestaTests : PruebaE2E
+public class EncuestaTests : E2ETestBase
 {
     [SetUp]
     public async Task AbrirLaEncuestaAsync() => await IrAAsync("/encuesta");
@@ -30,7 +30,7 @@ public class EncuestaTests : PruebaE2E
         await Page.GetByTestId("campo-motivo").SelectOptionAsync("trabajo");
     }
 
-    private Task SiguienteAsync() => Page.GetByTestId("boton-siguiente").ClickAsync();
+    private Task NextAsync() => Page.GetByTestId("boton-siguiente").ClickAsync();
 
     [Test]
     [Description("Arranca en el paso 1 con el anterior deshabilitado")]
@@ -59,7 +59,7 @@ public class EncuestaTests : PruebaE2E
     public async Task NoAvanzaDelPaso1ConDatosInvalidos()
     {
         await Page.GetByTestId("campo-edad").FillAsync("12");
-        await SiguienteAsync();
+        await NextAsync();
 
         await Expect(Page.GetByTestId("aviso")).ToHaveTextAsync("Complete los datos del paso antes de continuar.");
         await Expect(Page.GetByTestId("error-nombre")).ToHaveTextAsync(new Regex("mínimo 3 caracteres"));
@@ -74,10 +74,10 @@ public class EncuestaTests : PruebaE2E
     public async Task NoAvanzaDelPaso2SinMediosNiFrecuencia()
     {
         await CompletarPaso1Async();
-        await SiguienteAsync();
+        await NextAsync();
         await Expect(Page.GetByTestId("paso-2")).ToBeVisibleAsync();
 
-        await SiguienteAsync();
+        await NextAsync();
         await Expect(Page.GetByTestId("error-medios")).ToHaveTextAsync("Seleccione al menos un medio de transporte.");
         await Expect(Page.GetByTestId("error-frecuencia")).ToHaveTextAsync(new Regex("Seleccione la frecuencia"));
         await Expect(Page.GetByTestId("etiqueta-paso")).ToHaveTextAsync("Paso 2 de 3");
@@ -88,9 +88,9 @@ public class EncuestaTests : PruebaE2E
     public async Task PermiteVolverAtrasConservandoLoCargado()
     {
         await CompletarPaso1Async();
-        await SiguienteAsync();
+        await NextAsync();
         await CompletarPaso2Async();
-        await SiguienteAsync();
+        await NextAsync();
 
         await Expect(Page.GetByTestId("paso-3")).ToBeVisibleAsync();
         await Expect(Page.GetByTestId("boton-siguiente")).ToBeHiddenAsync();
@@ -117,12 +117,12 @@ public class EncuestaTests : PruebaE2E
         await Expect(pasos.Nth(1)).ToHaveClassAsync(new Regex("mq-paso--pendiente"));
 
         await CompletarPaso1Async();
-        await SiguienteAsync();
+        await NextAsync();
         await Expect(pasos.Nth(1)).ToHaveAttributeAsync("aria-current", "step");
         await Expect(pasos.Nth(0)).ToHaveClassAsync(new Regex("mq-paso--completado"));
 
         await CompletarPaso2Async();
-        await SiguienteAsync();
+        await NextAsync();
         await Expect(pasos.Nth(2)).ToHaveAttributeAsync("aria-current", "step");
         await Expect(pasos.Nth(1)).ToHaveClassAsync(new Regex("mq-paso--completado"));
     }
@@ -132,9 +132,9 @@ public class EncuestaTests : PruebaE2E
     public async Task NoFinalizaConElPaso3Incompleto()
     {
         await CompletarPaso1Async();
-        await SiguienteAsync();
+        await NextAsync();
         await CompletarPaso2Async();
-        await SiguienteAsync();
+        await NextAsync();
 
         await Page.GetByTestId("campo-distancia").FillAsync("900");
         await Page.GetByTestId("boton-finalizar").ClickAsync();
@@ -149,9 +149,9 @@ public class EncuestaTests : PruebaE2E
     public async Task RecorreLosTresPasosMuestraElResumenYRegistraLaRespuesta()
     {
         await CompletarPaso1Async();
-        await SiguienteAsync();
+        await NextAsync();
         await CompletarPaso2Async();
-        await SiguienteAsync();
+        await NextAsync();
         await CompletarPaso3Async();
         await Page.GetByTestId("boton-finalizar").ClickAsync();
 
@@ -179,9 +179,9 @@ public class EncuestaTests : PruebaE2E
     public async Task NuevaEncuestaDevuelveElAsistenteAlPaso1()
     {
         await CompletarPaso1Async();
-        await SiguienteAsync();
+        await NextAsync();
         await CompletarPaso2Async();
-        await SiguienteAsync();
+        await NextAsync();
         await CompletarPaso3Async();
         await Page.GetByTestId("boton-finalizar").ClickAsync();
 

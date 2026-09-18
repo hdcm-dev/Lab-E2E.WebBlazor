@@ -14,51 +14,51 @@
 </div>
 
 @* Región activa: lo que cambia sin que la persona lo mire, se anuncia. *@
-<p class="mq-sr-only" role="status" aria-live="polite">@_anuncio</p>
+<p class="mq-sr-only" role="status" aria-live="polite">@_announcement</p>
 
-@if (_aviso is { } aviso)
+@if (_notice is { } notice)
 {
     <div class="mq-mb-6">
-        <Banda Tono="aviso.Tono" Testid="aviso">@aviso.Mensaje</Banda>
+        <Band Tone="notice.Tone" Testid="aviso">@notice.Message</Band>
     </div>
 }
 
-@if (_estado is EstadoDeSuperficie.Indisponible)
+@if (_state is SurfaceState.Indisponible)
 {
-    <EstadoIndisponible Titulo="No pudimos traer las localidades"
-                        Cuerpo="El servicio no respondió. Lo que ves puede estar desactualizado."
-                        AccionRotulo="Reintentar traer las localidades"
-                        AlReintentar="CargarAsync"
-                        Testid="indisponible" TestidAccion="boton-reintentar" />
+    <UnavailableState Title="No pudimos traer las localidades"
+                        Body="El service no respondió. Lo que ves puede estar desactualizado."
+                        ActionLabel="Reintentar traer las localidades"
+                        OnRetry="LoadAsync"
+                        Testid="indisponible" ActionTestid="boton-reintentar" />
 }
 else
 {
     <div class="mq-columnas-abm">
         <div class="mq-panel">
             <div class="mq-panel__cabecera" data-testid="titulo-formulario">
-                @(_modelo.EsEdicion ? "Editar localidad" : "Alta de localidad")
+                @(_model.IsEdit ? "Editar localidad" : "Alta de localidad")
             </div>
             <div class="mq-panel__cuerpo">
-                <EditForm Model="_modelo" OnSubmit="GuardarAsync" data-testid="formulario">
+                <EditForm Model="_model" OnSubmit="SaveAsync" data-testid="formulario">
                     <div class="mq-grilla-campos">
-                        <Campo Id="nombre" Rotulo="Nombre" TestidError="error-nombre"
-                               Requisito="@PoliticaDeLocalidades.RequisitoDelNombre" Error="@Error("nombre")">
+                        <FormField Id="nombre" Label="Nombre" ErrorTestid="error-nombre"
+                               Requirement="@LocalidadPolicy.RequisitoDelNombre" Error="@Error("nombre")">
                             <Control Context="campo">
-                                <input class="@campo.ClaseDeInput" id="@campo.Id" type="text"
+                                <input class="@campo.InputClass" id="@campo.Id" type="text"
                                        data-testid="campo-nombre" autocomplete="off"
-                                       maxlength="@ReglasDeLocalidad.LargoMaximoDelNombre"
-                                       aria-describedby="@campo.Descriptores" @ref="_campoDelNombre"
-                                       value="@_modelo.Nombre"
-                                       @oninput="argumentos => _modelo.Nombre = argumentos.Value?.ToString() ?? string.Empty" />
+                                       maxlength="@LocalidadRules.LargoMaximoDelNombre"
+                                       aria-describedby="@campo.DescribedBy" @ref="_campoDelNombre"
+                                       value="@_model.Nombre"
+                                       @oninput="argumentos => _model.Nombre = argumentos.Value?.ToString() ?? string.Empty" />
                             </Control>
-                        </Campo>
+                        </FormField>
 
-                        <Campo Id="provincia" Rotulo="Provincia" TestidError="error-provincia"
-                               Requisito="@PoliticaDeLocalidades.RequisitoDeLaProvincia" Error="@Error("provincia")">
+                        <FormField Id="provincia" Label="Provincia" ErrorTestid="error-provincia"
+                               Requirement="@LocalidadPolicy.RequisitoDeLaProvincia" Error="@Error("provincia")">
                             <Control Context="campo">
-                                <select class="@campo.ClaseDeSelect" id="@campo.Id"
+                                <select class="@campo.SelectClass" id="@campo.Id"
                                         data-testid="campo-provincia"
-                                        aria-describedby="@campo.Descriptores" @bind="_modelo.Provincia">
+                                        aria-describedby="@campo.DescribedBy" @bind="_model.Provincia">
                                     <option value="">Seleccione…</option>
                                     @foreach (var provincia in Catalogos.Provincias)
                                     {
@@ -66,46 +66,46 @@ else
                                     }
                                 </select>
                             </Control>
-                        </Campo>
+                        </FormField>
 
-                        <Campo Id="codigoPostal" Rotulo="Código postal" TestidError="error-codigo-postal"
-                               Requisito="@PoliticaDeLocalidades.RequisitoDelCodigoPostal" Error="@Error("codigoPostal")">
+                        <FormField Id="codigoPostal" Label="Código postal" ErrorTestid="error-codigo-postal"
+                               Requirement="@LocalidadPolicy.RequisitoDelCodigoPostal" Error="@Error("codigoPostal")">
                             <Control Context="campo">
-                                <input class="@campo.ClaseDeInput" id="@campo.Id" type="text"
+                                <input class="@campo.InputClass" id="@campo.Id" type="text"
                                        data-testid="campo-codigo-postal" autocomplete="postal-code"
                                        inputmode="numeric" placeholder="3400"
-                                       aria-describedby="@campo.Descriptores"
-                                       value="@_modelo.CodigoPostal"
-                                       @oninput="argumentos => _modelo.CodigoPostal = argumentos.Value?.ToString() ?? string.Empty" />
+                                       aria-describedby="@campo.DescribedBy"
+                                       value="@_model.CodigoPostal"
+                                       @oninput="argumentos => _model.CodigoPostal = argumentos.Value?.ToString() ?? string.Empty" />
                             </Control>
-                        </Campo>
+                        </FormField>
 
-                        <Campo Id="habitantes" Rotulo="Habitantes" TestidError="error-habitantes"
-                               Requisito="@PoliticaDeLocalidades.RequisitoDeLosHabitantes" Error="@Error("habitantes")">
+                        <FormField Id="habitantes" Label="Habitantes" ErrorTestid="error-habitantes"
+                               Requirement="@LocalidadPolicy.RequisitoDeLosHabitantes" Error="@Error("habitantes")">
                             <Control Context="campo">
                                 @* `oninput` y no `onchange`: `fill()` de Playwright dispara `input`, y con el
                                    enlace por defecto el valor no llegaría al servidor hasta perder el foco. *@
-                                <input class="@campo.ClaseDeInput" id="@campo.Id" type="number"
-                                       data-testid="campo-habitantes" min="@ReglasDeLocalidad.HabitantesMinimos"
-                                       step="1" aria-describedby="@campo.Descriptores"
-                                       @bind="_modelo.Habitantes" @bind:event="oninput" />
+                                <input class="@campo.InputClass" id="@campo.Id" type="number"
+                                       data-testid="campo-habitantes" min="@LocalidadRules.HabitantesMinimos"
+                                       step="1" aria-describedby="@campo.DescribedBy"
+                                       @bind="_model.Habitantes" @bind:event="oninput" />
                             </Control>
-                        </Campo>
+                        </FormField>
                     </div>
 
                     <div class="mq-acciones-pie mq-mt-6">
                         <button type="button" class="mq-btn mq-btn--secundario" data-testid="boton-cancelar"
-                                @onclick="Cancelar">Cancelar</button>
+                                @onclick="Cancel">Cancelar</button>
                         <button type="submit" class="mq-btn mq-btn--primario" data-testid="boton-guardar"
-                                disabled="@_procesando">
-                            @if (_procesando)
+                                disabled="@_busy">
+                            @if (_busy)
                             {
                                 <span class="mq-spinner"></span><text>Guardando…</text>
                             }
                             else
                             {
-                                <Icono Nombre="@Iconos.Tilde" Tamanio="RolesDeIcono.Fila" />
-                                <text>@(_modelo.EsEdicion ? "Actualizar" : "Guardar")</text>
+                                <Icon Nombre="@Icons.Tilde" Size="IconRoles.Row" />
+                                <text>@(_model.IsEdit ? "Actualizar" : "Guardar")</text>
                             }
                         </button>
                     </div>
@@ -116,10 +116,10 @@ else
         <div class="mq-panel">
             <div class="mq-panel__cabecera">
                 <span>Listado</span>
-                <Insignia Testid="contador">@_visibles.Count</Insignia>
-                @if (HayFiltro)
+                <Badge Testid="contador">@_visible.Count</Badge>
+                @if (HasFilter)
                 {
-                    <span class="mq-caption">de @_todas.Count</span>
+                    <span class="mq-caption">de @_all.Count</span>
                 }
             </div>
 
@@ -128,15 +128,15 @@ else
                     <div class="mq-campo mq-campo-busqueda">
                         <label for="buscar">Buscar por nombre o código postal</label>
                         <span class="mq-campo-busqueda__icono">
-                            <Icono Nombre="@Iconos.Buscar" />
+                            <Icon Nombre="@Icons.Buscar" />
                         </span>
                         <input class="mq-input" id="buscar" type="search" data-testid="campo-buscar"
-                               placeholder="nombre o código postal" value="@_texto" @oninput="AlBuscar" />
+                               placeholder="nombre o código postal" value="@_texto" @oninput="OnSearch" />
                     </div>
                     <div class="mq-campo">
                         <label for="filtro-provincia">Provincia</label>
                         <select class="mq-select mq-ancho-38" id="filtro-provincia"
-                                data-testid="filtro-provincia" @bind="_provincia" @bind:after="Refiltrar">
+                                data-testid="filtro-provincia" @bind="_provincia" @bind:after="ApplyFilter">
                             <option value="">todas</option>
                             @foreach (var provincia in Catalogos.Provincias)
                             {
@@ -147,58 +147,58 @@ else
                 </div>
             </div>
 
-            <Grilla TItem="Localidad" Items="_visibles" Estado="_estado"
-                    TituloAccesible="Localidades cargadas, con su provincia, su código postal y sus habitantes"
+            <Grid TItem="Localidad" Items="_visible" State="_state"
+                    AccessibleTitle="Localidades cargadas, con su provincia, su código postal y sus habitantes"
                     Clave="localidad => localidad.Id"
-                    TestidCuerpo="cuerpo-tabla" TestidFila="fila" TestidTarjeta="tarjeta">
-                <Columnas>
-                    <ColumnaDeGrilla TItem="Localidad" Titulo="Nombre" EsEncabezadoDeFila="true"
+                    BodyTestid="cuerpo-tabla" RowTestid="fila" CardTestid="tarjeta">
+                <Columns>
+                    <GridColumn TItem="Localidad" Title="Nombre" IsRowHeader="true"
                                      Testid="celda-nombre">
-                        <Plantilla Context="localidad">
-                            <span class="mq-iniciales" aria-hidden="true">@Iniciales(localidad.Nombre)</span>@localidad.Nombre
-                        </Plantilla>
-                    </ColumnaDeGrilla>
-                    <ColumnaDeGrilla TItem="Localidad" Titulo="Provincia" Testid="celda-provincia">
-                        <Plantilla Context="localidad">@localidad.Provincia</Plantilla>
-                    </ColumnaDeGrilla>
-                    <ColumnaDeGrilla TItem="Localidad" Titulo="CP" Testid="celda-codigo-postal">
-                        <Plantilla Context="localidad">@localidad.CodigoPostal</Plantilla>
-                    </ColumnaDeGrilla>
-                    <ColumnaDeGrilla TItem="Localidad" Titulo="Habitantes" EsNumerica="true"
+                        <Template Context="localidad">
+                            <span class="mq-iniciales" aria-hidden="true">@Initials(localidad.Nombre)</span>@localidad.Nombre
+                        </Template>
+                    </GridColumn>
+                    <GridColumn TItem="Localidad" Title="Provincia" Testid="celda-provincia">
+                        <Template Context="localidad">@localidad.Provincia</Template>
+                    </GridColumn>
+                    <GridColumn TItem="Localidad" Title="CP" Testid="celda-codigo-postal">
+                        <Template Context="localidad">@localidad.CodigoPostal</Template>
+                    </GridColumn>
+                    <GridColumn TItem="Localidad" Title="Habitantes" IsNumeric="true"
                                      Testid="celda-habitantes">
-                        <Plantilla Context="localidad">@localidad.Habitantes.ToString("N0")</Plantilla>
-                    </ColumnaDeGrilla>
-                </Columnas>
-                <Acciones Context="localidad">
+                        <Template Context="localidad">@localidad.Habitantes.ToString("N0")</Template>
+                    </GridColumn>
+                </Columns>
+                <Actions Context="localidad">
                     <button type="button" class="mq-btn mq-btn--fila mq-btn--marca" data-testid="boton-editar"
                             aria-label="@($"Editar la localidad {localidad.Nombre}")"
-                            @onclick="() => Editar(localidad)">
-                        <Icono Nombre="@Iconos.Editar" Tamanio="RolesDeIcono.Fila" />Editar
+                            @onclick="() => Edit(localidad)">
+                        <Icon Nombre="@Icons.Edit" Size="IconRoles.Row" />Editar
                     </button>
                     <button type="button" class="mq-btn mq-btn--fila mq-btn--destructivo"
                             data-testid="boton-eliminar"
                             aria-label="@($"Eliminar la localidad {localidad.Nombre}")"
-                            @onclick="() => PedirBajaAsync(localidad)">
-                        <Icono Nombre="@Iconos.Eliminar" Tamanio="RolesDeIcono.Fila" />Eliminar
+                            @onclick="() => ConfirmDeleteAsync(localidad)">
+                        <Icon Nombre="@Icons.Delete" Size="IconRoles.Row" />Eliminar
                     </button>
-                </Acciones>
-                <Vacio>
+                </Actions>
+                <Empty>
                     @* Vacío de colección: la acción que corresponde es cargar la primera. *@
-                    <EstadoVacio Titulo="Todavía no hay localidades"
-                                 Cuerpo="Cuando cargues la primera, va a aparecer acá con su provincia y sus habitantes."
-                                 AccionRotulo="Cargar la primera localidad"
-                                 AlAccionar="EnfocarElNombreAsync"
-                                 Testid="sin-datos" TestidAccion="boton-cargar-la-primera" />
-                </Vacio>
-                <SinResultados>
+                    <EmptyState Title="Todavía no hay localidades"
+                                 Body="Cuando cargues la primera, va a aparecer acá con su provincia y sus habitantes."
+                                 ActionLabel="Cargar la primera localidad"
+                                 OnAction="FocusNameAsync"
+                                 Testid="sin-datos" ActionTestid="boton-cargar-la-primera" />
+                </Empty>
+                <NoResults>
                     @* Vacío de filtrado: hay localidades y ninguna coincide. Otra acción. *@
-                    <EstadoVacio Titulo="Ninguna localidad coincide con el filtro"
-                                 Cuerpo="Hay localidades cargadas; ninguna cumple lo que buscaste."
-                                 AccionRotulo="Limpiar el filtro"
-                                 AlAccionar="LimpiarElFiltro"
-                                 Testid="sin-resultados" TestidAccion="boton-limpiar-filtro" />
-                </SinResultados>
-            </Grilla>
+                    <EmptyState Title="Ninguna localidad coincide con el filtro"
+                                 Body="Hay localidades cargadas; ninguna cumple lo que buscaste."
+                                 ActionLabel="Limpiar el filtro"
+                                 OnAction="ClearFilter"
+                                 Testid="sin-resultados" ActionTestid="boton-limpiar-filtro" />
+                </NoResults>
+            </Grid>
         </div>
     </div>
 }

@@ -3,16 +3,16 @@
 @inherits LayoutComponentBase
 
 <div class="mq-shell">
-    <BarraLateral />
+    <Sidebar />
     <div class="mq-shell-contenido">
         <main id="mq-main" tabindex="-1">@Body</main>
-        <SelloDeVersion />
+        <VersionStamp />
     </div>
 </div>
 
 @* Los dos hosts que el layout monta una sola vez para todo el shell. *@
-<DialogoHost />
-<AvisoDeReconexion />
+<DialogHost />
+<ReconnectionNotice />
 
 @*
     Testigo de interactividad. Durante el prerenderizado vale `false` y pasa a `true` cuando el

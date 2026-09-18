@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using MovilidadUrbana.ApiWeb.Aplicacion.Encuestas;
-using MovilidadUrbana.ApiWeb.Contratos;
-using MovilidadUrbana.ApiWeb.Dominio.Reglas;
+using MovilidadUrbana.ApiWeb.Application.Encuestas;
+using MovilidadUrbana.ApiWeb.Contracts;
+using MovilidadUrbana.ApiWeb.Domain.Rules;
 
 namespace MovilidadUrbana.ApiWeb.Controllers;
 
@@ -12,40 +12,40 @@ namespace MovilidadUrbana.ApiWeb.Controllers;
 [ApiController]
 [Route("api/v1/encuestas")]
 [Produces("application/json")]
-public sealed class EncuestasController(ServicioDeEncuestas servicio) : ControllerBase
+public sealed class EncuestasController(EncuestaService service) : ControllerBase
 {
     /// <summary>Cuántas encuestas registró esta sesión.</summary>
     [HttpGet("contador")]
     [ProducesResponseType<ContadorDeEncuestasDto>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<ContadorDeEncuestasDto>> Contar(CancellationToken cancelacion) =>
-        Ok(new ContadorDeEncuestasDto(await servicio.ContarAsync(cancelacion)));
+    public async Task<ActionResult<ContadorDeEncuestasDto>> GetCount(CancellationToken cancellationToken) =>
+        Ok(new ContadorDeEncuestasDto(await service.CountAsync(cancellationToken)));
 
     /// <summary>Valida un paso —1, 2 o 3— sin registrar nada.</summary>
     [HttpPost("pasos/{paso:int}/validacion")]
     [ProducesResponseType<ValidacionDePasoDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<ValidacionDePasoDto> ValidarPaso(int paso, SolicitudDeEncuesta solicitud)
+    public ActionResult<ValidacionDePasoDto> ValidarPaso(int paso, EncuestaRequest request)
     {
-        if (paso < 1 || paso > ReglasDeEncuesta.TotalDePasos) return NotFound();
+        if (paso < 1 || paso > EncuestaRules.TotalDePasos) return NotFound();
 
-        var errores = servicio.ValidarPaso(paso, AModelo(solicitud));
-        return Ok(new ValidacionDePasoDto(paso, errores.Count == 0, errores));
+        var errors = service.ValidarPaso(paso, ToModel(request));
+        return Ok(new ValidacionDePasoDto(paso, errors.Count == 0, errors));
     }
 
     /// <summary>Registra una encuesta completa. Valida los tres pasos antes de guardar.</summary>
     [HttpPost]
     [ProducesResponseType<EncuestaRegistradaDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<EncuestaRegistradaDto>> Registrar(SolicitudDeEncuesta solicitud, CancellationToken cancelacion)
+    public async Task<ActionResult<EncuestaRegistradaDto>> Registrar(EncuestaRequest request, CancellationToken cancellationToken)
     {
-        var modelo = AModelo(solicitud);
+        var model = ToModel(request);
 
-        var errores = Enumerable.Range(1, ReglasDeEncuesta.TotalDePasos)
-            .SelectMany(paso => servicio.ValidarPaso(paso, modelo))
+        var errors = Enumerable.Range(1, EncuestaRules.TotalDePasos)
+            .SelectMany(paso => service.ValidarPaso(paso, model))
             .ToDictionary(e => e.Key, e => e.Value);
-        if (errores.Count > 0) return BadRequest(ProblemasDeValidacion.De(errores));
+        if (errors.Count > 0) return BadRequest(ValidationProblems.De(errors));
 
-        var respuesta = await servicio.RegistrarAsync(modelo, cancelacion);
+        var respuesta = await service.RegistrarAsync(model, cancellationToken);
         var dto = new EncuestaRegistradaDto(
             respuesta.Id,
             respuesta.RegistradaEn,
@@ -54,9 +54,9 @@ public sealed class EncuestasController(ServicioDeEncuestas servicio) : Controll
         return Created($"/api/v1/encuestas/{respuesta.Id}", dto);
     }
 
-    private static ModeloDeEncuesta AModelo(SolicitudDeEncuesta s)
+    private static EncuestaModel ToModel(EncuestaRequest s)
     {
-        var modelo = new ModeloDeEncuesta
+        var model = new EncuestaModel
         {
             Nombre = s.Nombre ?? string.Empty,
             Edad = s.Edad,
@@ -66,7 +66,7 @@ public sealed class EncuestasController(ServicioDeEncuestas servicio) : Controll
             Minutos = s.Minutos,
             Motivo = s.Motivo ?? string.Empty
         };
-        foreach (var medio in s.Medios ?? []) modelo.AlternarMedio(medio, elegido: true);
-        return modelo;
+        foreach (var medio in s.Medios ?? []) model.AlternarMedio(medio, elegido: true);
+        return model;
     }
 }

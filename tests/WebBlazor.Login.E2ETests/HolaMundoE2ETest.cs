@@ -7,7 +7,7 @@ namespace WebBlazor.Login.E2ETests;
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
-public class HolaMundoE2ETest : PruebaDeSuperficie
+public class HolaMundoE2ETest : SurfaceTestBase
 {
     // Iniciar en estado conocido: la pantalla abierta y con la sesión establecida.
     [SetUp]
@@ -21,7 +21,7 @@ public class HolaMundoE2ETest : PruebaDeSuperficie
         // La superficie llega pintada antes de que el circuito abra, y en esa ventana
         // el botón se ve y se puede clickear pero no responde. `Expect` reintenta:
         // la prueba queda detenida hasta que la superficie declara que ya es interactiva.
-        await EsperarCircuitoAbiertoAsync();
+        await WaitForOpenCircuitAsync();
     }
 
     [Test]
