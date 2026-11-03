@@ -85,8 +85,8 @@ jobs:
     # Contra un entorno ya desplegado no hay nada que compilar.
     if: ${{ inputs.url-base == '' }}
     # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
-    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
-    runs-on: [self-hosted, i7infra-dev]
+    # propio: la etiqueta `ci-hdcm` es la que identifica a ese runner en el repositorio.
+    runs-on: [self-hosted, ci-hdcm]
     # runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -132,8 +132,8 @@ jobs:
   preparar:
     name: Preparar matriz
     # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
-    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
-    # runs-on: [self-hosted, i7infra-dev]
+    # propio: la etiqueta `ci-hdcm` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, ci-hdcm]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -155,8 +155,8 @@ jobs:
     # `publicar` se saltea cuando se prueba un entorno ya desplegado; eso no debe arrastrar a este job.
     if: ${{ !cancelled() && needs.preparar.result == 'success' && needs.publicar.result != 'failure' }}
     # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
-    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
-    # runs-on: [self-hosted, i7infra-dev]
+    # propio: la etiqueta `ci-hdcm` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, ci-hdcm]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -252,8 +252,8 @@ jobs:
     needs: [preparar, pruebas]
     if: ${{ !cancelled() }}
     # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
-    # propio: la etiqueta `i7infra-dev` es la que identifica a ese runner en el repositorio.
-    # runs-on: [self-hosted, i7infra-dev]
+    # propio: la etiqueta `ci-hdcm` es la que identifica a ese runner en el repositorio.
+    # runs-on: [self-hosted, ci-hdcm]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
