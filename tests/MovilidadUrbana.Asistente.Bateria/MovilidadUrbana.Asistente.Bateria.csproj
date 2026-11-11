@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Batería bateria.v1 del asistente (K3 §2): las 37 preguntas contra el modelo real, por
+       variable de entorno. No corre en la CI: la corre tools/asistente/bateria.sh, tres veces. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MovilidadUrbana.Web\MovilidadUrbana.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- El mismo fixture congelado que usan las unitarias: un solo lugar donde viven las 20 encuestas. -->
+    <Compile Include="..\MovilidadUrbana.UnitTests\Dobles\FixtureDeEncuestas.cs" Link="FixtureDeEncuestas.cs" />
+    <None Include="bateria.v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+</Project>
