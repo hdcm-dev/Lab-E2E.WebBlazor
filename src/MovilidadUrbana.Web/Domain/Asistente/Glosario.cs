@@ -6,7 +6,7 @@ namespace MovilidadUrbana.Web.Domain.Asistente;
 /// </summary>
 public static class Glosario
 {
-    public const string Version = "glosario.v1";
+    public const string Version = "glosario.v2";
 
     public static readonly IReadOnlyList<EntradaDelGlosario> Entradas =
     [
@@ -15,7 +15,7 @@ public static class Glosario
         new("codigo_postal", "Código postal", ["codigo postal"], "Cuatro dígitos, el código postal clásico; no es el CPA de ocho caracteres.", "LocalidadRules.DigitosDelCodigoPostal", "localidades.alta"),
         new("habitantes", "Habitantes", ["habitantes"], "La cantidad que declarás al cargar la localidad; no es un dato oficial.", "LocalidadRules.HabitantesMinimos", "localidades.lista"),
         new("medio", "Medio de transporte", ["medio", "medios", "transporte"], "Uno de los seis medios de la encuesta: colectivo, auto particular, bicicleta, moto, a pie y tren.", "Catalogos.Medios", "encuesta.inicio"),
-        new("multirrespuesta", "Multirrespuesta", ["multirrespuesta", "marcar dos", "marcar varios", "dos medios", "varios medios"], "En el paso 2 podés marcar todos los medios que usás; por eso los porcentajes de medios no suman 100 %.", "EncuestaPolicy.RequisitoDeLosMedios", "encuesta.inicio"),
+        new("multirrespuesta", "Multirrespuesta", ["multirrespuesta", "marcar dos", "marcar varios", "dos medios", "varios medios"], "En el paso 2 podés marcar todos los medios que usás; por eso los conteos de medios pueden sumar más que el total de encuestas.", "EncuestaPolicy.RequisitoDeLosMedios", "encuesta.inicio"),
         new("frecuencia", "Frecuencia", ["frecuencia", "semanal", "diaria", "ocasional"], "Con qué asiduidad usás esos medios: todos los días, algunos días por semana u ocasionalmente.", "Catalogos.Frecuencias", "encuesta.inicio"),
         new("motivo", "Motivo", ["motivo"], "El motivo principal del viaje: trabajo, estudio, salud u otros. Se elige uno solo.", "Catalogos.Motivos", "encuesta.inicio"),
         new("distancia", "Distancia diaria", ["distancia", "kilometros", "km"], "Los kilómetros que recorrés por día, entre 0 y 500.", "EncuestaRules.DistanciaMaxima", "encuesta.inicio"),

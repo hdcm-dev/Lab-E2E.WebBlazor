@@ -32,6 +32,12 @@ tiene su propio registro.
 
 ### Cambiado
 
+- Asistente, pendientes de la ronda 4: el glosario (`glosario.v2`) ya no dice «los porcentajes de medios no
+  suman 100 %» en una respuesta que no muestra porcentajes (B20); el eco de instrucción cierra cada forma con
+  `\b` y deja de marcar «las instrucciones del formulario», «omitido» o «skipper»; las reglas del juez a
+  ciegas suman R9 (aclaración perdida, B11) y R10 (redundancia, B40), con 4 pares de control nuevos
+  (`pares-a-ciegas.v2`), y deciden el veredicto; el juez por modelo se registra y el ADR 0008 deja escrito
+  que la bandera no se prende mientras no detecte los pares peores.
 - `LocalidadRules` de la web, endurecidas a causa de la capa de IA: el nombre aplica el máximo de 60, la
   provincia tiene que ser del catálogo y el código postal acepta sólo dígitos 0-9. Las 49 pruebas previas
   siguen sin cambios.

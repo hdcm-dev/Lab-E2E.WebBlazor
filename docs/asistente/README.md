@@ -97,9 +97,12 @@ Asistente__Redaccion__Habilitada=true BATERIA_JUEZ_MODELO=<otro modelo> \
   OLLAMA_ENDPOINT=… OLLAMA_MODEL=… tools/asistente/bateria.sh   # el camino del redactor, con juez distinto
 ```
 
-La compuerta a ciegas juzga en cada corrida los pares fijos de `pares-a-ciegas.v1.json` y cada redactada que
-difiera de la fija; sin `BATERIA_JUEZ_MODELO` el juez son reglas deterministas declaradas. Con 0 pares
-juzgados el veredicto es NO EJECUTADO. El informe trae la tasa de rechazo del validador por forma.
+La compuerta a ciegas juzga en cada corrida los pares fijos de `pares-a-ciegas.v2.json` (13: 8 peores y 5 no
+peores) y cada redactada que difiera de la fija. El veredicto lo deciden las reglas deterministas declaradas
+R1–R10 (`tests/MovilidadUrbana.UnitTests/Asistente/ReglasDelJuez.cs`); `BATERIA_JUEZ_MODELO` agrega un juez
+por modelo que se registra y se mide con los pares de control (ADR 0008: la bandera no se prende mientras no
+detecte los 8 peores). Con 0 pares juzgados el veredicto es NO EJECUTADO. Con la bandera apagada, el informe
+separa la comparación respuesta por respuesta con la plantilla (diferencias de redacción) del k/M. El informe trae la tasa de rechazo del validador por forma.
 
 Sin `OLLAMA_*`, `bateria.sh` corre la línea base (el camino de la plantilla). `tools/asistente/cifras.sql`
 es el oráculo independiente de las cifras.

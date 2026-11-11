@@ -7,8 +7,9 @@
 #
 # La redacción con IA está apagada por omisión (ADR 0008): así la batería mide que la respuesta es la
 # plantilla palabra por palabra. Para medir el camino del modelo, Asistente__Redaccion__Habilitada=true.
-# Juez a ciegas (K7 R9.8): BATERIA_JUEZ_MODELO=<otro modelo del servidor>; sin él, reglas deterministas.
-# La compuerta juzga en cada corrida los pares fijos de pares-a-ciegas.v1.json y las redactadas que
+# Juez a ciegas (K7 R9.8): BATERIA_JUEZ_MODELO=<otro modelo del servidor>, que se registra y se mide;
+# el veredicto lo deciden siempre las reglas deterministas R1–R10 (ADR 0008).
+# La compuerta juzga en cada corrida los pares fijos de pares-a-ciegas.v2.json y las redactadas que
 # difieren de la fija; con 0 pares juzgados el veredicto es NO EJECUTADO.
 #
 # Sin OLLAMA_* corre la línea base (camino de la plantilla). Cada corrida deja corrida-N.jsonl
@@ -66,6 +67,11 @@ peores = sum(c.get("redactadas", {}).get("peores", 0) for c in ciegas)
 juzgados = [c.get("paresJuzgados", 0) for c in ciegas]
 validador = [r.get("validador", {}) for r in resumenes]
 distintas = sorted({x for r in resumenes for x in ((r.get("igualesALaPlantilla") or {}).get("distintas") or [])})
+comparadasPlantilla = [(r.get("igualesALaPlantilla") or {}).get("comparadas") for r in resumenes]
+peoresControl = [c.get("control", {}).get("peores") for c in ciegas]
+peoresJuez = [c.get("control", {}).get("peoresDetectadosPorElJuez") for c in ciegas]
+peoresReglas = [c.get("control", {}).get("peoresDetectadosPorReglas") for c in ciegas]
+juezConfiable = all(j is not None and j == p for j, p in zip(peoresJuez, peoresControl))
 variacion = [{"corrida": r["corrida"], "semilla": r.get("semilla"), "temperatura": r.get("temperatura")} for r in resumenes]
 # Estabilidad: cuántos casos redactados dieron el mismo texto en todas las corridas.
 textos = {}
@@ -85,15 +91,19 @@ print(f"variación {variacion}; a ciegas, redactada peor que la fija: {peores}; 
 print(f"redacción {resumenes[0].get('redaccion')}; compuerta a ciegas: juez {ciegas[0].get('juez')}; pares juzgados {juzgados} "
       f"(control {[c.get('control', {}).get('juzgados') for c in ciegas]}, aciertos del juez {[c.get('control', {}).get('aciertos') for c in ciegas]}, "
       f"redactadas juzgadas {[c.get('redactadas', {}).get('juzgadas') for c in ciegas]})")
+print(f"veredicto por reglas: peores de control detectados {peoresReglas} de {peoresControl}; "
+      f"juez {ciegas[0].get('juez')}: {peoresJuez} de {peoresControl} ({'detecta todos' if juezConfiable else 'NO detecta todos: la bandera no se prende (ADR 0008)'})")
 print(f"validador: rechazos {[v.get('rechazos') for v in validador]} de {[v.get('intentos') for v in validador]} intentos; "
       f"tasa {[v.get('tasaDeRechazo') for v in validador]}; sólo citas {[v.get('soloCitas') for v in validador]}; motivos {[v.get('porMotivo') for v in validador]}")
 if resumenes[0].get("igualesALaPlantilla") is not None:
-    print(f"con la redacción apagada, distintas de la plantilla: {', '.join(distintas) or 'ninguna'}")
+    print(f"con la redacción apagada, comparadas respuesta por respuesta con la plantilla {comparadasPlantilla}; "
+          f"diferencias de redacción: {', '.join(distintas) or '0'}")
 print(f"casos con alguna falla: {', '.join(sorted(inestables)) or 'ninguno'}")
 print("VEREDICTO:", "NO EJECUTADO" if not ejecutada else ("CUMPLE" if veredicto else "NO CUMPLE"))
 (salida / "veredicto.json").write_text(json.dumps({"k": ks, "m": m, "minimo": min(ks), "umbral": minimo, "inventados": inventados,
     "inestables": sorted(inestables), "peoresACiegas": peores, "paresJuzgados": juzgados,
-    "compuerta": "EJERCIDA" if ejecutada else "NO EJECUTADO", "validador": validador, "distintasDeLaPlantilla": distintas, "redaccion": resumenes[0].get("redaccion"), "variacion": variacion,
+    "compuerta": "EJERCIDA" if ejecutada else "NO EJECUTADO", "validador": validador, "distintasDeLaPlantilla": distintas, "comparadasConLaPlantilla": comparadasPlantilla,
+    "peoresDeControl": peoresControl, "peoresDetectadosPorReglas": peoresReglas, "peoresDetectadosPorElJuez": peoresJuez, "juezDetectaTodos": juezConfiable, "redaccion": resumenes[0].get("redaccion"), "variacion": variacion,
     "conIa": sorted(conIa), "identicosEntreCorridas": identicos, "cumple": veredicto}, ensure_ascii=False, indent=2), encoding="utf-8")
 sys.exit(0 if veredicto else 1)
 PY
