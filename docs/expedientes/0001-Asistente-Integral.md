@@ -62,3 +62,10 @@ Se elevan en un solo mensaje, con su default (mientras no firme, rige el default
 D-1 escritura con aprobación en el chat · D-2 el asistente en MAUI y en ApiWeb (una copia por aplicación) ·
 D-3 migraciones · D-4 intenciones elegidas por el modelo · D-5 la velocidad implícita como función · D-6
 MCP · embeddings opcionales (ADR 0006).
+
+## 6. Segunda ronda (2026-11-11)
+
+Corrección de los tres defectos de la verificación (atribución de cifras, redondeo contra SQLite, marcas
+crudas) y de B14, B17 y B19 de la lectura propia; investigación de la tasa de redacción. Detalle y conteos en
+[`verificacion-2026-11-11.md` §7](../asistente/verificacion-2026-11-11.md). La batería pasa a `bateria.v2`
+(v1 más seis casos sobre el fixture de empates cercanos, umbral 40 de 43); el prompt pasa a `redactor.v2`.

@@ -13,6 +13,12 @@ SELECT 'motivos', Motivo, COUNT(*) FROM Encuestas WHERE SessionId = @sesion GROU
 UNION ALL
 SELECT 'frecuencias', Frecuencia, COUNT(*) FROM Encuestas WHERE SessionId = @sesion GROUP BY Frecuencia
 UNION ALL
-SELECT 'minutos_promedio', 'colectivo', ROUND(AVG(Minutos), 1) FROM Encuestas WHERE SessionId = @sesion AND (',' || Medios || ',') LIKE '%,colectivo,%'
+SELECT 'minutos_promedio', 'todas', ROUND(AVG(Minutos), 1) FROM Encuestas WHERE SessionId = @sesion
 UNION ALL
-SELECT 'distancia_promedio', 'colectivo', ROUND(AVG(Distancia), 1) FROM Encuestas WHERE SessionId = @sesion AND (',' || Medios || ',') LIKE '%,colectivo,%';
+SELECT 'distancia_promedio', 'todas', ROUND(AVG(Distancia), 1) FROM Encuestas WHERE SessionId = @sesion
+UNION ALL
+SELECT 'minutos_promedio', m.clave, (SELECT ROUND(AVG(e.Minutos), 1) FROM Encuestas e WHERE e.SessionId = @sesion AND (',' || e.Medios || ',') LIKE '%,' || m.clave || ',%')
+FROM (SELECT 'colectivo' AS clave UNION ALL SELECT 'auto' UNION ALL SELECT 'bicicleta' UNION ALL SELECT 'moto' UNION ALL SELECT 'caminata' UNION ALL SELECT 'tren') m
+UNION ALL
+SELECT 'distancia_promedio', m.clave, (SELECT ROUND(AVG(e.Distancia), 1) FROM Encuestas e WHERE e.SessionId = @sesion AND (',' || e.Medios || ',') LIKE '%,' || m.clave || ',%')
+FROM (SELECT 'colectivo' AS clave UNION ALL SELECT 'auto' UNION ALL SELECT 'bicicleta' UNION ALL SELECT 'moto' UNION ALL SELECT 'caminata' UNION ALL SELECT 'tren') m;

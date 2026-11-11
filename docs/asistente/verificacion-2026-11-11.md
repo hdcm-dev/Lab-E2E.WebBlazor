@@ -99,3 +99,43 @@ CLS y falla si no dan 0.
 | Lectura a ciegas de REQ-IA-47 | persona lectora | «más clara» ≥ «menos clara» sobre los casos F4 |
 | Batería con un modelo más grande y latencia en frío | quien tenga el turno del servidor de modelos | ×3 ≥ 34/37 y p95 frío medido |
 | Embeddings opcionales (`OLLAMA_EMBED_*`) | — | diferido: el corpus es chico y el recall léxico es 1,0 (ADR 0006) |
+
+## 7. Segunda ronda: defectos de la verificación y de la lectura propia
+
+Evidencia: [`evidencia/2026-11-11-asistente-ronda2/`](../../evidencia/2026-11-11-asistente-ronda2/). Todas las
+pruebas nuevas se corrieron contra el código anterior: **34 en rojo** (validador, redondeo y panel), en verde
+con la corrección.
+
+| Defecto | Corrección | Prueba que lo fija |
+| --- | --- | --- |
+| 1. «Trabajo y Estudio, cada una con 4» con Trabajo en 5: el validador miraba números sueltos | `VinculoDeCifras`: cada número se ata a su categoría (la que lo precede, la pegada que lo sigue o la primera de su cláusula; «cada una con N» se aplica a todas), promedio y mediana a su unidad y estadístico, y los ordinales («la segunda», «el más usado», «el menos elegido») al orden de las cifras, con empates como rango | `AtribucionTests` (prueba de intercambio sobre todos los pares, ordinales, promedio↔mediana); `FixtureDeEncuestas.EmpatesCercanos()` (20 encuestas: trabajo 6, estudio 5, salud 5, otros 4); oráculo independiente `CifrasCruzadas` en la batería |
+| 2. `Math.Round` al par contra `ROUND` de SQLite | `MidpointRounding.AwayFromZero` en promedios y mediana | `Cifras_CoincidenConSql` sin tolerancia, con promedios en la mitad (41,25 → 41,3; 15,25 → 15,3) y todos los medios; `PromedioEnLaMitad_SeRedondeaComoSql`; `Mediana([1,5; 3]) = 2,3` |
+| 3. `**…**` crudo en el panel | `TextoConMarcas`: un par cerrado se pinta como `<strong>`, un `**` suelto se quita; nunca HTML del modelo | `Ayuda_SinMarcasCrudas` (bUnit), `TextoConMarcasTests`, E2E `AyudaSinMarcasCrudas` a 1280 y 390: sin «**» en el texto visible, `<strong>` con peso ≥ 600, desborde 0, CLS 0 |
+| B19 «veces por semana» | control «período sin origen»: «veces», «por/cada/al semana·día·mes·año», «en una semana» sólo si están en las fuentes | `B19_PeriodoSinOrigen_SeRechaza`; en la batería, B40 cayó por este control («8 veces por semana») |
+| B17 eco de la inyección | control «eco de una instrucción» (ignor…, olvid…, instruccion…) salvo que esté en la ayuda; el 80 % atado a «auto» se rechaza por atribución | `B17_EcoDeLaInyeccion_SeRechaza` |
+| B14 peor que la fija | controles «cita colgante» («…: [1]») y «cifra sin la nota de la sesión» | `B14_PeorQueLaPlantilla_SeRechaza` |
+
+**Tasa de redacción.** Se clasificaron los rechazos guardando, sólo en la batería, el texto del modelo antes del
+validador (campo `crudo` de `corrida-N.jsonl`).
+
+| Rechazo de la ronda 1 | Clase | Qué se hizo |
+| --- | --- | --- |
+| 4 por número en palabras («cien», «nueve», «veinte») | evitable: la cifra era correcta | la palabra se convierte a su valor y pasa por el mismo control de origen (y de atribución) |
+| 3 por oración sin cita, 1 por cita no entregada | evitable en parte: la referencia citaba sólo al final y el modelo la copiaba | la referencia que ve el modelo cita cada oración (`CitarCadaOracion`); prompt `redactor.v2` con la regla explícita |
+| B02 «8 caracteres» (ronda 2) | evitable: la ayuda dice «ocho caracteres» | los números en palabras de las fuentes también anclan |
+
+Con el modelo chico, por corrida: **13 de 43 redactadas** (antes 8 de 37) y 10 rechazos, de los que 9 son
+legítimos: oraciones agregadas sin fuente («Queda solo en tu sesión», «Vé a la sección **Medios**», «pero son
+menos frecuentes»), textos sin ninguna cita y B40 con «8 veces por semana». Ningún control se aflojó.
+
+| Suite / corrida | Resultado |
+| --- | --- |
+| Compilación `-warnaserror` | 0 avisos, 0 errores |
+| Unitarias, bUnit y arquitectura | 300/300 |
+| API / ViewModels de Android | 13/13 · 18/18 |
+| E2E Chromium / emulación móvil | 41/41 · 41/41 (22/22 previas con el asistente apagado) |
+| Batería `bateria.v2` (43 casos, umbral 40) ×3 con modelo | 43, 43, 43; 0 inventados ni cruzados; p95 1,8 s |
+| Línea base `bateria.v2` sin modelo | 40/43 (B03, B04, B36, como en v1) |
+
+Queda a la vista: B25 redactado usa «la vuestra» (no es voseo); ningún control lo mira. Siguen pendientes los
+críticos independientes y la lectura a ciegas (§6).

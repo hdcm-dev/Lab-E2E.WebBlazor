@@ -36,14 +36,14 @@ public class BateriaTests
         string? Destino, string[]? Contiene, string[]? NoContiene, string[]? HrefContiene, string[]? HrefNoContiene,
         string? Grafico, bool SinDestino, string? Sesion, bool SinModelo, string? Aviso);
 
-    private sealed record Archivo(string Version, string Congelada, Caso[] Casos);
+    private sealed record Archivo(string Version, string Congelada, Caso[] Casos, int? Minimo);
 
     private static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = true, WriteIndented = false, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     [Test]
     public async Task Corrida()
     {
-        var ruta = Path.Combine(TestContext.CurrentContext.TestDirectory, "bateria.v1.json");
+        var ruta = Path.Combine(TestContext.CurrentContext.TestDirectory, Environment.GetEnvironmentVariable("BATERIA_ARCHIVO") ?? "bateria.v2.json");
         var crudo = await File.ReadAllBytesAsync(ruta);
         var hash = Convert.ToHexString(SHA256.HashData(crudo))[..16].ToLowerInvariant();
         var bateria = JsonSerializer.Deserialize<Archivo>(crudo, Json)!;
@@ -68,15 +68,18 @@ public class BateriaTests
         {
             var composicion = c.SinModelo ? sinModelo : conModelo;
             var sesion = $"{c.Id}-{corrida}-{Guid.NewGuid():n}";
-            if (c.Sesion != "sinEncuestas") await composicion.SembrarAsync(sesion, FixtureDeEncuestas.Veinte());
+            if (c.Sesion != "sinEncuestas") await composicion.SembrarAsync(sesion, c.Sesion == "empates" ? FixtureDeEncuestas.EmpatesCercanos() : FixtureDeEncuestas.Veinte());
             if (c.Sesion == "sinLocalidades") await composicion.VaciarLocalidadesAsync(sesion);
 
+            composicion.UltimoCrudo = null;
             var reloj = Stopwatch.StartNew();
             var r = await composicion.PreguntarAsync(sesion, c.Pregunta);
             reloj.Stop();
             latencias.Add(reloj.Elapsed.TotalMilliseconds);
 
             var fallas = Evaluar(c, r);
+            var cruzadas = CifrasCruzadas(r);
+            if (cruzadas.Count > 0) { inventados++; fallas.AddRange(cruzadas); }
             var inventado = NumerosInventados(c, r);
             if (inventado.Count > 0) { inventados++; fallas.Add($"cifra inventada: {string.Join(", ", inventado)}"); }
             if (fallas.Count == 0) aciertos++;
@@ -87,17 +90,18 @@ public class BateriaTests
                 id = c.Id, persona = c.Persona, tipo = c.Tipo, ok = fallas.Count == 0, fallas,
                 intencion = r.Intencion, anillo = r.Anillo.ToString(), forma = r.Forma.ToString(), resultado = r.Resultado.ToString(),
                 redactadaConIa = r.RedactadaConIa, destino = r.Destinos.FirstOrDefault()?.DestinoId, href = r.Destinos.FirstOrDefault()?.Href,
-                grafico = r.Grafico.ToString(), motivo = r.MotivoDelResultado, texto = r.Texto, aviso = r.Aviso, ms = Math.Round(reloj.Elapsed.TotalMilliseconds)
+                grafico = r.Grafico.ToString(), motivo = r.MotivoDelResultado, texto = r.Texto, crudo = r.Resultado == ResultadoDelTurno.Rechazado ? composicion.UltimoCrudo : null, aviso = r.Aviso, ms = Math.Round(reloj.Elapsed.TotalMilliseconds)
             }, Json));
         }
 
+        var minimo = bateria.Minimo ?? 34;
         var ordenadas = latencias.Order().ToArray();
         double Percentil(double p) => ordenadas[Math.Min(ordenadas.Length - 1, (int)Math.Ceiling(p * ordenadas.Length) - 1)];
         var resumen = new
         {
             bateria = bateria.Version, hash, corrida, camino, fecha = DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture),
             modelo = camino == "modelo" ? "por variable OLLAMA_MODEL (fuera del repositorio)" : "ninguno",
-            k = aciertos, m = bateria.Casos.Length, inventados, porResultado,
+            k = aciertos, m = bateria.Casos.Length, minimo, inventados, redactadas = lineas.Count(l => l.Contains("\"redactadaConIa\":true", StringComparison.Ordinal)), porResultado,
             p50ms = Math.Round(Percentil(0.5)), p95ms = Math.Round(Percentil(0.95)), maxms = Math.Round(ordenadas[^1])
         };
 
@@ -106,11 +110,12 @@ public class BateriaTests
         TestContext.Progress.WriteLine($"BATERIA corrida {corrida} ({camino}): {aciertos}/{bateria.Casos.Length}, inventados {inventados}, p50 {resumen.p50ms} ms, p95 {resumen.p95ms} ms");
         foreach (var l in lineas.Where(l => l.Contains("\"ok\":false", StringComparison.Ordinal))) TestContext.Progress.WriteLine("FALLA " + l);
 
-        // El umbral no se baja (K3 §11): mínimo 34 de 37 y cero cifras inventadas.
+        // El umbral no se baja (K3 §11): el mínimo de la versión (34 de 37, 40 de 43) y cero cifras
+        // inventadas ni atribuidas a otra categoría.
         Assert.Multiple(() =>
         {
             Assert.That(inventados, Is.Zero);
-            Assert.That(aciertos, Is.GreaterThanOrEqualTo(34));
+            Assert.That(aciertos, Is.GreaterThanOrEqualTo(minimo));
         });
     }
 
@@ -137,9 +142,42 @@ public class BateriaTests
         var permitidos = new HashSet<double>(r.Cifras.Select(x => Math.Round(x.Valor, 1)));
         foreach (var n in ValidadorDeCifras.Numeros(c.Pregunta)) permitidos.Add(Math.Round(n, 1));
         foreach (var f in Corpus.Fragmentos) foreach (var n in ValidadorDeCifras.Numeros(f.Texto)) permitidos.Add(Math.Round(n, 1));
+        // Una cifra que la ayuda escribe en palabras («el CPA de ocho caracteres») también tiene origen.
+        foreach (var f in Corpus.Fragmentos)
+            foreach (Match m in Regex.Matches(VinculoDeCifras.SinTildes(f.Texto).ToLowerInvariant(), @"\p{L}+"))
+                if (ValidadorDeCifras.ValorEnPalabras(m.Value) is double v) permitidos.Add(v);
         foreach (var n in new double[] { 1, 2, 3, 5, 6, 100, 346334, 291720, 3400, 3500 }) permitidos.Add(n);
         if (r.Distribucion is { } d) { permitidos.Add(d.Encuestas); foreach (var x in d.Filas) permitidos.Add(x.Cantidad); }
         return ValidadorDeCifras.Numeros(r.Texto).Select(n => Math.Round(n, 1)).Where(n => !permitidos.Contains(n)).ToList();
+    }
+
+    /// <summary>
+    /// Oráculo de atribución, independiente del validador: la cifra que sigue a una categoría
+    /// («Trabajo: 6», «Trabajo con 6») y la de «A y B, cada una con N» tienen que ser las de la
+    /// distribución del código.
+    /// </summary>
+    private static List<string> CifrasCruzadas(RespuestaDelAsistente r)
+    {
+        var f = new List<string>();
+        if (r.Distribucion is not { } d) return f;
+        var texto = Regex.Replace(r.Texto, @"\[\d+\]|\*\*", string.Empty);
+        foreach (var fila in d.Filas)
+        {
+            foreach (Match m in Regex.Matches(texto, $@"(?i)\b{Regex.Escape(fila.Etiqueta)}\b\s*(?::|=|,)?\s*(?:con|tiene|suma|es de)?\s*(\d+)\b"))
+            {
+                if (int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) != fila.Cantidad) f.Add($"cifra cruzada: «{m.Value}» con {fila.Etiqueta} = {fila.Cantidad}");
+            }
+        }
+        foreach (Match m in Regex.Matches(texto, @"(?i)\b([\p{L}]+(?: [\p{L}]+)?) y ([\p{L}]+(?: [\p{L}]+)?),? cada (?:una|uno) con (\d+)"))
+        {
+            var n = int.Parse(m.Groups[3].Value, CultureInfo.InvariantCulture);
+            foreach (var nombre in new[] { m.Groups[1].Value, m.Groups[2].Value })
+            {
+                var fila = d.Filas.FirstOrDefault(x => string.Equals(x.Etiqueta, nombre, StringComparison.OrdinalIgnoreCase));
+                if (fila is not null && fila.Cantidad != n) f.Add($"cifra cruzada: «{m.Value}» con {fila.Etiqueta} = {fila.Cantidad}");
+            }
+        }
+        return f;
     }
 
     private static readonly CorpusDeAyuda Corpus = new();
@@ -160,6 +198,11 @@ public class BateriaTests
             s.AddInfrastructure(cadena);
             s.AddApplication();
             s.AddAI(configuracion, contenidoEnTrazas: false);
+            // Para clasificar los rechazos (legítimos o evitables) la corrida guarda lo que el modelo
+            // escribió antes del validador; la aplicación no lo guarda en ningún lado.
+            var original = s.LastOrDefault(d => d.ServiceType == typeof(Microsoft.Extensions.AI.IChatClient) && d.ImplementationFactory is not null);
+            if (original is not null) ((IServiceCollection)s).Add(ServiceDescriptor.Singleton<Microsoft.Extensions.AI.IChatClient>(sp =>
+                new Grabador((Microsoft.Extensions.AI.IChatClient)original.ImplementationFactory!(sp), this)));
             _servicios = s.BuildServiceProvider();
             DatabaseInitializer.Initialize(_servicios);
         }
@@ -192,6 +235,18 @@ public class BateriaTests
         {
             using var a = Sesion(sesion);
             return await a.ServiceProvider.GetRequiredService<AsistenteService>().ResponderAsync(pregunta);
+        }
+
+        public string? UltimoCrudo { get; set; }
+
+        private sealed class Grabador(Microsoft.Extensions.AI.IChatClient interno, Composicion duena) : Microsoft.Extensions.AI.DelegatingChatClient(interno)
+        {
+            public override async Task<Microsoft.Extensions.AI.ChatResponse> GetResponseAsync(IEnumerable<Microsoft.Extensions.AI.ChatMessage> messages, Microsoft.Extensions.AI.ChatOptions? options = null, CancellationToken cancellationToken = default)
+            {
+                var r = await base.GetResponseAsync(messages, options, cancellationToken);
+                duena.UltimoCrudo = r.Text;
+                return r;
+            }
         }
 
         public void Dispose()

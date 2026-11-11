@@ -56,9 +56,9 @@ public sealed class ResultadosDeEncuestaService(IEncuestaRepository repository)
         var filas = grupos
             .Where(g => g.Items.Count > 0)
             .Select(g => new FilaDePromedio(g.Grupo, g.Etiqueta, g.Items.Count,
-                Math.Round(g.Items.Average(r => r.Distancia), 1),
+                Math.Round(g.Items.Average(r => r.Distancia), 1, MidpointRounding.AwayFromZero),
                 Mediana(g.Items.Select(r => r.Distancia)),
-                Math.Round(g.Items.Average(r => (double)r.Minutos), 1),
+                Math.Round(g.Items.Average(r => (double)r.Minutos), 1, MidpointRounding.AwayFromZero),
                 Mediana(g.Items.Select(r => (double)r.Minutos))))
             .ToList();
 
@@ -72,7 +72,7 @@ public sealed class ResultadosDeEncuestaService(IEncuestaRepository repository)
         if (ordenados.Length == 0) return 0;
         var medio = ordenados.Length / 2;
         var mediana = ordenados.Length % 2 == 1 ? ordenados[medio] : (ordenados[medio - 1] + ordenados[medio]) / 2;
-        return Math.Round(mediana, 1);
+        return Math.Round(mediana, 1, MidpointRounding.AwayFromZero);
     }
 
     private static Distribucion Unica(

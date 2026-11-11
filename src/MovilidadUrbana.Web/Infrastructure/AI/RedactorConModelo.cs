@@ -18,7 +18,7 @@ public sealed class RedactorConModelo(
     OpcionesDelModelo opciones,
     ILogger<RedactorConModelo> registro) : IRedactorDeAyuda
 {
-    public static readonly string Prompt = LeerPrompt("redactor.v1.txt");
+    public static readonly string Prompt = LeerPrompt("redactor.v2.txt");
 
     public async Task<Resultado<string>> RedactarAsync(PedidoDeRedaccion pedido, CancellationToken cancellationToken = default)
     {
@@ -77,8 +77,33 @@ public sealed class RedactorConModelo(
             sb.AppendLine(string.Join("; ", pedido.Cifras.Select(c => $"{MarcarTerceros(c.Etiqueta)} = {Plantillas.N(c.Valor)} ({c.Nota})")));
         }
         sb.AppendLine();
-        sb.AppendLine("RESPUESTA FIJA DE REFERENCIA (podés mejorar su claridad, no su contenido): " + pedido.Plantilla);
+        sb.AppendLine("RESPUESTA FIJA DE REFERENCIA (podés mejorar su claridad, no su contenido): " + CitarCadaOracion(pedido.Plantilla));
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// La referencia que ve el modelo lleva la cita en cada oración, como se le exige al texto:
+    /// la plantilla de la pantalla cita sólo al final, y el modelo la copiaba con oraciones sin
+    /// cita, que el validador rechaza con razón. Cada oración sin cita toma la siguiente cita de la
+    /// plantilla, o [1] si no hay ninguna. La plantilla que se muestra no cambia.
+    /// </summary>
+    public static string CitarCadaOracion(string plantilla)
+    {
+        var oraciones = System.Text.RegularExpressions.Regex.Split(plantilla.Trim(), @"(?<=[.!?](?:\s*\[\d+\])?)\s+(?=[A-ZÁÉÍÓÚÑ¿¡«*])");
+        var resultado = new List<string>();
+        for (var i = 0; i < oraciones.Length; i++)
+        {
+            var o = oraciones[i].Trim();
+            if (o.Length == 0) continue;
+            if (!System.Text.RegularExpressions.Regex.IsMatch(o, @"\[\d+\]"))
+            {
+                var siguiente = oraciones.Skip(i + 1).Select(x => System.Text.RegularExpressions.Regex.Match(x, @"\[\d+\]")).FirstOrDefault(m => m.Success)?.Value ?? "[1]";
+                o = System.Text.RegularExpressions.Regex.Replace(o, @"([.!?])$", " " + siguiente + "$1");
+                if (!o.Contains(siguiente, StringComparison.Ordinal)) o += " " + siguiente;
+            }
+            resultado.Add(o);
+        }
+        return string.Join(' ', resultado);
     }
 
     /// <summary>

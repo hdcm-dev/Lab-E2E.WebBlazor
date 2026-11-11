@@ -59,6 +59,29 @@ public class CapturasDelAsistenteTests : E2ETestBase
     }
 
     [TestCaseSource(nameof(Anchos))]
+    [Description("Defecto 3: la ayuda nombra los botones en negrita; en la captura no hay «**» crudos")]
+    public async Task AyudaSinMarcasCrudas(int ancho)
+    {
+        await Page.SetViewportSizeAsync(ancho, 900);
+        await IrAAsync("/localidades");
+        await Page.GetByTestId("nav-asistente").ClickAsync();
+        await Page.GetByTestId("asistente-pregunta").FillAsync("¿Cómo doy de alta una localidad?");
+        await Page.GetByTestId("asistente-enviar").ClickAsync();
+        var texto = Page.GetByTestId("respuesta-texto");
+        await Expect(texto).ToHaveCountAsync(1);
+        var visible = await texto.InnerTextAsync();
+        Assert.Multiple(() =>
+        {
+            Assert.That(visible, Does.Contain("Guardar"));
+            Assert.That(visible, Does.Not.Contain("**"));
+        });
+        await Expect(texto.Locator("strong", new() { HasTextString = "Guardar" })).ToHaveCountAsync(1);
+        var peso = await texto.Locator("strong", new() { HasTextString = "Guardar" }).EvaluateAsync<string>("e => getComputedStyle(e).fontWeight");
+        Assert.That(int.Parse(peso), Is.GreaterThanOrEqualTo(600));
+        await MedirAsync("ayuda-negrita", ancho);
+    }
+
+    [TestCaseSource(nameof(Anchos))]
     public async Task Resultados(int ancho)
     {
         await Page.SetViewportSizeAsync(ancho, 900);

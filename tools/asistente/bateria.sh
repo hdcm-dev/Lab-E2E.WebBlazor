@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Batería bateria.v1 del asistente, tres corridas (K3 §2, R2.5): mínimo de las tres ≥ 34/37 y cero
-# cifras inventadas. El modelo llega por el entorno y nunca se escribe en el repositorio:
+# Batería del asistente (bateria.v2 por defecto; BATERIA_ARCHIVO=bateria.v1.json para la anterior), tres
+# corridas (K3 §2, R2.5): mínimo de las tres ≥ el de la versión (40/43; 34/37 en v1) y cero cifras
+# inventadas o atribuidas a otra categoría. El modelo llega por el entorno y nunca se escribe en el repositorio:
 #
 #   OLLAMA_ENDPOINT=… OLLAMA_MODEL=… tools/asistente/bateria.sh [carpeta-de-salida]
 #
@@ -44,12 +45,14 @@ for i in range(1, n + 1):
         c = json.loads(l)
         if not c["ok"]:
             inestables.add(c["id"])
-veredicto = min(ks) >= 34 and inventados == 0
-print(f"bateria.v1 ({resumenes[0]['camino']}): k = {ks} / {m}; mínimo {min(ks)}; inventados {inventados}; "
+minimo = resumenes[0].get("minimo", 34)
+veredicto = min(ks) >= minimo and inventados == 0
+print(f"{resumenes[0]['bateria']} ({resumenes[0]['camino']}): k = {ks} / {m}; mínimo {min(ks)} (umbral {minimo}); inventados {inventados}; "
+      f"redactadas con IA {[r.get('redactadas') for r in resumenes]}; "
       f"p50 {[r['p50ms'] for r in resumenes]} ms; p95 {[r['p95ms'] for r in resumenes]} ms")
 print(f"casos con alguna falla: {', '.join(sorted(inestables)) or 'ninguno'}")
 print("VEREDICTO:", "CUMPLE" if veredicto else "NO CUMPLE")
-(salida / "veredicto.json").write_text(json.dumps({"k": ks, "m": m, "minimo": min(ks), "inventados": inventados,
+(salida / "veredicto.json").write_text(json.dumps({"k": ks, "m": m, "minimo": min(ks), "umbral": minimo, "inventados": inventados,
     "inestables": sorted(inestables), "cumple": veredicto}, ensure_ascii=False, indent=2), encoding="utf-8")
 sys.exit(0 if veredicto else 1)
 PY

@@ -36,4 +36,37 @@ public static class FixtureDeEncuestas
             RegistradaEn = new DateTimeOffset(2026, 11, 11, 12, 0, 0, TimeSpan.FromHours(-3))
         };
     }
+
+    /// <summary>
+    /// Fixture de empates cercanos (bateria.v2): 20 encuestas con cifras vecinas, para que una
+    /// cifra atribuida a la categoría de al lado no pase. Motivo: trabajo 6, estudio 5, salud 5,
+    /// otros 4. Frecuencia: diaria 8, semanal 7, ocasional 5. Medios (33 marcas): colectivo 8,
+    /// auto 7, bicicleta 7, caminata 6, tren 3, moto 2. Los promedios de todas las respuestas caen
+    /// en la mitad: 41,25 minutos y 15,25 km, que se redondean a 41,3 y 15,3 (como ROUND de SQLite).
+    /// </summary>
+    public static IReadOnlyList<RespuestaDeEncuesta> EmpatesCercanos() => Enumerable.Range(1, 20).Select(Empate).ToList();
+
+    public static RespuestaDeEncuesta Empate(int i)
+    {
+        var medios = new List<string>();
+        if (i <= 8) medios.Add("colectivo");
+        if (i is >= 9 and <= 15) medios.Add("auto");
+        if (i is 3 or 6 or 10 or 13 or 16 or 18 or 20) medios.Add("bicicleta");
+        if (i is 1 or 4 or 9 or 14 or 17 or 19) medios.Add("caminata");
+        if (i is 2 or 11 or 20) medios.Add("tren");
+        if (i is 5 or 12) medios.Add("moto");
+
+        return new RespuestaDeEncuesta
+        {
+            Nombre = $"Persona {i:00}",
+            Edad = 20 + i,
+            Localidad = i <= 10 ? "Corrientes" : "Resistencia",
+            Medios = medios,
+            Frecuencia = i <= 8 ? "diaria" : i <= 15 ? "semanal" : "ocasional",
+            Distancia = i == 20 ? 20 : 1.5 * i,
+            Minutos = i == 20 ? 65 : 10 + 3 * i,
+            Motivo = i <= 6 ? "trabajo" : i <= 11 ? "estudio" : i <= 16 ? "salud" : "otros",
+            RegistradaEn = new DateTimeOffset(2026, 11, 11, 12, 0, 0, TimeSpan.FromHours(-3))
+        };
+    }
 }

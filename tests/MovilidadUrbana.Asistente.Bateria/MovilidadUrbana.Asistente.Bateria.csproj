@@ -25,6 +25,7 @@
     <!-- El mismo fixture congelado que usan las unitarias: un solo lugar donde viven las 20 encuestas. -->
     <Compile Include="..\MovilidadUrbana.UnitTests\Dobles\FixtureDeEncuestas.cs" Link="FixtureDeEncuestas.cs" />
     <None Include="bateria.v1.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="bateria.v2.json" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 

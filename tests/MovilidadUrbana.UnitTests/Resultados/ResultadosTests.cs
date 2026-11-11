@@ -74,11 +74,18 @@ public class ResultadosTests
         Assert.That(visitados.Any(t => t == typeof(Distribucion)), Is.True);
     }
 
-    [Test(Description = "Las cifras coinciden con la consulta SQL independiente (cifras.sql)")]
-    public async Task Cifras_CoincidenConSql()
+    private static IEnumerable<TestCaseData> Fixtures()
+    {
+        yield return new TestCaseData("veinte", 31).SetName("Cifras_CoincidenConSql(veinte)");
+        yield return new TestCaseData("empates", 33).SetName("Cifras_CoincidenConSql(empates en la mitad)");
+    }
+
+    [TestCaseSource(nameof(Fixtures))]
+    [Description("Las cifras coinciden con la consulta SQL independiente (cifras.sql), sin tolerancia, también con promedios en la mitad")]
+    public async Task Cifras_CoincidenConSql(string fixture, int marcas)
     {
         using var arnes = new Arnes(habilitada: false);
-        await arnes.SembrarEncuestasAsync(Sesion, FixtureDeEncuestas.Veinte());
+        await arnes.SembrarEncuestasAsync(Sesion, fixture == "empates" ? FixtureDeEncuestas.EmpatesCercanos() : FixtureDeEncuestas.Veinte());
         using var alcance = arnes.Sesion(Sesion);
         var servicio = alcance.ServiceProvider.GetRequiredService<ResultadosDeEncuestaService>();
         var factory = alcance.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
@@ -91,26 +98,47 @@ public class ResultadosTests
         var sql = new Dictionary<(string, string), double>();
         await using (var lector = await comando.ExecuteReaderAsync())
         {
-            while (await lector.ReadAsync()) sql[(lector.GetString(0), lector.GetString(1))] = lector.GetDouble(2);
+            while (await lector.ReadAsync()) if (!lector.IsDBNull(2)) sql[(lector.GetString(0), lector.GetString(1))] = lector.GetDouble(2);
         }
 
         var medios = await servicio.MediosAsync();
         var motivos = await servicio.MotivosAsync();
         var frecuencias = await servicio.FrecuenciasAsync();
-        var colectivo = (await servicio.PromediosAsync(AgrupacionDePromedios.Medio)).Filas.Single(f => f.Grupo == "colectivo");
+        var porMedio = (await servicio.PromediosAsync(AgrupacionDePromedios.Medio)).Filas;
+        var todas = (await servicio.PromediosAsync(AgrupacionDePromedios.Ninguno)).Filas.Single();
         Assert.Multiple(() =>
         {
             Assert.That(sql[("encuestas", "total")], Is.EqualTo(20));
             foreach (var f in medios.Filas) Assert.That(f.Cantidad, Is.EqualTo(sql[("medios", f.Clave)]), f.Clave);
             foreach (var f in motivos.Filas) Assert.That(f.Cantidad, Is.EqualTo(sql.GetValueOrDefault(("motivos", f.Clave))), f.Clave);
             foreach (var f in frecuencias.Filas) Assert.That(f.Cantidad, Is.EqualTo(sql.GetValueOrDefault(("frecuencias", f.Clave))), f.Clave);
-            Assert.That(colectivo.MinutosPromedio, Is.EqualTo(sql[("minutos_promedio", "colectivo")]).Within(0.05));
-            Assert.That(colectivo.DistanciaPromedio, Is.EqualTo(sql[("distancia_promedio", "colectivo")]).Within(0.05));
-            Assert.That(colectivo.Encuestas, Is.EqualTo(12));
-            Assert.That(medios.Filas.Sum(f => f.Cantidad), Is.EqualTo(31));
+            // Sin tolerancia: el redondeo de la aplicación tiene que ser el de ROUND de SQLite.
+            Assert.That(todas.MinutosPromedio, Is.EqualTo(sql[("minutos_promedio", "todas")]), "minutos, todas");
+            Assert.That(todas.DistanciaPromedio, Is.EqualTo(sql[("distancia_promedio", "todas")]), "km, todas");
+            foreach (var f in porMedio)
+            {
+                Assert.That(f.MinutosPromedio, Is.EqualTo(sql[("minutos_promedio", f.Grupo)]), $"minutos, {f.Grupo}");
+                Assert.That(f.DistanciaPromedio, Is.EqualTo(sql[("distancia_promedio", f.Grupo)]), $"km, {f.Grupo}");
+            }
+            Assert.That(medios.Filas.Sum(f => f.Cantidad), Is.EqualTo(marcas));
         });
     }
 
+    [Test(Description = "Un promedio en la mitad se redondea hacia arriba, como ROUND de SQLite: 41,25 → 41,3 y 15,25 → 15,3")]
+    public async Task PromedioEnLaMitad_SeRedondeaComoSql()
+    {
+        using var arnes = new Arnes(habilitada: false);
+        await arnes.SembrarEncuestasAsync(Sesion, FixtureDeEncuestas.EmpatesCercanos());
+        using var alcance = arnes.Sesion(Sesion);
+        var todas = (await alcance.ServiceProvider.GetRequiredService<ResultadosDeEncuestaService>().PromediosAsync(AgrupacionDePromedios.Ninguno)).Filas.Single();
+        Assert.Multiple(() =>
+        {
+            Assert.That(todas.MinutosPromedio, Is.EqualTo(41.3));
+            Assert.That(todas.DistanciaPromedio, Is.EqualTo(15.3));
+        });
+    }
+
+    [TestCase(new double[] { 1.5, 3 }, 2.3)]
     [TestCase(new double[] { 1, 2, 3 }, 2)]
     [TestCase(new double[] { 1, 2, 3, 4 }, 2.5)]
     [TestCase(new double[] { }, 0)]

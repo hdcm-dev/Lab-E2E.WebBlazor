@@ -1,0 +1,69 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  MovilidadUrbana.E2ETests -> <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll
+Test run for <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+NUnit Adapter 5.0.0.0: Test execution started
+Running all tests in <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll
+   NUnit3TestExecutor discovered 41 of 41 NUnit test cases using Current Discovery mode, Non-Explicit run
+Asegurando el navegador «chromium»…
+Publicando la aplicación bajo prueba en «<repo>/publicacion»…
+  Passed ArrancaEnElPaso1ConElAnteriorDeshabilitado [12 s]
+CAPTURA alta-prellenada-1280: desborde=0 cls=0.000
+  Passed ElDesplegableDeLocalidadesSeAlimentaDelAbm [312 ms]
+  Passed AlBorrarTodasLasLocalidadesAvisaQueNoHayDatos [12 s]
+  Passed Aclaracion_ElegirSigue [12 s]
+  Passed Afuera_RechazoConSugerencias [842 ms]
+  Passed ElIndicadorDePasosAcompanaElAvance [1 s]
+  Passed AltaPrellenada(1280) [13 s]
+  Passed CadaPruebaTrabajaSobreSuPropioConjuntoDeDatos [1 s]
+  Passed NoAvanzaDelPaso1ConDatosInvalidos [820 ms]
+  Passed ChipDeAlta_AbreElFormulario [985 ms]
+  Passed CancelarLaBajaDejaLaTablaIntacta [838 ms]
+CAPTURA alta-prellenada-390: desborde=0 cls=0.000
+  Passed NoAvanzaDelPaso2SinMediosNiFrecuencia [1 s]
+  Passed ConfirmarLaBajaEliminaLaFila [860 ms]
+  Passed ChipDeBaja_AbreLaConfirmacion_YRechazarNoBorra [1 s]
+  Passed AltaPrellenada(390) [1 s]
+  Passed Resultados_SinEncuestas [569 ms]
+  Passed NoFinalizaConElPaso3Incompleto [1 s]
+  Passed DaDeAltaUnaLocalidadYLaPersisteTrasRecargar [1 s]
+  Passed SinModelo_CifraDestinoYAviso [845 ms]
+  Passed ModificaUnaLocalidadExistente [877 ms]
+  Passed Votar_QuedaRegistrado [802 ms]
+  Passed NuevaEncuestaDevuelveElAsistenteAlPaso1 [1 s]
+  Passed MuestraElListadoSembrado [562 ms]
+CAPTURA ayuda-negrita-1280: desborde=0 cls=0.000
+  Passed AyudaSinMarcasCrudas(1280) [2 s]
+  Passed DesdeLaPortadaSeLlegaAlAbmYALaEncuesta [1 s]
+  Passed NoPermiteDuplicarNombreDentroDeLaMismaProvincia [1 s]
+CAPTURA ayuda-negrita-390: desborde=0 cls=0.000
+  Passed ElMenuMarcaLaPaginaActiva [562 ms]
+  Passed PermiteVolverAtrasConservandoLoCargado [1 s]
+  Passed RechazaElAltaConCamposInvalidos [834 ms]
+  Passed LaPortadaOfreceAccesoALasDosPantallas [476 ms]
+  Passed UnaDireccionInexistenteMuestraLaPantallaDeNoEncontrado [354 ms]
+  Passed AyudaSinMarcasCrudas(390) [2 s]
+  Passed RecorreLosTresPasosMuestraElResumenYRegistraLaRespuesta [1 s]
+CAPTURA medicion-1280: desborde=0 cls=0.000
+  Passed Medicion(1280) [1 s]
+CAPTURA medicion-390: desborde=0 cls=0.000
+  Passed Medicion(390) [1 s]
+CAPTURA panel-1280: desborde=0 cls=0.000
+  Passed Panel(1280) [1 s]
+CAPTURA panel-390: desborde=0 cls=0.000
+  Passed Panel(390) [1 s]
+CAPTURA resultados-vacio-1280: desborde=0 cls=0.000
+  Passed Resultados(1280) [1 s]
+CAPTURA resultados-vacio-390: desborde=0 cls=0.000
+  Passed Resultados(390) [1 s]
+CAPTURA resultados-con-datos-1280: desborde=0 cls=0.000
+  Passed ResultadosConDatos(1280) [2 s]
+CAPTURA resultados-con-datos-390: desborde=0 cls=0.000
+NUnit Adapter 5.0.0.0: Test execution complete
+  Passed ResultadosConDatos(390) [2 s]
+
+Test Run Successful.
+Total tests: 41
+     Passed: 41
+ Total time: 39.2454 Seconds

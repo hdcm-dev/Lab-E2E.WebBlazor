@@ -65,7 +65,7 @@ public class RedaccionTests
     [TestCase("Agregué la localidad [1].", "primera persona de acción")]
     [TestCase("Hay 20 encuestas registradas en tu sesión.", "oración sin cita")]
     [TestCase("Hay 20 encuestas [4].", "cita a una fuente no entregada")]
-    [TestCase("Hay veinte encuestas [1].", "cifra en palabras sin origen")]
+    [TestCase("Hay siete encuestas registradas en tu sesión [1].", "cifra en palabras sin origen")]
     public void Validador_RechazaConMotivo(string texto, string motivo)
     {
         var pedido = new PedidoDeRedaccion("contar_encuestas", Anillo.Operar, "cuantas encuestas hay", [new Cifra("encuestas", 20, "de tu sesión")], [], "Hay 20 encuestas registradas en tu sesión.");

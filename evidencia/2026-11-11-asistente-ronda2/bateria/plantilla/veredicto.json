@@ -1,0 +1,17 @@
+{
+  "k": [
+    40,
+    40,
+    40
+  ],
+  "m": 43,
+  "minimo": 40,
+  "umbral": 40,
+  "inventados": 0,
+  "inestables": [
+    "B03",
+    "B04",
+    "B36"
+  ],
+  "cumple": true
+}

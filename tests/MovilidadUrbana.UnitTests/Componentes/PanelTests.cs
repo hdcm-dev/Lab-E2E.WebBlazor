@@ -35,6 +35,22 @@ public class PanelTests : ContextoDeComponentes
         });
     }
 
+    [Test(Description = "Defecto 3: las marcas **…** de la ayuda se pintan en negrita y no se ven crudas")]
+    public void Ayuda_SinMarcasCrudas()
+    {
+        Preparar(new Arnes(habilitada: false));
+        var panel = Render<PanelDelAsistente>();
+        panel.Find("[data-testid=asistente-pregunta]").Input("¿Cómo doy de alta una localidad?");
+        panel.Find("[data-testid=asistente-formulario]").Submit();
+        panel.WaitForAssertion(() => Assert.That(panel.FindAll("[data-testid=burbuja-asistente]"), Has.Count.EqualTo(1)));
+        var texto = panel.Find("[data-testid=respuesta-texto]");
+        Assert.Multiple(() =>
+        {
+            Assert.That(texto.TextContent, Does.Not.Contain("**"));
+            Assert.That(texto.QuerySelectorAll("strong").Select(e => e.TextContent), Does.Contain("Guardar"));
+        });
+    }
+
     [Test(Description = "Al elegir una opción de la aclaración, la respuesta sigue sin volver a preguntar")]
     public void Aclaracion_ElegirSigue()
     {
