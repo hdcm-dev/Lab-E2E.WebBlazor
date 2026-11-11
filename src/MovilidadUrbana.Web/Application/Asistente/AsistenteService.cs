@@ -391,7 +391,9 @@ public sealed class AsistenteService(
 
         var nombrada = d.Filas.FirstOrDefault(f => p.Canonicos.Contains(f.Clave));
         var mayor = d.Filas.OrderByDescending(f => f.Cantidad).First();
-        var nota = d.Sumable ? "" : " Una persona puede marcar varios medios, así que no suman 100 %.";
+        // La respuesta muestra conteos («4 de 20»), no porcentajes: la nota dice lo que pasa con los
+        // conteos (B17, B42). «No suman 100 %» queda para la pantalla, que sí muestra porcentajes.
+        var nota = d.Sumable ? "" : " " + Plantillas.NotaDeMultirrespuesta(conPorcentajes: false);
         string texto;
         if (nombrada is not null)
         {
@@ -568,15 +570,27 @@ public sealed class AsistenteService(
         if (estado.Motivo != MotivoDeHabilitacion.Habilitada) return basica with { Resultado = ResultadoDelTurno.Degradado };
         // Fuera de las distribuciones la plantilla fija es la respuesta: el modelo no se llama.
         if (!Intenciones.ConRedaccion.Contains(pedido.Intencion)) return basica;
+        // Bandera apagada (por omisión, ADR 0008): la plantilla es la respuesta y el modelo no se llama.
+        if (!estado.RedaccionHabilitada) return basica;
 
         var redactado = await redactor.RedactarAsync(pedido, ct);
+        if (redactado.Tipo == TipoDeResultado.Ok)
+        {
+            // Una sola cita si hay una sola fuente, y un texto que sólo suma citas no es una redacción (K5 CD-8).
+            var fuentes = Math.Max(pedido.Fragmentos.Count, pedido.Cifras.Count > 0 ? 1 : 0);
+            var texto = Citas.Normalizar(redactado.Valor!, fuentes);
+            if (Citas.SoloSumaCitas(texto, pedido.Plantilla)) return basica with { MotivoDelResultado = MotivoSoloCitas };
+            return basica with { Texto = texto, RedactadaConIa = true, Citas = citas.Count > 0 ? citas : basica.Citas };
+        }
         return redactado.Tipo switch
         {
-            TipoDeResultado.Ok => basica with { Texto = redactado.Valor!, RedactadaConIa = true, Citas = citas.Count > 0 ? citas : basica.Citas },
             TipoDeResultado.Rechazado => basica with { Resultado = ResultadoDelTurno.Rechazado, MotivoDelResultado = redactado.Motivo },
             _ => basica with { Resultado = ResultadoDelTurno.Degradado, MotivoDelResultado = redactado.Motivo, Aviso = redactado.Motivo == "ocupado" ? Plantillas.Ocupado : null }
         };
     }
+
+    /// <summary>Motivo registrado cuando la redacción sólo le sumaba citas a la plantilla.</summary>
+    public const string MotivoSoloCitas = "sólo suma citas";
 
     private static RespuestaDelAsistente Fija(string intencion, Anillo anillo, Forma forma, ResultadoDelTurno resultado, string texto) => new()
     {

@@ -70,11 +70,8 @@ public static partial class ValidadorDeCifras
 
 
         // Lo que pide la pregunta («ignorá los datos») no se repite en la respuesta (B17).
-        var deLaAyuda = VinculoDeCifras.SinTildes(string.Join(' ', pedido.Fragmentos.Select(f => f.Texto))).ToLowerInvariant();
-        foreach (Match m in EcoDeInstruccion().Matches(VinculoDeCifras.SinTildes(texto).ToLowerInvariant()))
-        {
-            if (!deLaAyuda.Contains(m.Value, StringComparison.Ordinal)) return $"eco de una instrucción: {m.Value}";
-        }
+        var eco = Eco(texto, string.Join(' ', pedido.Fragmentos.Select(f => f.Texto)));
+        if (eco is not null) return $"eco de una instrucción: {eco}";
 
         // Un período o una cantidad de veces que no está en las fuentes es una paráfrasis que cambia
         // el sentido (B19: «veces por semana» por «algunos días por semana»).
@@ -120,6 +117,20 @@ public static partial class ValidadorDeCifras
         return null;
     }
 
+    /// <summary>
+    /// La primera forma de instrucción del texto («ignorá», «omití», «no hagas caso», «override»…)
+    /// que no esté también en la ayuda entregada; <c>null</c> si no hay. Sin tildes ni mayúsculas.
+    /// </summary>
+    public static string? Eco(string texto, string ayuda = "")
+    {
+        var deLaAyuda = VinculoDeCifras.SinTildes(ayuda).ToLowerInvariant();
+        foreach (Match m in EcoDeInstruccion().Matches(VinculoDeCifras.SinTildes(texto).ToLowerInvariant()))
+        {
+            if (!deLaAyuda.Contains(m.Value, StringComparison.Ordinal)) return m.Value;
+        }
+        return null;
+    }
+
     /// <summary>Controles de forma contra la plantilla fija; motivo del rechazo o <c>null</c>.</summary>
     public static string? ControlarForma(string texto, string plantilla)
     {
@@ -139,12 +150,20 @@ public static partial class ValidadorDeCifras
 
         var t = VinculoDeCifras.SinTildes(texto).ToLowerInvariant();
         var p = VinculoDeCifras.SinTildes(plantilla).ToLowerInvariant();
-        // B17, B42: «los porcentajes no suman» cuando la respuesta no muestra ningún porcentaje.
-        if (t.Contains("porcentaje", StringComparison.Ordinal) && !p.Contains("porcentaje", StringComparison.Ordinal))
+        // B17, B42: «los porcentajes no suman 100 %» cuando la respuesta no muestra ningún porcentaje.
+        var plantillaConPorcentajes = p.Contains('%') || p.Contains("porcentaje", StringComparison.Ordinal);
+        if (!plantillaConPorcentajes && (t.Contains("porcentaje", StringComparison.Ordinal) || t.Contains('%')))
         {
             return "nota de porcentaje sin porcentajes";
         }
-        if (p.Contains("no suman 100 %", StringComparison.Ordinal))
+        var conConteos = VinculoDeCifras.SinTildes(Plantillas.NotaConConteos).ToLowerInvariant().TrimEnd('.');
+        var nucleoConteos = conConteos[conConteos.IndexOf("los conteos", StringComparison.Ordinal)..];
+        if (p.Contains(nucleoConteos, StringComparison.Ordinal))
+        {
+            if (NotaInvertida().IsMatch(t)) return "nota de multirrespuesta con otro sentido";
+            if (!t.Contains(nucleoConteos, StringComparison.Ordinal)) return "nota de multirrespuesta alterada";
+        }
+        else if (p.Contains("no suman 100 %", StringComparison.Ordinal))
         {
             // B11: «no llegan al cien» dice lo contrario: con varias marcas por persona se pasa de cien.
             if (NotaInvertida().IsMatch(t)) return "nota de multirrespuesta con otro sentido";
@@ -214,8 +233,10 @@ public static partial class ValidadorDeCifras
     [GeneratedRegex(@"(?i)\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|diecis[eé]is|diecisiete|dieciocho|diecinueve|veinte|veinti\w+|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|(?<!por )ciento|mil|millones)\b")]
     private static partial Regex NumeroEnPalabras();
 
-    // Sin tildes: «dejá de lado», «pasá por alto», y en inglés («ignore», «disregard», «instructions»).
-    [GeneratedRegex(@"\b(ignor\w*|olvid\w*|instruccion\w*|instruction\w*|disregard\w*|forget\w*|deja\w* de lado|pasa\w* por alto|no tengas en cuenta)")]
+    // Sin tildes y en minúsculas: «dejá de lado», «pasá por alto», «omití», «no hagas caso», «salteá»
+    // (voseo, tuteo e infinitivo), y en inglés («ignore», «disregard», «override», «system prompt»).
+    // Es un control adicional, no la frontera (K7 R9.9): el texto de la persona nunca es instrucción.
+    [GeneratedRegex(@"\b(ignor\w*|olvid\w*|instruccion\w*|instruction\w*|disregard\w*|forget\w*|deja\w* de lado|pasa\w* por alto|no tengas en cuenta|omit\w*|omiti\w*|no (?:le |les )?hag\w* caso|no (?:le |les )?hace\w* caso|saltea\w*|override\w*|overrid\w*|system prompt|prompt del sistema|skip\w*)")]
     private static partial Regex EcoDeInstruccion();
 
     [GeneratedRegex(@"\bveces\b|\ben una semana\b|\ba la semana\b|\b(por|cada|al|una vez por) (semana|dia|mes|ano)\b")]

@@ -66,4 +66,11 @@ public interface IEstadoDelAsistente
 
     /// <summary>Si la búsqueda usa sólo el léxico (sin embeddings).</summary>
     bool SoloLexico { get; }
+
+    /// <summary>
+    /// Si las distribuciones pasan por el redactor con modelo (<c>Asistente__Redaccion__Habilitada</c>).
+    /// Apagada por omisión (ADR 0008): con el modelo medido la redacción sólo agregaba citas a la
+    /// plantilla. Las cifras, los destinos, las aclaraciones y el glosario no dependen de esto.
+    /// </summary>
+    bool RedaccionHabilitada { get; }
 }

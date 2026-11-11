@@ -14,3 +14,4 @@ rige la propuesta como default.
 | [0005](0005-agencia.md) | El asistente no escribe: lleva a la acción y la persona la confirma |
 | [0006](0006-conocimiento.md) | Contexto completo de los fragmentos elegidos por una compuerta léxica |
 | [0007](0007-votos-sin-migracion.md) | La tabla de votos se crea con `EnsureCreated`, sin migraciones |
+| [0008](0008-redaccion-apagada-por-omision.md) | La redacción con IA queda apagada por omisión (`Asistente__Redaccion__Habilitada=false`) |

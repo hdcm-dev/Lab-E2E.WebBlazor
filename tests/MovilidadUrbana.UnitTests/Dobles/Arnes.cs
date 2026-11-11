@@ -29,7 +29,7 @@ public sealed class Arnes : IDisposable
 
     public ClienteDeChatGuionado Modelo { get; }
 
-    public Arnes(ClienteDeChatGuionado? modelo = null, bool habilitada = true, IDictionary<string, string?>? configuracion = null)
+    public Arnes(ClienteDeChatGuionado? modelo = null, bool habilitada = true, IDictionary<string, string?>? configuracion = null, bool redaccion = true)
     {
         var nombre = "arnes-" + Guid.NewGuid().ToString("n");
         var cadena = $"Data Source=file:{nombre}?mode=memory&cache=shared";
@@ -38,7 +38,8 @@ public sealed class Arnes : IDisposable
 
         Modelo = modelo ?? new ClienteDeChatGuionado(_ => null);
         var valores = configuracion ?? (habilitada
-            ? new Dictionary<string, string?> { ["OLLAMA_ENDPOINT"] = "http://modelo.invalid", ["OLLAMA_MODEL"] = "doble" }
+            // La bandera de redacción va explícita: en producción está apagada por omisión (ADR 0008).
+            ? new Dictionary<string, string?> { ["OLLAMA_ENDPOINT"] = "http://modelo.invalid", ["OLLAMA_MODEL"] = "doble", [Habilitacion.ClaveRedaccion] = redaccion ? "true" : "false" }
             : new Dictionary<string, string?>());
         var config = new ConfigurationBuilder().AddInMemoryCollection(valores).Build();
 

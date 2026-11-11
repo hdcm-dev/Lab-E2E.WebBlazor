@@ -20,11 +20,12 @@ tiene su propio registro.
   amable, abstención, degradación sin modelo, catálogo de destinos con deeplinks que abren la acción,
   votos sin texto y tablero de medición. El asistente no escribe: el alta se abre prellenada y la baja
   abre la confirmación de siempre. Sin modelo responde con plantillas; con `Asistente__Habilitado=false`
-  no hay panel.
+  no hay panel. La redacción con IA está apagada por omisión (`Asistente__Redaccion__Habilitada=false`,
+  ADR 0008): las distribuciones responden con la plantilla y el modelo sólo lee el alta desde una frase.
 - Pantalla **`/resultados`**: medios en barras (multirrespuesta), motivo y frecuencia en torta con su
   tabla, distancias y tiempos en tabla; `?vista=` para abrir una sola.
 - `/asistente/medicion` y `/health/asistente`.
-- `docs/adr/` con las decisiones 0001–0007, `tools/asistente/bateria.sh` (batería ×3) y
+- `docs/adr/` con las decisiones 0001–0008, `tools/asistente/bateria.sh` (batería ×3) y
   `tools/asistente/cifras.sql` (oráculo de las cifras).
 - `tests/MovilidadUrbana.Asistente.Bateria` (no corre en la CI) y 204 pruebas unitarias nuevas, bUnit
   incluido; 17 E2E nuevas.

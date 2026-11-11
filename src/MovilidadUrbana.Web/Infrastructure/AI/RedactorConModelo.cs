@@ -18,7 +18,7 @@ public sealed class RedactorConModelo(
     OpcionesDelModelo opciones,
     ILogger<RedactorConModelo> registro) : IRedactorDeAyuda
 {
-    public static readonly string Prompt = LeerPrompt("redactor.v3.txt");
+    public static readonly string Prompt = LeerPrompt("redactor.v4.txt");
 
     public async Task<Resultado<string>> RedactarAsync(PedidoDeRedaccion pedido, CancellationToken cancellationToken = default)
     {
@@ -91,9 +91,14 @@ public sealed class RedactorConModelo(
         return sb.ToString();
     }
 
+    /// <summary>
+    /// La nota del código habla de los porcentajes de la pantalla; la respuesta muestra conteos, así
+    /// que al modelo le llega la nota de los conteos, con las palabras de la plantilla (B17, B42).
+    /// </summary>
     public static string NotaParaElModelo(string nota) =>
-        nota.Replace("los porcentajes de medios no suman", "no suman", StringComparison.Ordinal)
-            .Replace("los porcentajes no suman", "no suman", StringComparison.Ordinal);
+        System.Text.RegularExpressions.Regex.Replace(nota,
+            @"una persona puede marcar varios medios, así que los porcentajes( de medios)? no suman 100 %\.?",
+            Plantillas.NotaConConteos[0..1].ToLowerInvariant() + Plantillas.NotaConConteos[1..]);
 
     /// <summary>
     /// La referencia que ve el modelo lleva la cita en cada oración, como se le exige al texto:

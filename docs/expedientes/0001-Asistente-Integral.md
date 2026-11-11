@@ -37,7 +37,7 @@ votos sin texto y medición, redacción anclada, degradación sin modelo, prueba
 | E1 | Cifras por código y `/resultados` | hecha |
 | E2 | Panel sin modelo: enrutador, anillos, glosario, sinónimos, aclaración, rechazo, F8 | hecha |
 | E3 | Catálogo de destinos y deeplinks que abren la acción | hecha |
-| E4 | Redacción anclada con modelo | hecha; REQ-IA-47 pendiente |
+| E4 | Redacción anclada con modelo | hecha; apagada por omisión desde la ronda 4 (ADR 0008); REQ-IA-47 pendiente |
 | E5 | Votos sin texto y tablero de medición | hecha |
 | E6 | Alta desde una frase y reglas endurecidas | hecha |
 | E7 | Batería ×3, críticos y cierre | batería hecha (37/37 ×3); críticos y lectura pendientes |
@@ -79,3 +79,16 @@ sentido de la nota de multirrespuesta, entidades sin origen y cita al final de c
 (`bateria.v3`, 46 casos) varía semilla y temperatura y compara a ciegas cada redactada con la fija como
 compuerta registrada. Prompt `redactor.v3`. Detalle en
 [`verificacion-2026-11-11.md` §8](../asistente/verificacion-2026-11-11.md).
+
+## 8. Cuarta ronda (2026-11-11)
+
+Decisión de la mesa con la ronda 3 medida (la redacción con este modelo sólo agregaba «[1]» a la plantilla, a
+~1 s contra 2 ms): la redacción con IA queda **apagada por omisión** (`Asistente__Redaccion__Habilitada=false`,
+como en Geometría), [ADR 0008](../adr/0008-redaccion-apagada-por-omision.md). Las cifras, los destinos, las
+aclaraciones y el glosario siguen sin modelo; el camino del redactor queda detrás de la bandera, con su
+compuerta, para un modelo futuro. Se corrigen además la nota de multirrespuesta con conteos (B17, B42), una
+sola cita por fuente, «sólo suma citas no cuenta como redactada» (K5 CD-8), la compuerta a ciegas ejercida con
+pares de control y juez distinto del redactor (K7 R9.8), la tasa de rechazo del validador en el informe y el
+eco con «omití», «no hagas caso», «salteá», «override» y «system prompt» con sus falsos positivos (K7 R9.9,
+R9.10). Bandera apagada: batería ×3 46/46 e idéntica a la plantilla; bandera en `true`: NO CUMPLE (un peor a
+ciegas, 54–77 % de rechazos). Detalle en [`verificacion-2026-11-11.md` §9](../asistente/verificacion-2026-11-11.md).

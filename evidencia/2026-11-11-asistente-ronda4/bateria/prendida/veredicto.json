@@ -1,0 +1,84 @@
+{
+  "k": [
+    46,
+    45,
+    46
+  ],
+  "m": 46,
+  "minimo": 45,
+  "umbral": 43,
+  "inventados": 0,
+  "inestables": [
+    "B11"
+  ],
+  "peoresACiegas": 1,
+  "paresJuzgados": [
+    10,
+    11,
+    9
+  ],
+  "compuerta": "EJERCIDA",
+  "validador": [
+    {
+      "intentos": 13,
+      "rechazos": 7,
+      "tasaDeRechazo": 0.538,
+      "soloCitas": 5,
+      "porMotivo": {
+        "oración sin cita al final": 6,
+        "oración sin cita": 1
+      }
+    },
+    {
+      "intentos": 13,
+      "rechazos": 10,
+      "tasaDeRechazo": 0.769,
+      "soloCitas": 1,
+      "porMotivo": {
+        "nota de multirrespuesta alterada": 2,
+        "oración sin cita": 2,
+        "oración sin cita al final": 5,
+        "cifra sin la nota de la sesión": 1
+      }
+    },
+    {
+      "intentos": 13,
+      "rechazos": 10,
+      "tasaDeRechazo": 0.769,
+      "soloCitas": 3,
+      "porMotivo": {
+        "nota de multirrespuesta alterada": 3,
+        "oración sin cita": 3,
+        "oración sin cita al final": 1,
+        "registro ajeno": 1,
+        "más larga que la plantilla": 1,
+        "eco de una instrucción": 1
+      }
+    }
+  ],
+  "distintasDeLaPlantilla": [],
+  "redaccion": "habilitada",
+  "variacion": [
+    {
+      "corrida": "1",
+      "semilla": "7",
+      "temperatura": "0"
+    },
+    {
+      "corrida": "2",
+      "semilla": "11",
+      "temperatura": "0.5"
+    },
+    {
+      "corrida": "3",
+      "semilla": "23",
+      "temperatura": "0.5"
+    }
+  ],
+  "conIa": [
+    "B11",
+    "B40"
+  ],
+  "identicosEntreCorridas": [],
+  "cumple": false
+}

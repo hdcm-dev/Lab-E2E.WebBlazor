@@ -27,7 +27,7 @@ builder.Services.AddInfrastructure(connectionString);
 builder.Services.AddApplication();
 
 // --- Capa de IA ------------------------------------------------------------------------------
-// Todo desde el entorno (OLLAMA_*, Asistente__Habilitado); sin valores por defecto. Sin modelo, el
+// Todo desde el entorno (OLLAMA_*, Asistente__Habilitado, Asistente__Redaccion__Habilitada); sin valores por defecto. Sin modelo, el
 // asistente sigue con plantillas, cifras y destinos.
 builder.Services.AddAI(builder.Configuration, contenidoEnTrazas: builder.Environment.IsDevelopment());
 
@@ -65,7 +65,7 @@ app.MapStaticAssets();
 
 // Motivo exacto de la habilitación, sin el valor de ninguna clave (REQ-IA-29).
 app.MapGet("/health/asistente", (IEstadoDelAsistente estado) =>
-    Results.Json(new { motivo = estado.Motivo.ToString(), clave = estado.Clave, soloLexico = estado.SoloLexico }));
+    Results.Json(new { motivo = estado.Motivo.ToString(), clave = estado.Clave, soloLexico = estado.SoloLexico, redaccion = estado.RedaccionHabilitada }));
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

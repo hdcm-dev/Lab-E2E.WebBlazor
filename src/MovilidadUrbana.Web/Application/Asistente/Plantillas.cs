@@ -74,4 +74,14 @@ public static class Plantillas
         if (r == "resultados") return ("resultados", "Resultados");
         return null;
     }
+
+    /// <summary>
+    /// Nota de multirrespuesta según lo que muestra la respuesta: con porcentajes, «no suman 100 %»;
+    /// con conteos («4 de 20»), que los conteos pueden sumar más que las encuestas (B17, B42).
+    /// </summary>
+    public static string NotaDeMultirrespuesta(bool conPorcentajes) => conPorcentajes ? NotaConPorcentajes : NotaConConteos;
+
+    public const string NotaConConteos = "Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas.";
+
+    public const string NotaConPorcentajes = "Una persona puede marcar varios medios, así que los porcentajes no suman 100 %.";
 }

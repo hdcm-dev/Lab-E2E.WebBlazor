@@ -187,3 +187,54 @@ que exige el criterio; que sea *mejor* no se demostró. Ningún caso dio el mism
 | Unitarias, bUnit y arquitectura | 338/338 (27 de las nuevas fallan con el código de la ronda 2) |
 | API / ViewModels de Android | 13/13 · 18/18 |
 | E2E Chromium / emulación móvil | 41/41 · 41/41 |
+
+## 9. Cuarta ronda: la redacción con IA apagada por omisión
+
+Decisión de la mesa sobre la ronda 3 medida: con este modelo la redacción sólo le agregaba «[1]» a la plantilla
+y costaba ~1 s contra 2 ms. Queda apagada por omisión (`Asistente__Redaccion__Habilitada=false`, como en
+Geometría; [ADR 0008](../adr/0008-redaccion-apagada-por-omision.md)); el camino del modelo queda detrás de la
+bandera, con su compuerta, para un modelo futuro.
+
+| Hallazgo | Cambio | Prueba que falla con el código de la ronda 3 |
+| --- | --- | --- |
+| La redacción no aporta y cuesta 500 veces más | bandera `Asistente:Redaccion:Habilitada`, `false` salvo `true` explícito; con la bandera apagada el redactor no se llama y la respuesta es la plantilla, sin aviso (la IA sigue habilitada para el extractor); `/health/asistente` informa `redaccion` | `Bandera_ApagadaSalvoTrueExplicito`, `BanderaPorOmision_DistribucionConLaPlantilla_SinLlamar`, `BanderaEnTrue_Redacta` |
+| B17, B42: «no suman 100 %» con conteos y sin porcentajes, también en la plantilla | `Plantillas.NotaDeMultirrespuesta(conPorcentajes)`: con conteos, «los conteos pueden sumar más que el total de encuestas»; «no suman 100 %» queda para la pantalla de resultados, que muestra porcentajes. Al modelo le llega la nota de los conteos; el validador rechaza «%» o «porcentaje» si la plantilla no los tiene y exige la nota de conteos con sus palabras. Prompt `redactor.v4` | `NotaDeMultirrespuesta_ConConteos_SinPorcentajes` (B17, B42), `Mensaje_NotaDeConteos`, `Validador_NotaDeConteos`, `Forma_PorcentajeSinPorcentajes` |
+| Una cita por oración con una sola fuente; espacio antes de «[» | `Citas.Normalizar`: un espacio antes de cada cita y, con una fuente, sólo la última | `Citas_Normalizar`, `Redactada_UnaSolaCita` |
+| Sumar citas a la plantilla contaba como redactada (K5 CD-8) | `Citas.SoloSumaCitas` (sin citas, negritas, espacios ni punto final): la respuesta es la fija, `RedactadaConIa=false`, motivo «sólo suma citas» | `SoloSumaCitas_NoCuentaComoRedactada`, `Citas_SoloSumaCitas` (incluye B38 de esta ronda, sin el punto) |
+| Compuerta a ciegas sin ejercer (K7 R9.8): 0 pares juzgados en la ronda 3 | 9 pares fijos de control (`pares-a-ciegas.v1.json`, 3 por forma, 6 peores y 3 no peores, la redactada siempre distinta) que se juzgan en cada corrida, con o sin modelo; además cada redactada distinta de la fija. Juez distinto del redactor: `BATERIA_JUEZ_MODELO` (otro modelo del servidor) o reglas deterministas declaradas R1–R8, que corren siempre al lado. 0 pares juzgados → NO EJECUTADO | la batería falla si `paresJuzgados == 0` o si las reglas no detectan los 6 peores de control |
+| Sin tasa de rechazo del validador (K6 §12.10) | el resumen trae intentos, rechazos, tasa, «sólo citas» y motivos, en total y por forma | `bateria.sh` la imprime |
+| Eco: faltaban «omití», «no hagas caso», «salteá», «override», «system prompt» (K7 R9.9) | se suman con voseo, tuteo, mayúsculas y acentos; también «skip», «prompt del sistema». `ValidadorDeCifras.Eco` es público para fijar los falsos positivos (K7 R9.10): «en ese caso», «Salta», «salteños», «ómnibus», «hacé caso», «el sistema registra» | `Eco_Variantes_Marcadas` (13), `Eco_FalsosPositivos_SinMarca` (9), `Eco_PalabraDeLaAyuda_NoEsEco`, `Validador_EcoNuevo_Rechazado` |
+
+Con el código de la ronda 3 (más sólo la superficie de API nueva, con el comportamiento viejo, para que
+compile) fallan 39 de las 396 unitarias.
+
+**Batería ×3** (`bateria.v3`, 46 casos, umbral 43; semilla/temperatura 7/0, 11/0,5 y 23/0,5; juez por modelo
+distinto del redactor, ambos por variable de entorno y fuera del repositorio):
+
+| Camino | k/M | Inventados | Redactadas | Pares juzgados (control + redactadas) | Peores a ciegas | Validador: rechazos / intentos | p95 | Veredicto |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Plantilla (sin modelo), juez por reglas | 43, 43, 43 (B03, B04, B36) | 0 | 0 | 9, 9, 9 | 0 | — | 32–34 ms | CUMPLE |
+| Modelo, **bandera apagada** (producción) | 46, 46, 46 | 0 | 0 | 9, 9, 9 | 0 | — | 73–111 ms | CUMPLE; distintas de la plantilla: ninguna |
+| Modelo, bandera en `true` | 46, 45, 46 | 0 | 1, 2, 0 | 10, 11, 9 | 1 (B11, corrida 2) | 7/13, 10/13, 10/13 (54 %, 77 %, 77 %); sólo citas 5, 1, 3 | 1,7–3,9 s | NO CUMPLE |
+
+[MEDIDO, 2026-11-11]. Evidencia en [`evidencia/2026-11-11-asistente-ronda4/`](../../evidencia/2026-11-11-asistente-ronda4/)
+(`corrida-N.jsonl`, `control-N.jsonl`, `resumen-N.json`, `veredicto.json` por camino).
+
+- **Bandera apagada = plantilla.** Con el modelo presente y la bandera apagada, cada respuesta (salvo el alta
+  desde una frase, que usa el extractor) es palabra por palabra la de la plantilla en las tres corridas. Las
+  tres diferencias con la línea base sin modelo (B03 y B04 leen la frase con el extractor; B36 espera el aviso de
+  IA apagada) no son de redacción.
+- **Bandera en true.** El redactor se llama 13 veces por corrida y el validador rechaza más de la mitad
+  (sobre todo «oración sin cita al final» y la nota de multirrespuesta alterada); de lo que pasa, 1 a 5 por corrida
+  sólo sumaban citas y ya no cuentan. Quedan 3 redactadas en 3 corridas; en B11 (corrida 2) el juez eligió la
+  fija. Confirma la decisión: el camino no está listo para este modelo.
+- **El juez.** Las reglas aciertan los 9 pares de control en cada corrida. El juez por modelo acierta 5, 4 y 7
+  de 9: no ve el tuteo de C01 ni la nota invertida de C02. Es un juez distinto del redactor, como pide R9.8, pero
+  no confiable sólo; por eso las reglas corren al lado y la batería exige que detecten los 6 peores.
+
+| Suite | Resultado |
+| --- | --- |
+| Compilación `-warnaserror` (`SinMaui.slnf`) | 0 avisos, 0 errores |
+| Unitarias, bUnit y arquitectura | 396/396 (39 fallan con el código de la ronda 3) |
+| API / ViewModels de Android | 13/13 · 18/18 |
+| E2E Chromium / emulación móvil | 41/41 · 41/41 |

@@ -76,13 +76,14 @@ curl -s http://localhost:5000/health/asistente   # {"motivo":"Habilitada",…}
 | `OLLAMA_*` mal escrita (`OLLAMA_MODELO`) | Apaga con `ClaveDesconocida` y nombra la clave |
 | `Asistente__Habilitado=false` | No hay panel: la aplicación queda como era |
 | `Asistente__TiempoMaximoSegundos` | Tiempo máximo de una llamada (20 por defecto) |
+| `Asistente__Redaccion__Habilitada` | `false` por omisión ([ADR 0008](../adr/0008-redaccion-apagada-por-omision.md)): las distribuciones responden con la plantilla y el modelo no se llama; sólo `true` prende el redactor. El extractor del alta desde una frase no depende de esto |
 
 ## Qué mirar
 
 1. Abrí el panel desde **Asistente** en la barra lateral y preguntá «¿Cuántas hay en Corrientes?»: la
    respuesta es una aclaración con dos botones, sin llamada al modelo.
 2. «¿Cuántos van en bondi?» con encuestas cargadas: la cifra sale del código, en barras, y la burbuja dice si
-   la redactó el modelo o es fija.
+   la redactó el modelo o es fija (fija salvo `Asistente__Redaccion__Habilitada=true`).
 3. «Borrá Resistencia»: el chip abre la confirmación existente; cancelala y no se borra nada.
 4. `/asistente/medicion` después de votar: la tasa útil por anillo, sin preguntas guardadas.
 
@@ -91,8 +92,14 @@ curl -s http://localhost:5000/health/asistente   # {"motivo":"Habilitada",…}
 ```bash
 dotnet test tests/MovilidadUrbana.UnitTests        # unitarias, arquitectura, bUnit: sin red
 scripts/pruebas.sh                                 # E2E con Playwright, sin modelo
-OLLAMA_ENDPOINT=… OLLAMA_MODEL=… tools/asistente/bateria.sh   # batería ×3 contra el modelo
+OLLAMA_ENDPOINT=… OLLAMA_MODEL=… tools/asistente/bateria.sh   # batería ×3, redacción apagada
+Asistente__Redaccion__Habilitada=true BATERIA_JUEZ_MODELO=<otro modelo> \
+  OLLAMA_ENDPOINT=… OLLAMA_MODEL=… tools/asistente/bateria.sh   # el camino del redactor, con juez distinto
 ```
+
+La compuerta a ciegas juzga en cada corrida los pares fijos de `pares-a-ciegas.v1.json` y cada redactada que
+difiera de la fija; sin `BATERIA_JUEZ_MODELO` el juez son reglas deterministas declaradas. Con 0 pares
+juzgados el veredicto es NO EJECUTADO. El informe trae la tasa de rechazo del validador por forma.
 
 Sin `OLLAMA_*`, `bateria.sh` corre la línea base (el camino de la plantilla). `tools/asistente/cifras.sql`
 es el oráculo independiente de las cifras.

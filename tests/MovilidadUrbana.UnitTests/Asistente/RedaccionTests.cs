@@ -24,7 +24,7 @@ public class RedaccionTests
     [Test(Description = "REQ-IA-24: la redacción no ofrece herramientas")]
     public async Task Redaccion_SinHerramientas()
     {
-        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Auto particular: 4 de 20 encuestas de tu sesión [1]. Una persona puede marcar varios medios, así que no suman 100 % [1]."));
+        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("En tu sesión, 4 de 20 encuestas marcaron Auto particular [1]. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas [1]."));
         var r = await arnes.PreguntarAsync(Sesion, "¿Cuántos van en auto?");
         Assert.Multiple(() =>
         {
@@ -39,7 +39,7 @@ public class RedaccionTests
     [Test(Description = "REQ-IA-22: «hay 7» con 20 → texto fijo con la cifra del código")]
     public async Task CifraSinOrigen_TextoFijoConCifrasDelCodigo()
     {
-        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Auto particular: 7 de 20 encuestas de tu sesión [1]. Una persona puede marcar varios medios, así que no suman 100 % [1]."));
+        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Auto particular: 7 de 20 encuestas de tu sesión [1]. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas [1]."));
         var r = await arnes.PreguntarAsync(Sesion, "¿Cuántos van en auto?");
         Assert.Multiple(() =>
         {
@@ -206,7 +206,7 @@ public class RedaccionTests
     [Test(Description = "REQ-IA-27: el doble que devuelve un enlace queda sin enlace")]
     public async Task UrlLibre_SeElimina()
     {
-        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Auto particular: 4 de 20 encuestas de tu sesión en [Resultados](/admin) [1]. Una persona puede marcar varios medios, así que no suman 100 % [1]."));
+        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("En tu sesión, 4 de 20 encuestas marcaron Auto particular en [Resultados](/admin) [1]. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas [1]."));
         var r = await arnes.PreguntarAsync(Sesion, "¿Cuántos van en auto?");
         Assert.Multiple(() =>
         {

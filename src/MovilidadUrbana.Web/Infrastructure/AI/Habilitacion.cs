@@ -16,6 +16,7 @@ public sealed class Habilitacion : IEstadoDelAsistente
     public const string ClaveEmbedModelo = "OLLAMA_EMBED_MODEL";
     public const string ClaveNumCtx = "OLLAMA_NUM_CTX";
     public const string ClaveHabilitado = "Asistente:Habilitado";
+    public const string ClaveRedaccion = "Asistente:Redaccion:Habilitada";
 
     public static readonly IReadOnlySet<string> ClavesConocidas =
         new HashSet<string>([ClaveEndpoint, ClaveModelo, ClaveEmbedEndpoint, ClaveEmbedModelo, ClaveNumCtx], StringComparer.Ordinal);
@@ -27,6 +28,9 @@ public sealed class Habilitacion : IEstadoDelAsistente
     public string? Clave { get; init; }
 
     public bool SoloLexico { get; init; } = true;
+
+    /// <summary>Sólo con <c>Asistente__Redaccion__Habilitada=true</c> explícito (ADR 0008); cualquier otro valor la apaga.</summary>
+    public bool RedaccionHabilitada { get; init; }
 
     public string? Endpoint { get; init; }
 
@@ -63,7 +67,8 @@ public sealed class Habilitacion : IEstadoDelAsistente
             Endpoint = endpoint,
             Modelo = modelo,
             NumCtx = numCtx,
-            SoloLexico = true
+            SoloLexico = true,
+            RedaccionHabilitada = string.Equals(configuracion[ClaveRedaccion], "true", StringComparison.OrdinalIgnoreCase)
         };
     }
 }

@@ -5,6 +5,12 @@
 #
 #   OLLAMA_ENDPOINT=… OLLAMA_MODEL=… tools/asistente/bateria.sh [carpeta-de-salida]
 #
+# La redacción con IA está apagada por omisión (ADR 0008): así la batería mide que la respuesta es la
+# plantilla palabra por palabra. Para medir el camino del modelo, Asistente__Redaccion__Habilitada=true.
+# Juez a ciegas (K7 R9.8): BATERIA_JUEZ_MODELO=<otro modelo del servidor>; sin él, reglas deterministas.
+# La compuerta juzga en cada corrida los pares fijos de pares-a-ciegas.v1.json y las redactadas que
+# difieren de la fija; con 0 pares juzgados el veredicto es NO EJECUTADO.
+#
 # Sin OLLAMA_* corre la línea base (camino de la plantilla). Cada corrida deja corrida-N.jsonl
 # (un registro por caso, recalculable) y resumen-N.json. Si la composición de la batería cambió
 # entre corridas (hash distinto), el script se niega a sumar.
@@ -55,7 +61,11 @@ for i in range(1, n + 1):
         if not c["ok"]:
             inestables.add(c["id"])
 minimo = resumenes[0].get("minimo", 34)
-peores = sum(r.get("comparacionACiegas", {}).get("peores", 0) for r in resumenes)
+ciegas = [r.get("comparacionACiegas", {}) for r in resumenes]
+peores = sum(c.get("redactadas", {}).get("peores", 0) for c in ciegas)
+juzgados = [c.get("paresJuzgados", 0) for c in ciegas]
+validador = [r.get("validador", {}) for r in resumenes]
+distintas = sorted({x for r in resumenes for x in ((r.get("igualesALaPlantilla") or {}).get("distintas") or [])})
 variacion = [{"corrida": r["corrida"], "semilla": r.get("semilla"), "temperatura": r.get("temperatura")} for r in resumenes]
 # Estabilidad: cuántos casos redactados dieron el mismo texto en todas las corridas.
 textos = {}
@@ -65,16 +75,25 @@ for i in range(1, n + 1):
         textos.setdefault(c["id"], []).append((c["redactadaConIa"], c["texto"]))
 conIa = {k: v for k, v in textos.items() if any(x[0] for x in v)}
 identicos = sorted(k for k, v in conIa.items() if len({t for _, t in v}) == 1)
-veredicto = min(ks) >= minimo and inventados == 0 and peores == 0
+ejecutada = min(juzgados) > 0
+veredicto = ejecutada and min(ks) >= minimo and inventados == 0 and peores == 0 and not distintas
 print(f"{resumenes[0]['bateria']} ({resumenes[0]['camino']}): k = {ks} / {m}; mínimo {min(ks)} (umbral {minimo}); inventados {inventados}; "
       f"redactadas con IA {[r.get('redactadas') for r in resumenes]}; "
       f"p50 {[r['p50ms'] for r in resumenes]} ms; p95 {[r['p95ms'] for r in resumenes]} ms")
 print(f"variación {variacion}; a ciegas, redactada peor que la fija: {peores}; "
       f"casos con IA idénticos en todas las corridas: {len(identicos)} de {len(conIa)}")
+print(f"redacción {resumenes[0].get('redaccion')}; compuerta a ciegas: juez {ciegas[0].get('juez')}; pares juzgados {juzgados} "
+      f"(control {[c.get('control', {}).get('juzgados') for c in ciegas]}, aciertos del juez {[c.get('control', {}).get('aciertos') for c in ciegas]}, "
+      f"redactadas juzgadas {[c.get('redactadas', {}).get('juzgadas') for c in ciegas]})")
+print(f"validador: rechazos {[v.get('rechazos') for v in validador]} de {[v.get('intentos') for v in validador]} intentos; "
+      f"tasa {[v.get('tasaDeRechazo') for v in validador]}; sólo citas {[v.get('soloCitas') for v in validador]}; motivos {[v.get('porMotivo') for v in validador]}")
+if resumenes[0].get("igualesALaPlantilla") is not None:
+    print(f"con la redacción apagada, distintas de la plantilla: {', '.join(distintas) or 'ninguna'}")
 print(f"casos con alguna falla: {', '.join(sorted(inestables)) or 'ninguno'}")
-print("VEREDICTO:", "CUMPLE" if veredicto else "NO CUMPLE")
+print("VEREDICTO:", "NO EJECUTADO" if not ejecutada else ("CUMPLE" if veredicto else "NO CUMPLE"))
 (salida / "veredicto.json").write_text(json.dumps({"k": ks, "m": m, "minimo": min(ks), "umbral": minimo, "inventados": inventados,
-    "inestables": sorted(inestables), "peoresACiegas": peores, "variacion": variacion,
+    "inestables": sorted(inestables), "peoresACiegas": peores, "paresJuzgados": juzgados,
+    "compuerta": "EJERCIDA" if ejecutada else "NO EJECUTADO", "validador": validador, "distintasDeLaPlantilla": distintas, "redaccion": resumenes[0].get("redaccion"), "variacion": variacion,
     "conIa": sorted(conIa), "identicosEntreCorridas": identicos, "cumple": veredicto}, ensure_ascii=False, indent=2), encoding="utf-8")
 sys.exit(0 if veredicto else 1)
 PY
