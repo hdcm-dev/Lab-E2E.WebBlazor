@@ -1,0 +1,155 @@
+@* Panel del asistente: se monta una sola vez en el layout (E-1) y vive lo que vive el circuito.
+   El código elige la respuesta; el modelo, cuando está, sólo redacta. Cada burbuja dice cómo se
+   hizo («Respuesta fija» o «Redactado con IA a partir de la ayuda»), y los chips abren la acción
+   en la pantalla, donde la persona la confirma. El asistente no escribe. *@
+@using MovilidadUrbana.Web.Application.Asistente
+@using MovilidadUrbana.Web.Components.Shared.Charts
+@using MovilidadUrbana.Web.Domain.Asistente
+
+<aside class="mq-asistente" hidden="@(!Panel.Abierto)" aria-labelledby="asistente-titulo" data-testid="panel-asistente">
+    <div class="mq-asistente__cabecera">
+        <Icon Nombre="@Icons.Asistente" Size="IconRoles.Card" />
+        <h2 id="asistente-titulo">Asistente</h2>
+        <button type="button" class="mq-btn mq-btn--secundario mq-ml-auto" data-testid="asistente-cerrar"
+                @onclick="() => Panel.Fijar(false)">Cerrar</button>
+    </div>
+
+    @if (Estado.Motivo != MotivoDeHabilitacion.Habilitada)
+    {
+        <div class="mq-asistente__aviso">
+            <Band Tone="BandTone.Info" Testid="asistente-aviso">@Plantillas.Aviso(Estado.Motivo, Estado.Clave)</Band>
+        </div>
+    }
+
+    <div class="mq-asistente__conversacion" data-testid="asistente-conversacion" aria-live="polite">
+        @if (_turnos.Count == 0)
+        {
+            <p class="mq-caption">Preguntá por las localidades, la encuesta o sus resultados. Las cifras salen de tu sesión.</p>
+        }
+        @foreach (var turno in _turnos)
+        {
+            <div class="mq-burbuja mq-burbuja--persona" data-testid="burbuja-persona">@turno.Pregunta</div>
+            <div class="mq-burbuja mq-burbuja--asistente" data-testid="burbuja-asistente"
+                 data-forma="@turno.Respuesta.Forma" data-intencion="@turno.Respuesta.Intencion" data-anillo="@turno.Respuesta.Anillo">
+                <Badge Tone="@(turno.Respuesta.RedactadaConIa ? BadgeTone.Info : BadgeTone.Neutro)" Testid="rotulo">@turno.Respuesta.Rotulo</Badge>
+                <p class="mq-burbuja__texto" data-testid="respuesta-texto"><TextoMarcado Texto="@turno.Respuesta.Texto" /></p>
+
+                @if (turno.Respuesta.Distribucion is { } d)
+                {
+                    @if (turno.Respuesta.Grafico == FormaDeGrafico.TortaConTabla)
+                    {
+                        <Torta Filas="d.Filas" Titulo="@Titulo(d.Variable)" Nota="@d.Nota" Testid="grafico-respuesta" />
+                    }
+                    else
+                    {
+                        <Barras Filas="d.Filas" Denominador="d.Encuestas" Titulo="@Titulo(d.Variable)" Nota="@d.Nota" Testid="grafico-respuesta" />
+                    }
+                }
+                @if (turno.Respuesta.Promedios is { } p)
+                {
+                    <TablaDePromedios Promedios="p" Titulo="Promedio y mediana" />
+                }
+
+                @if (turno.Respuesta.Opciones.Count > 0)
+                {
+                    <div class="mq-chips" role="group" aria-label="Opciones para aclarar">
+                        @foreach (var opcion in turno.Respuesta.Opciones)
+                        {
+                            <button type="button" class="mq-chip" data-testid="opcion" disabled="@_ocupado"
+                                    @onclick="() => EnviarAsync(opcion.Pregunta)">@opcion.Rotulo</button>
+                        }
+                    </div>
+                }
+
+                @if (turno.Respuesta.Destinos.Count > 0)
+                {
+                    <div class="mq-chips">
+                        @foreach (var chip in turno.Respuesta.Destinos)
+                        {
+                            @* Tocar un destino cierra el panel: la acción se abre en la pantalla y se confirma ahí. *@
+                            <a class="mq-chip mq-chip--destino" href="@chip.Href" data-testid="chip-destino" data-destino="@chip.DestinoId"
+                               @onclick="() => Panel.Fijar(false)">@chip.Rotulo</a>
+                        }
+                    </div>
+                }
+
+                @if (turno.Respuesta.Citas.Count > 0)
+                {
+                    <ul class="mq-burbuja__citas" data-testid="citas">
+                        @foreach (var cita in turno.Respuesta.Citas)
+                        {
+                            <li data-fragmento="@cita.FragmentoId">[@cita.Numero] @cita.Titulo</li>
+                        }
+                    </ul>
+                }
+
+                @if (turno.Respuesta.Aviso is { Length: > 0 } aviso && aviso != Plantillas.Aviso(Estado.Motivo, Estado.Clave))
+                {
+                    <p class="mq-caption" data-testid="aviso-turno">@aviso</p>
+                }
+
+                @if (turno.Respuesta.Sugerencias.Count > 0)
+                {
+                    <div class="mq-chips" role="group" aria-label="Preguntas que sí contesto">
+                        @foreach (var sugerencia in turno.Respuesta.Sugerencias)
+                        {
+                            <button type="button" class="mq-chip" data-testid="sugerencia" disabled="@_ocupado"
+                                    @onclick="() => EnviarAsync(sugerencia)">@sugerencia</button>
+                        }
+                    </div>
+                }
+
+                <div class="mq-burbuja__votos" data-testid="votos">
+                    @if (turno.Voto is null)
+                    {
+                        <span>¿Te sirvió?</span>
+                        <button type="button" class="mq-chip" aria-label="Me sirvió" data-testid="voto-util" @onclick="() => VotarAsync(turno, true, null)">👍</button>
+                        <button type="button" class="mq-chip" aria-label="No me sirvió" data-testid="voto-no-util" @onclick="() => turno.PidiendoMotivo = true">👎</button>
+                        @if (turno.PidiendoMotivo)
+                        {
+                            @foreach (var (motivo, rotulo) in Motivos)
+                            {
+                                <button type="button" class="mq-chip" data-testid="voto-motivo" @onclick="() => VotarAsync(turno, false, motivo)">@rotulo</button>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <span data-testid="voto-registrado">Gracias: tu voto quedó registrado, sin tu pregunta ni tu respuesta.</span>
+                    }
+                </div>
+            </div>
+        }
+        @if (_ocupado)
+        {
+            <p class="mq-caption" data-testid="asistente-pensando"><span class="mq-spinner"></span> Buscando la respuesta…</p>
+        }
+    </div>
+
+    <div class="mq-asistente__pie">
+        @if (Contexto is { } contexto && !_contextoQuitado)
+        {
+            <div class="mq-chips">
+                <button type="button" class="mq-chip mq-chip--contexto" data-testid="chip-contexto"
+                        aria-label="@($"Quitar el contexto {contexto.Rotulo}")" @onclick="() => _contextoQuitado = true">Sobre: @contexto.Rotulo ×</button>
+            </div>
+        }
+        @if (_turnos.Count == 0)
+        {
+            <div class="mq-chips" role="group" aria-label="Sugerencias">
+                @foreach (var sugerencia in Plantillas.SugerenciasPara(Ruta))
+                {
+                    <button type="button" class="mq-chip" data-testid="sugerencia-inicial" disabled="@_ocupado"
+                            @onclick="() => EnviarAsync(sugerencia)">@sugerencia</button>
+                }
+            </div>
+        }
+        <form class="mq-asistente__fila" @onsubmit="() => EnviarAsync(_pregunta)" @onsubmit:preventDefault data-testid="asistente-formulario">
+            <label class="mq-sr-only" for="asistente-pregunta">Tu pregunta</label>
+            <input id="asistente-pregunta" class="mq-input" type="text" maxlength="@GuardaDeLargo.Maximo" autocomplete="off"
+                   placeholder="Escribí tu pregunta" data-testid="asistente-pregunta"
+                   value="@_pregunta" @oninput="a => _pregunta = a.Value?.ToString() ?? string.Empty" />
+            <button type="submit" class="mq-btn mq-btn--primario" data-testid="asistente-enviar" disabled="@_ocupado">Preguntar</button>
+        </form>
+    </div>
+</aside>

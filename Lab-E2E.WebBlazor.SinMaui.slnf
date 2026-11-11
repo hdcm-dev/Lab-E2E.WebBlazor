@@ -5,6 +5,7 @@
       "src\\MovilidadUrbana.Web\\MovilidadUrbana.Web.csproj",
       "tests\\MovilidadUrbana.E2ETests\\MovilidadUrbana.E2ETests.csproj",
       "tests\\MovilidadUrbana.UnitTests\\MovilidadUrbana.UnitTests.csproj",
+      "tests\\MovilidadUrbana.Asistente.Bateria\\MovilidadUrbana.Asistente.Bateria.csproj",
       "src\\WebBlazor.HolaMundo\\WebBlazor.HolaMundo.csproj",
       "src\\WebBlazor.Login\\WebBlazor.Login.csproj",
       "tests\\WebBlazor.HolaMundo.E2ETests\\WebBlazor.HolaMundo.E2ETests.csproj",

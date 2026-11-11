@@ -15,10 +15,14 @@ public static partial class LocalidadRules
     /// <summary>Dígitos exactos del código postal. El patrón de <see cref="CodigoPostal" /> lo espeja.</summary>
     public const int DigitosDelCodigoPostal = 4;
 
+    // Endurecida a causa de la capa de IA (la propuesta del extractor pasa por acá): antes sólo
+    // se aplicaba el mínimo, y el máximo declarado quedaba librado al `maxlength` de la vista.
     public static bool NombreValido(string? nombre) =>
-        (nombre ?? string.Empty).Trim().Length >= LargoMinimoDelNombre;
+        (nombre ?? string.Empty).Trim().Length is >= LargoMinimoDelNombre and <= LargoMaximoDelNombre;
 
-    public static bool ProvinciaValida(string? provincia) => !string.IsNullOrWhiteSpace(provincia);
+    /// <summary>La provincia tiene que ser una del catálogo, escrita como el catálogo la escribe.</summary>
+    public static bool ProvinciaValida(string? provincia) =>
+        !string.IsNullOrWhiteSpace(provincia) && Catalogos.Provincias.Contains(provincia, StringComparer.Ordinal);
 
     public static bool CodigoPostalValido(string? codigoPostal) =>
         CodigoPostal().IsMatch((codigoPostal ?? string.Empty).Trim());
@@ -31,6 +35,7 @@ public static partial class LocalidadRules
         string.Equals(nombreA.Trim(), nombreB.Trim(), StringComparison.OrdinalIgnoreCase) &&
         string.Equals(provinciaA, provinciaB, StringComparison.Ordinal);
 
-    [GeneratedRegex(@"^\d{4}$")]
+    // `[0-9]` y no `\d`: `\d` acepta dígitos de cualquier escritura Unicode («٣٤٠٠»).
+    [GeneratedRegex(@"^[0-9]{4}$")]
     private static partial Regex CodigoPostal();
 }

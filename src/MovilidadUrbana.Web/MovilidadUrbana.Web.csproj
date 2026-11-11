@@ -12,6 +12,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+    <!-- Capa de IA: la abstracción y el adaptador del proveedor. Sólo los usan Infrastructure/AI y
+         Program.cs; una prueba de arquitectura lo vigila. -->
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.11.0" />
+    <PackageReference Include="OllamaSharp" Version="5.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- El corpus de ayuda y los prompts viajan dentro del ensamblado: son código versionado. -->
+    <EmbeddedResource Include="Ayuda\*.md" />
+    <EmbeddedResource Include="Infrastructure\AI\Prompts\*.txt" />
+    <InternalsVisibleTo Include="MovilidadUrbana.UnitTests" />
   </ItemGroup>
 
 </Project>

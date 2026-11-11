@@ -1,0 +1,20 @@
+{
+  "bateria": "bateria.v1",
+  "hash": "65b00cc18c0d1b9f",
+  "corrida": "1",
+  "camino": "modelo",
+  "fecha": "2026-11-11T13:51:53-03:00",
+  "modelo": "por variable OLLAMA_MODEL (fuera del repositorio)",
+  "k": 37,
+  "m": 37,
+  "inventados": 0,
+  "porResultado": {
+    "Rechazado": 8,
+    "Ok": 18,
+    "Abstencion": 6,
+    "Afuera": 5
+  },
+  "p50ms": 64,
+  "p95ms": 1853,
+  "maxms": 2051
+}

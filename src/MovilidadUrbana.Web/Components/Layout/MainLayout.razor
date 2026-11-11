@@ -1,6 +1,7 @@
 @* Shell de trabajo: barra lateral con el ítem activo, contenido y sello de versión al pie. La
    frontera entre superficies es una navegación, no un condicional dentro del layout. *@
 @inherits LayoutComponentBase
+@inject MovilidadUrbana.Web.Application.Asistente.IEstadoDelAsistente EstadoDelAsistente
 
 <div class="mq-shell">
     <Sidebar />
@@ -13,6 +14,13 @@
 @* Los dos hosts que el layout monta una sola vez para todo el shell. *@
 <DialogHost />
 <ReconnectionNotice />
+
+@* El panel del asistente se monta una sola vez, acá, con el mismo modo de render que el shell.
+   Con Asistente__Habilitado=false no existe: la aplicación queda como era. *@
+@if (EstadoDelAsistente.PanelVisible)
+{
+    <MovilidadUrbana.Web.Components.Shared.Asistente.PanelDelAsistente />
+}
 
 @*
     Testigo de interactividad. Durante el prerenderizado vale `false` y pasa a `true` cuando el

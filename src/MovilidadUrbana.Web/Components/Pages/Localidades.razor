@@ -39,6 +39,13 @@ else
                 @(_model.IsEdit ? "Editar localidad" : "Alta de localidad")
             </div>
             <div class="mq-panel__cuerpo">
+                @if (_propuestaDeIa)
+                {
+                    @* A0 con persona que firma: lo propuso el modelo, lo revisa y lo guarda la persona. *@
+                    <div class="mq-mb-6">
+                        <Band Tone="BandTone.Info" Testid="propuesta-ia">Propuesto por IA, revisá antes de guardar.</Band>
+                    </div>
+                }
                 <EditForm Model="_model" OnSubmit="SaveAsync" data-testid="formulario">
                     <div class="mq-grilla-campos">
                         <FormField Id="nombre" Label="Nombre" ErrorTestid="error-nombre"

@@ -1,0 +1,20 @@
+{
+  "bateria": "bateria.v1",
+  "hash": "65b00cc18c0d1b9f",
+  "corrida": "1",
+  "camino": "plantilla",
+  "fecha": "2026-11-11T13:52:57-03:00",
+  "modelo": "ninguno",
+  "k": 34,
+  "m": 37,
+  "inventados": 0,
+  "porResultado": {
+    "Degradado": 18,
+    "Ok": 8,
+    "Abstencion": 6,
+    "Afuera": 5
+  },
+  "p50ms": 2,
+  "p95ms": 51,
+  "maxms": 55
+}

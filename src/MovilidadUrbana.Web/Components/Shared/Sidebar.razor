@@ -2,6 +2,8 @@
    fondo de marca. Debajo del punto de quiebre pasa a navegación superior. *@
 @implements IDisposable
 @inject NavigationManager Navigation
+@inject MovilidadUrbana.Web.Application.Asistente.IEstadoDelAsistente EstadoDelAsistente
+@inject EstadoDelPanel Panel
 
 <nav class="mq-shell-sidebar" aria-label="Navegación principal">
     <a class="mq-identidad" href="" data-testid="marca">
@@ -19,6 +21,15 @@
                 @navTarget.Texto
             </a>
         }
+        @if (EstadoDelAsistente.PanelVisible)
+        {
+            @* El asistente no es una pantalla: abre el panel lateral, que vive en el layout. *@
+            <button type="button" class="mq-nav-item mq-nav-item--boton" data-testid="nav-asistente"
+                    aria-expanded="@Panel.Abierto.ToString().ToLowerInvariant()" @onclick="Panel.Alternar">
+                <Icon Nombre="@Icons.Asistente" Size="IconRoles.Card" />
+                Asistente
+            </button>
+        }
     </div>
 </nav>
 
@@ -29,10 +40,17 @@
     [
         new("", "Inicio", Icons.Home, "nav-inicio"),
         new("localidades", "Localidades", Icons.Localidad, "nav-localidades"),
-        new("encuesta", "Encuesta", Icons.Encuesta, "nav-encuesta")
+        new("encuesta", "Encuesta", Icons.Encuesta, "nav-encuesta"),
+        new("resultados", "Resultados", Icons.Resultados, "nav-resultados")
     ];
 
-    protected override void OnInitialized() => Navigation.LocationChanged += OnNavigate;
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnNavigate;
+        Panel.OnChange += OnPanel;
+    }
+
+    private void OnPanel() => InvokeAsync(StateHasChanged);
 
     private void OnNavigate(object? origen, LocationChangedEventArgs argumentos) =>
         InvokeAsync(StateHasChanged);
@@ -43,5 +61,9 @@
         return string.Equals(actual, ruta, StringComparison.OrdinalIgnoreCase);
     }
 
-    public void Dispose() => Navigation.LocationChanged -= OnNavigate;
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnNavigate;
+        Panel.OnChange -= OnPanel;
+    }
 }

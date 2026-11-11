@@ -1,0 +1,41 @@
+@* Comparación con varias columnas: va en tabla, con n por fila (REQ-IA-40). *@
+@using MovilidadUrbana.Web.Application.Resultados
+
+<figure class="mq-grafico" data-testid="tabla-promedios" data-forma="tabla">
+    <figcaption class="mq-grafico__titulo">@Titulo</figcaption>
+    <div class="mq-tabla-envoltorio mq-tabla-envoltorio--siempre">
+        <table class="mq-tabla">
+            <caption class="mq-sr-only">@Titulo</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Grupo</th>
+                    <th scope="col" class="mq-num">n</th>
+                    <th scope="col" class="mq-num">Km prom.</th>
+                    <th scope="col" class="mq-num">Km mediana</th>
+                    <th scope="col" class="mq-num">Min prom.</th>
+                    <th scope="col" class="mq-num">Min mediana</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Promedios.Filas)
+                {
+                    <tr data-testid="fila-promedio" data-clave="@f.Grupo">
+                        <th scope="row">@f.Etiqueta</th>
+                        <td class="mq-num">@f.Encuestas</td>
+                        <td class="mq-num">@f.DistanciaPromedio.ToString("N1")</td>
+                        <td class="mq-num">@f.DistanciaMediana.ToString("N1")</td>
+                        <td class="mq-num">@f.MinutosPromedio.ToString("N1")</td>
+                        <td class="mq-num">@f.MinutosMediana.ToString("N1")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="mq-grafico__nota" data-testid="nota-de-metrica">@Promedios.Nota</p>
+</figure>
+
+@code {
+    [Parameter, EditorRequired] public Promedios Promedios { get; set; } = default!;
+
+    [Parameter, EditorRequired] public string Titulo { get; set; } = string.Empty;
+}

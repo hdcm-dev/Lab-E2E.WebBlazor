@@ -1,0 +1,14 @@
+{
+  "k": [
+    34
+  ],
+  "m": 37,
+  "minimo": 34,
+  "inventados": 0,
+  "inestables": [
+    "B03",
+    "B04",
+    "B36"
+  ],
+  "cumple": true
+}

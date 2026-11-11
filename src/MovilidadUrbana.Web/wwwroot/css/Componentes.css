@@ -561,6 +561,11 @@ main:focus-visible {
     color: var(--color-accent-module-b);
 }
 
+.mq-tarjeta-entrada--modulo-d .mq-tarjeta-entrada__icono {
+    background-color: var(--color-background-info);
+    color: var(--color-accent-module-d);
+}
+
 /* --- Tablas ----------------------------------------------------------------------------- */
 .mq-tabla-envoltorio {
     overflow-x: auto;
@@ -872,6 +877,95 @@ main:focus-visible {
     align-items: start;
 }
 
+/* == 5b. Gráficos y asistente ===============================================================
+   Gráficos en SVG inline con los tokens del catálogo y siempre con su tabla accesible al lado:
+   las mismas cifras, legibles sin ver el dibujo. La serie se colorea con los acentos de módulo,
+   en orden fijo. El panel del asistente es una superficie lateral del shell: se monta una vez. */
+
+.mq-serie-1 { fill: var(--color-accent-module-a); background-color: var(--color-accent-module-a); }
+.mq-serie-2 { fill: var(--color-accent-module-b); background-color: var(--color-accent-module-b); }
+.mq-serie-3 { fill: var(--color-accent-module-c); background-color: var(--color-accent-module-c); }
+.mq-serie-4 { fill: var(--color-accent-module-d); background-color: var(--color-accent-module-d); }
+.mq-serie-5 { fill: var(--color-brand-primary-dark); background-color: var(--color-brand-primary-dark); }
+.mq-serie-6 { fill: var(--color-text-tertiary); background-color: var(--color-text-tertiary); }
+
+.mq-grafico { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.mq-grafico__titulo { font-size: var(--font-size-body-strong); font-weight: var(--font-weight-body-strong); margin: 0; }
+.mq-grafico__nota { font-size: var(--font-size-caption); color: var(--color-text-secondary); margin: 0; }
+
+.mq-barras { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.mq-barra { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) 3.5rem; align-items: center; gap: var(--space-2); font-size: var(--font-size-body); }
+.mq-barra__rotulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mq-barra__pista { width: 100%; height: 14px; display: block; }
+.mq-barra__pista rect.mq-barra__fondo { fill: var(--color-background-secondary); }
+.mq-barra__valor { text-align: right; font-variant-numeric: tabular-nums; color: var(--color-text-secondary); }
+
+.mq-torta { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
+.mq-torta svg { width: 140px; height: 140px; flex: 0 0 auto; }
+.mq-leyenda { display: flex; flex-direction: column; gap: var(--space-1); margin: 0; padding: 0; list-style: none; font-size: var(--font-size-body); }
+.mq-leyenda li { display: flex; align-items: center; gap: var(--space-2); }
+.mq-leyenda__muestra { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+.mq-cifra-grande { font-size: 28px; font-weight: var(--font-weight-title); line-height: var(--line-height-titulo); font-variant-numeric: tabular-nums; }
+.mq-grilla-resultados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.mq-pestanas { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); }
+
+/* --- Panel del asistente --------------------------------------------------------------- */
+.mq-nav-item--boton { background: none; border: 0; width: 100%; text-align: left; cursor: pointer; font: inherit; }
+
+.mq-asistente {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    width: 400px;
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background-primary);
+    border-left: var(--border-control);
+    box-shadow: 0 0 24px var(--color-backdrop);
+}
+.mq-asistente[hidden] { display: none; }
+.mq-asistente__cabecera { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-5); border-bottom: var(--border-hairline); }
+.mq-asistente__cabecera h2 { margin: 0; font-size: var(--font-size-title); font-weight: var(--font-weight-title); }
+.mq-asistente__aviso { padding: var(--space-3) var(--space-5) 0; }
+.mq-asistente__conversacion { flex: 1 1 auto; overflow-y: auto; padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-4); }
+.mq-asistente__pie { border-top: var(--border-hairline); padding: var(--space-4) var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); }
+.mq-asistente__fila { display: flex; gap: var(--space-2); }
+.mq-asistente__fila .mq-input { flex: 1 1 auto; min-width: 0; }
+
+.mq-burbuja { border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); font-size: var(--font-size-body); line-height: var(--line-height-prosa); display: flex; flex-direction: column; gap: var(--space-3); }
+.mq-burbuja--persona { align-self: flex-end; max-width: 85%; background-color: var(--color-brand-primary-tint); color: var(--color-text-primary); }
+.mq-burbuja--asistente { align-self: stretch; background-color: var(--color-background-tertiary); border: var(--border-hairline); }
+.mq-burbuja > .mq-insignia { align-self: flex-start; }
+.mq-burbuja__texto { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.mq-burbuja__citas { margin: 0; padding: 0; list-style: none; font-size: var(--font-size-caption); color: var(--color-text-secondary); }
+.mq-burbuja__votos { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--font-size-caption); color: var(--color-text-secondary); }
+
+.mq-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.mq-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 32px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-pill);
+    border: var(--border-control);
+    background-color: var(--color-background-primary);
+    color: var(--color-brand-primary);
+    font: inherit;
+    font-size: var(--font-size-body);
+    text-decoration: none;
+    cursor: pointer;
+}
+.mq-chip--destino { background-color: var(--color-brand-primary); border-color: var(--color-brand-primary); color: var(--color-text-on-brand); }
+.mq-chip--contexto { color: var(--color-text-secondary); }
+
+/* La tabla de un gráfico no conmuta a tarjetas: es corta y es la versión accesible del dibujo. */
+.mq-tabla-envoltorio--siempre { display: block; overflow-x: auto; }
+
 /* == 6. El único punto de quiebre ============================================================
    La barra lateral pasa a navegación superior, y la colección conmuta de tabla a tarjetas
    apiladas: las dos presentaciones están siempre en el marcado y las decide el CSS. */
@@ -910,11 +1004,28 @@ main:focus-visible {
         display: none;
     }
 
+    .mq-tabla-envoltorio.mq-tabla-envoltorio--siempre {
+        display: block;
+    }
+
     .mq-tarjetas-apiladas {
         display: flex;
     }
 
     .mq-acciones-pie {
         flex-direction: column-reverse;
+    }
+
+    .mq-grilla-resultados {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mq-barra {
+        grid-template-columns: minmax(0, 6rem) minmax(0, 1fr) 3rem;
+    }
+
+    .mq-asistente {
+        width: 100vw;
+        border-left: 0;
     }
 }

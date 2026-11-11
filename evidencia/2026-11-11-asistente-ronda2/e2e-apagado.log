@@ -1,0 +1,35 @@
+Test run for <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+NUnit Adapter 5.0.0.0: Test execution started
+Running selected tests in <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll
+   NUnit3TestExecutor discovered 22 of 22 NUnit test cases using Current Discovery mode, Non-Explicit run
+Asegurando el navegador «chromium»…
+Publicando la aplicación bajo prueba en «<repo>/publicacion»…
+  Passed DesdeLaPortadaSeLlegaAlAbmYALaEncuesta [2 s]
+  Passed ArrancaEnElPaso1ConElAnteriorDeshabilitado [2 s]
+  Passed ElDesplegableDeLocalidadesSeAlimentaDelAbm [412 ms]
+  Passed AlBorrarTodasLasLocalidadesAvisaQueNoHayDatos [3 s]
+  Passed ElMenuMarcaLaPaginaActiva [649 ms]
+  Passed LaPortadaOfreceAccesoALasDosPantallas [483 ms]
+  Passed ElIndicadorDePasosAcompanaElAvance [1 s]
+  Passed UnaDireccionInexistenteMuestraLaPantallaDeNoEncontrado [359 ms]
+  Passed CadaPruebaTrabajaSobreSuPropioConjuntoDeDatos [1 s]
+  Passed NoAvanzaDelPaso1ConDatosInvalidos [466 ms]
+  Passed CancelarLaBajaDejaLaTablaIntacta [469 ms]
+  Passed NoAvanzaDelPaso2SinMediosNiFrecuencia [553 ms]
+  Passed ConfirmarLaBajaEliminaLaFila [466 ms]
+  Passed NoFinalizaConElPaso3Incompleto [690 ms]
+  Passed DaDeAltaUnaLocalidadYLaPersisteTrasRecargar [683 ms]
+  Passed ModificaUnaLocalidadExistente [811 ms]
+  Passed NuevaEncuestaDevuelveElAsistenteAlPaso1 [1 s]
+  Passed MuestraElListadoSembrado [399 ms]
+  Passed NoPermiteDuplicarNombreDentroDeLaMismaProvincia [410 ms]
+NUnit Adapter 5.0.0.0: Test execution complete
+  Passed PermiteVolverAtrasConservandoLoCargado [771 ms]
+  Passed RechazaElAltaConCamposInvalidos [458 ms]
+  Passed RecorreLosTresPasosMuestraElResumenYRegistraLaRespuesta [819 ms]
+
+Test Run Successful.
+Total tests: 22
+     Passed: 22
+ Total time: 13.6317 Seconds

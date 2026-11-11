@@ -1,0 +1,65 @@
+An issue was encountered verifying workloads. For more information, run "dotnet workload update".
+Test run for <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+NUnit Adapter 5.0.0.0: Test execution started
+Running all tests in <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll
+   NUnit3TestExecutor discovered 39 of 39 NUnit test cases using Current Discovery mode, Non-Explicit run
+Asegurando el navegador «chromium»…
+Publicando la aplicación bajo prueba en «<repo>/publicacion»…
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[35]
+      No XML encryptor configured. Key {8a9c2ed0-1d83-43f5-b436-e54e79dfd31a} may be persisted to storage in unencrypted form.
+  Passed Aclaracion_ElegirSigue [18 s]
+  Passed ArrancaEnElPaso1ConElAnteriorDeshabilitado [19 s]
+  Passed Afuera_RechazoConSugerencias [1 s]
+  Passed ElDesplegableDeLocalidadesSeAlimentaDelAbm [261 ms]
+  Passed AlBorrarTodasLasLocalidadesAvisaQueNoHayDatos [19 s]
+CAPTURA alta-prellenada-1280: desborde=0 cls=0.000
+  Passed AltaPrellenada(1280) [20 s]
+  Passed CadaPruebaTrabajaSobreSuPropioConjuntoDeDatos [1 s]
+  Passed ElIndicadorDePasosAcompanaElAvance [1 s]
+  Passed ChipDeAlta_AbreElFormulario [1 s]
+CAPTURA alta-prellenada-390: desborde=0 cls=0.000
+  Passed AltaPrellenada(390) [1 s]
+  Passed NoAvanzaDelPaso1ConDatosInvalidos [945 ms]
+  Passed CancelarLaBajaDejaLaTablaIntacta [1 s]
+  Passed ChipDeBaja_AbreLaConfirmacion_YRechazarNoBorra [1 s]
+  Passed NoAvanzaDelPaso2SinMediosNiFrecuencia [442 ms]
+  Passed ConfirmarLaBajaEliminaLaFila [445 ms]
+CAPTURA medicion-1280: desborde=0 cls=0.000
+  Passed Resultados_SinEncuestas [255 ms]
+  Passed Medicion(1280) [1 s]
+  Passed SinModelo_CifraDestinoYAviso [546 ms]
+  Passed NoFinalizaConElPaso3Incompleto [879 ms]
+  Passed DaDeAltaUnaLocalidadYLaPersisteTrasRecargar [811 ms]
+  Passed Votar_QuedaRegistrado [505 ms]
+CAPTURA medicion-390: desborde=0 cls=0.000
+  Passed ModificaUnaLocalidadExistente [540 ms]
+  Passed DesdeLaPortadaSeLlegaAlAbmYALaEncuesta [438 ms]
+  Passed MuestraElListadoSembrado [340 ms]
+  Passed ElMenuMarcaLaPaginaActiva [308 ms]
+  Passed Medicion(390) [1 s]
+  Passed LaPortadaOfreceAccesoALasDosPantallas [230 ms]
+  Passed NoPermiteDuplicarNombreDentroDeLaMismaProvincia [410 ms]
+  Passed NuevaEncuestaDevuelveElAsistenteAlPaso1 [1 s]
+  Passed UnaDireccionInexistenteMuestraLaPantallaDeNoEncontrado [486 ms]
+  Passed RechazaElAltaConCamposInvalidos [575 ms]
+CAPTURA panel-1280: desborde=0 cls=0.000
+  Passed Panel(1280) [2 s]
+  Passed PermiteVolverAtrasConservandoLoCargado [2 s]
+  Passed RecorreLosTresPasosMuestraElResumenYRegistraLaRespuesta [709 ms]
+CAPTURA panel-390: desborde=0 cls=0.000
+CAPTURA resultados-vacio-1280: desborde=0 cls=0.000
+  Passed Panel(390) [2 s]
+  Passed Resultados(1280) [899 ms]
+CAPTURA resultados-vacio-390: desborde=0 cls=0.000
+  Passed Resultados(390) [891 ms]
+CAPTURA resultados-con-datos-1280: desborde=0 cls=0.000
+  Passed ResultadosConDatos(1280) [1 s]
+CAPTURA resultados-con-datos-390: desborde=0 cls=0.000
+NUnit Adapter 5.0.0.0: Test execution complete
+  Passed ResultadosConDatos(390) [1 s]
+
+Test Run Successful.
+Total tests: 39
+     Passed: 39
+ Total time: 46.8264 Seconds

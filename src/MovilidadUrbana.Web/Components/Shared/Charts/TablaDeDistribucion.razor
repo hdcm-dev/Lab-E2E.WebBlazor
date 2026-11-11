@@ -1,0 +1,40 @@
+@* La tabla accesible de un gráfico: las mismas cifras, con su porcentaje sobre el denominador. *@
+@using MovilidadUrbana.Web.Application.Resultados
+
+<div class="mq-tabla-envoltorio mq-tabla-envoltorio--siempre">
+    <table class="mq-tabla" data-testid="tabla-de-datos">
+        <caption class="mq-sr-only">@Titulo</caption>
+        <thead>
+            <tr>
+                <th scope="col">Categoría</th>
+                <th scope="col" class="mq-num">@EncabezadoDelValor</th>
+                <th scope="col" class="mq-num">%</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fila in Filas)
+            {
+                <tr data-testid="fila-de-datos" data-clave="@fila.Clave">
+                    <th scope="row">@fila.Etiqueta</th>
+                    <td class="mq-num">@fila.Cantidad@Sufijo</td>
+                    <td class="mq-num">@Porcentaje(fila)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<FilaDeDistribucion> Filas { get; set; } = [];
+
+    [Parameter, EditorRequired] public int Denominador { get; set; }
+
+    [Parameter, EditorRequired] public string Titulo { get; set; } = string.Empty;
+
+    [Parameter] public string EncabezadoDelValor { get; set; } = "Respuestas";
+
+    [Parameter] public string? Sufijo { get; set; }
+
+    private string Porcentaje(FilaDeDistribucion fila) =>
+        Denominador == 0 ? "—" : (fila.Cantidad * 100.0 / Denominador).ToString("0", CultureInfo.GetCultureInfo("es-AR")) + " %";
+}

@@ -1,0 +1,65 @@
+{
+  "k": [
+    43,
+    43,
+    43
+  ],
+  "m": 46,
+  "minimo": 43,
+  "umbral": 43,
+  "inventados": 0,
+  "inestables": [
+    "B03",
+    "B04",
+    "B36"
+  ],
+  "peoresACiegas": 0,
+  "paresJuzgados": [
+    9,
+    9,
+    9
+  ],
+  "compuerta": "EJERCIDA",
+  "validador": [
+    {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "porMotivo": {}
+    },
+    {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "porMotivo": {}
+    },
+    {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "porMotivo": {}
+    }
+  ],
+  "distintasDeLaPlantilla": [],
+  "redaccion": "apagada",
+  "variacion": [
+    {
+      "corrida": "1",
+      "semilla": "7",
+      "temperatura": "0"
+    },
+    {
+      "corrida": "2",
+      "semilla": "11",
+      "temperatura": "0.5"
+    },
+    {
+      "corrida": "3",
+      "semilla": "23",
+      "temperatura": "0.5"
+    }
+  ],
+  "conIa": [],
+  "identicosEntreCorridas": [],
+  "cumple": true
+}

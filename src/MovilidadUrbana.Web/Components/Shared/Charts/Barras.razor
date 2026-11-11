@@ -1,0 +1,49 @@
+@* Barras horizontales ordenadas de mayor a menor (REQ-IA-40): para lo que no es parte de un
+   todo, como los medios, que son multirrespuesta. El largo es relativo al denominador, no a la
+   suma, y cada barra lleva su cifra escrita. *@
+@using MovilidadUrbana.Web.Application.Resultados
+
+<figure class="mq-grafico" data-testid="@Testid" data-forma="barras">
+    <figcaption class="mq-grafico__titulo">@Titulo</figcaption>
+    <ul class="mq-barras" aria-hidden="true">
+        @foreach (var (fila, i) in Ordenadas.Select((f, i) => (f, i)))
+        {
+            <li class="mq-barra" data-testid="barra" data-clave="@fila.Clave">
+                <span class="mq-barra__rotulo">@fila.Etiqueta</span>
+                <svg class="mq-barra__pista" viewBox="0 0 100 14" preserveAspectRatio="none" focusable="false">
+                    <rect class="mq-barra__fondo" x="0" y="0" width="100" height="14" rx="2" />
+                    <rect class="mq-serie-@((i % 6) + 1)" x="0" y="0" width="@Ancho(fila)" height="14" rx="2" />
+                </svg>
+                <span class="mq-barra__valor">@fila.Cantidad</span>
+            </li>
+        }
+    </ul>
+    <TablaDeDistribucion Filas="Ordenadas" Denominador="Denominador" Titulo="@Titulo" EncabezadoDelValor="@EncabezadoDelValor" Sufijo="@Sufijo" />
+    @if (Nota is not null)
+    {
+        <p class="mq-grafico__nota" data-testid="nota-de-metrica">@Nota</p>
+    }
+</figure>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<FilaDeDistribucion> Filas { get; set; } = [];
+
+    /// <summary>Base del porcentaje: en multirrespuesta, las encuestas, no la suma de marcas.</summary>
+    [Parameter, EditorRequired] public int Denominador { get; set; }
+
+    [Parameter, EditorRequired] public string Titulo { get; set; } = string.Empty;
+
+    [Parameter] public string? Nota { get; set; }
+
+    [Parameter] public string EncabezadoDelValor { get; set; } = "Encuestas";
+
+    [Parameter] public string? Sufijo { get; set; }
+
+    [Parameter] public string? Testid { get; set; }
+
+    private IReadOnlyList<FilaDeDistribucion> Ordenadas =>
+        Filas.OrderByDescending(f => f.Cantidad).ThenBy(f => f.Etiqueta, StringComparer.Ordinal).ToList();
+
+    private string Ancho(FilaDeDistribucion fila) =>
+        (Denominador == 0 ? 0 : Math.Round(fila.Cantidad * 100.0 / Denominador, 2)).ToString(CultureInfo.InvariantCulture);
+}

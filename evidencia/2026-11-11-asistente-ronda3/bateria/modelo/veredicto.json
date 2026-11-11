@@ -1,0 +1,40 @@
+{
+  "k": [
+    46,
+    46,
+    46
+  ],
+  "m": 46,
+  "minimo": 46,
+  "umbral": 43,
+  "inventados": 0,
+  "inestables": [],
+  "peoresACiegas": 0,
+  "variacion": [
+    {
+      "corrida": "1",
+      "semilla": "7",
+      "temperatura": "0"
+    },
+    {
+      "corrida": "2",
+      "semilla": "11",
+      "temperatura": "0.5"
+    },
+    {
+      "corrida": "3",
+      "semilla": "23",
+      "temperatura": "0.5"
+    }
+  ],
+  "conIa": [
+    "B17",
+    "B39",
+    "B42",
+    "B43",
+    "B44",
+    "B45"
+  ],
+  "identicosEntreCorridas": [],
+  "cumple": true
+}

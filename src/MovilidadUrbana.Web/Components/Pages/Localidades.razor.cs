@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using MovilidadUrbana.Web.Application;
 using MovilidadUrbana.Web.Application.Localidades;
 using MovilidadUrbana.Web.Components.Shared;
 using MovilidadUrbana.Web.Domain.Entities;
@@ -32,9 +33,93 @@ public partial class Localidades : ComponentBase
 
     [Inject] private ILogger<Localidades> Registro { get; set; } = default!;
 
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    // --- Deeplinks del catálogo de destinos ----------------------------------------------------
+    // La página lee de la consulta sólo lo que el catálogo declara para sus destinos: `alta` y su
+    // prellenado, `baja` y el filtro `provincia`. Cada acción se abre una sola vez: después se
+    // limpia la dirección, así que recargar no la vuelve a abrir.
+
+    [SupplyParameterFromQuery(Name = "alta")] public string? Alta { get; set; }
+
+    [SupplyParameterFromQuery(Name = "baja")] public int? Baja { get; set; }
+
+    [SupplyParameterFromQuery(Name = "nombre")] public string? Nombre { get; set; }
+
+    [SupplyParameterFromQuery(Name = "provincia")] public string? Provincia { get; set; }
+
+    [SupplyParameterFromQuery(Name = "cp")] public string? Cp { get; set; }
+
+    [SupplyParameterFromQuery(Name = "habitantes")] public int? Habitantes { get; set; }
+
+    [SupplyParameterFromQuery(Name = "propuesta")] public string? Propuesta { get; set; }
+
+    private bool _propuestaDeIa;
+    private bool _enfocarElNombre;
+
+    /// <summary>
+    /// El foco va al nombre después del render, y después del foco que la navegación pone en el
+    /// contenido principal (<c>FocusOnNavigate</c>): si no, la navegación se lo vuelve a llevar.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_enfocarElNombre) return;
+        _enfocarElNombre = false;
+        await Task.Delay(50);
+        try { await FocusNameAsync(); } catch (InvalidOperationException) { } catch (Microsoft.JSInterop.JSException) { }
+    }
+
     private bool HasFilter => _texto.Length > 0 || _provincia.Length > 0;
 
     protected override Task OnInitializedAsync() => LoadAsync();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // En el prerenderizado no se actúa: la acción se abre una vez, ya en el circuito.
+        if (!RendererInfo.IsInteractive) return;
+
+        if (Alta == "1")
+        {
+            _model = new LocalidadModel
+            {
+                Nombre = Nombre ?? string.Empty,
+                Provincia = Provincia is not null && Domain.Rules.LocalidadRules.ProvinciaValida(Provincia) ? Provincia : string.Empty,
+                CodigoPostal = Cp ?? string.Empty,
+                Habitantes = Habitantes
+            };
+            _propuestaDeIa = Propuesta == "ia";
+            var prellenado = Nombre is not null || Provincia is not null || Cp is not null || Habitantes is not null;
+            _errors = prellenado ? Servicio.ValidarSinGuardar(_model) : NoErrors;
+            _notice = null;
+            LimpiarLaDireccion();
+            _enfocarElNombre = true;
+            return;
+        }
+
+        if (Baja is int id)
+        {
+            LimpiarLaDireccion();
+            if (_state is SurfaceState.Cargando) await LoadAsync();
+            var localidad = _all.FirstOrDefault(l => l.Id == id);
+            if (localidad is null || !Permisos.PuedeEliminar(_all.Select(l => l.Id), id))
+            {
+                // Inquilino por código (REQ-IA-18): una localidad ajena es indistinguible de una inexistente.
+                _notice = ("No se encontró esa localidad en tu sesión.", BandTone.Error);
+                return;
+            }
+
+            _ = InvokeAsync(() => ConfirmDeleteAsync(localidad));
+            return;
+        }
+
+        if (Provincia is not null && Domain.Rules.LocalidadRules.ProvinciaValida(Provincia) && _provincia != Provincia)
+        {
+            _provincia = Provincia;
+            ApplyFilter();
+        }
+    }
+
+    private void LimpiarLaDireccion() => Navigation.NavigateTo("localidades", forceLoad: false, replace: true);
 
     /// <summary>
     /// Trae la colección. La carga es idempotente y sin efectos, que es la condición para que el
@@ -132,6 +217,7 @@ public partial class Localidades : ComponentBase
 
             _notice = (result.Message, BandTone.Exito);
             _model = new LocalidadModel();
+            _propuestaDeIa = false;
             await LoadAsync();
         }
         catch (Exception excepcion)
@@ -161,6 +247,7 @@ public partial class Localidades : ComponentBase
 
     private void Cancel()
     {
+        _propuestaDeIa = false;
         _model = new LocalidadModel();
         _errors = NoErrors;
         _notice = null;

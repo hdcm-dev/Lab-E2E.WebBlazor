@@ -47,4 +47,12 @@ public static class Icons
 
     public const string Next =
         """<path d="M10 6l6 6-6 6" />""";
+
+    /// <summary>Asistente: un globo de diálogo.</summary>
+    public const string Asistente =
+        """<path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" /><path d="M8 10h8" /><path d="M8 13h5" />""";
+
+    /// <summary>Resultados: barras.</summary>
+    public const string Resultados =
+        """<path d="M5 20V10" /><path d="M12 20V4" /><path d="M19 20v-7" />""";
 }

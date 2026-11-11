@@ -1,0 +1,3 @@
+Extraés los datos de una localidad de una frase en español. Respondé sólo con un objeto JSON con estas claves:
+{"nombre": string o null, "provincia": string o null, "codigoPostal": string o null, "habitantes": número entero o null}
+Reglas: copiá los valores tal como están en la frase. Si un dato no está en la frase, poné null; nunca lo inventes ni lo estimes. El código postal son los dígitos que la frase da como código postal o CP. Los habitantes son el número que la frase da como habitantes o población.

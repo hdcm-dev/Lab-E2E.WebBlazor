@@ -1,0 +1,89 @@
+
+Welcome to .NET 10.0!
+---------------------
+SDK Version: 10.0.403
+
+----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, run 'dotnet dev-certs https --trust'
+Learn about HTTPS: https://aka.ms/dotnet-https
+
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------
+An issue was encountered verifying workloads. For more information, run "dotnet workload update".
+  Determining projects to restore...
+  Restored <repo>/tests/MovilidadUrbana.E2ETests/MovilidadUrbana.E2ETests.csproj (in 1.49 sec).
+  MovilidadUrbana.E2ETests -> <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll
+Test run for <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+NUnit Adapter 5.0.0.0: Test execution started
+Running all tests in <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll
+   NUnit3TestExecutor discovered 41 of 41 NUnit test cases using Current Discovery mode, Non-Explicit run
+Asegurando el navegador «chromium»…
+Publicando la aplicación bajo prueba en «<repo>/publicacion»…
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[35]
+      No XML encryptor configured. Key {a6a4ea04-cc69-486b-a723-1bd502f2a49f} may be persisted to storage in unencrypted form.
+  Passed ArrancaEnElPaso1ConElAnteriorDeshabilitado [12 s]
+CAPTURA alta-prellenada-1280: desborde=0 cls=0.000
+  Passed ElDesplegableDeLocalidadesSeAlimentaDelAbm [475 ms]
+  Passed Aclaracion_ElegirSigue [12 s]
+  Passed AlBorrarTodasLasLocalidadesAvisaQueNoHayDatos [13 s]
+  Passed AltaPrellenada(1280) [13 s]
+CAPTURA alta-prellenada-390: desborde=0 cls=0.000
+  Passed Afuera_RechazoConSugerencias [1 s]
+  Passed ElIndicadorDePasosAcompanaElAvance [1 s]
+  Passed CadaPruebaTrabajaSobreSuPropioConjuntoDeDatos [1 s]
+  Passed NoAvanzaDelPaso1ConDatosInvalidos [669 ms]
+  Passed ChipDeAlta_AbreElFormulario [978 ms]
+  Passed AltaPrellenada(390) [1 s]
+  Passed CancelarLaBajaDejaLaTablaIntacta [705 ms]
+  Passed NoAvanzaDelPaso2SinMediosNiFrecuencia [1 s]
+  Passed ConfirmarLaBajaEliminaLaFila [934 ms]
+  Passed ChipDeBaja_AbreLaConfirmacion_YRechazarNoBorra [1 s]
+CAPTURA ayuda-negrita-1280: desborde=0 cls=0.000
+  Passed Resultados_SinEncuestas [480 ms]
+  Passed NoFinalizaConElPaso3Incompleto [1 s]
+  Passed DaDeAltaUnaLocalidadYLaPersisteTrasRecargar [1 s]
+  Passed SinModelo_CifraDestinoYAviso [809 ms]
+  Passed AyudaSinMarcasCrudas(1280) [2 s]
+CAPTURA ayuda-negrita-390: desborde=0 cls=0.000
+  Passed Votar_QuedaRegistrado [1 s]
+  Passed ModificaUnaLocalidadExistente [1 s]
+  Passed NuevaEncuestaDevuelveElAsistenteAlPaso1 [1 s]
+  Passed MuestraElListadoSembrado [519 ms]
+  Passed DesdeLaPortadaSeLlegaAlAbmYALaEncuesta [714 ms]
+  Passed AyudaSinMarcasCrudas(390) [1 s]
+  Passed ElMenuMarcaLaPaginaActiva [560 ms]
+  Passed NoPermiteDuplicarNombreDentroDeLaMismaProvincia [868 ms]
+  Passed PermiteVolverAtrasConservandoLoCargado [1 s]
+  Passed LaPortadaOfreceAccesoALasDosPantallas [593 ms]
+  Passed UnaDireccionInexistenteMuestraLaPantallaDeNoEncontrado [394 ms]
+  Passed RechazaElAltaConCamposInvalidos [878 ms]
+CAPTURA medicion-1280: desborde=0 cls=0.000
+CAPTURA medicion-390: desborde=0 cls=0.000
+  Passed Medicion(1280) [1 s]
+  Passed RecorreLosTresPasosMuestraElResumenYRegistraLaRespuesta [1 s]
+  Passed Medicion(390) [1 s]
+CAPTURA panel-1280: desborde=0 cls=0.000
+  Passed Panel(1280) [1 s]
+CAPTURA panel-390: desborde=0 cls=0.000
+  Passed Panel(390) [1 s]
+CAPTURA resultados-vacio-1280: desborde=0 cls=0.000
+CAPTURA resultados-vacio-390: desborde=0 cls=0.000
+  Passed Resultados(1280) [975 ms]
+  Passed Resultados(390) [948 ms]
+CAPTURA resultados-con-datos-1280: desborde=0 cls=0.000
+  Passed ResultadosConDatos(1280) [1 s]
+CAPTURA resultados-con-datos-390: desborde=0 cls=0.000
+NUnit Adapter 5.0.0.0: Test execution complete
+  Passed ResultadosConDatos(390) [1 s]
+
+Test Run Successful.
+Total tests: 41
+     Passed: 41
+ Total time: 36.7872 Seconds

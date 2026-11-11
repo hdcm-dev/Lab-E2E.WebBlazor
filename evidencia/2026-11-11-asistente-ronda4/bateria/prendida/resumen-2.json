@@ -1,0 +1,90 @@
+{
+  "bateria": "bateria.v3",
+  "hash": "277b9cb581f90141",
+  "corrida": "2",
+  "camino": "modelo",
+  "fecha": "2026-11-11T19:08:40+00:00",
+  "modelo": "por variable OLLAMA_MODEL (fuera del repositorio)",
+  "semilla": "11",
+  "temperatura": "0.5",
+  "redaccion": "habilitada",
+  "comparacionACiegas": {
+    "compuerta": "EJERCIDA",
+    "juez": "modelo distinto del redactor (BATERIA_JUEZ_MODELO)",
+    "paresJuzgados": 11,
+    "control": {
+      "pares": "pares-a-ciegas.v1",
+      "juzgados": 9,
+      "aciertos": 4,
+      "aciertosReglas": 9,
+      "peores": 6,
+      "peoresDetectadosPorReglas": 6
+    },
+    "redactadas": {
+      "comparadas": 2,
+      "juzgadas": 2,
+      "identicas": 0,
+      "peores": 1,
+      "mejores": 0,
+      "iguales": 1
+    }
+  },
+  "validador": {
+    "intentos": 13,
+    "rechazos": 10,
+    "tasaDeRechazo": 0.769,
+    "soloCitas": 1,
+    "porMotivo": {
+      "nota de multirrespuesta alterada": 2,
+      "oración sin cita": 2,
+      "oración sin cita al final": 5,
+      "cifra sin la nota de la sesión": 1
+    }
+  },
+  "porForma": {
+    "distribucion_medios": {
+      "intentos": 9,
+      "rechazos": 7,
+      "soloCitas": 1,
+      "redactadas": 1,
+      "juzgadas": 1,
+      "peores": 1,
+      "controlJuzgados": 4,
+      "controlAciertos": 1
+    },
+    "distribucion_motivos": {
+      "intentos": 2,
+      "rechazos": 2,
+      "soloCitas": 0,
+      "redactadas": 0,
+      "juzgadas": 0,
+      "peores": 0,
+      "controlJuzgados": 2,
+      "controlAciertos": 1
+    },
+    "distribucion_frecuencias": {
+      "intentos": 2,
+      "rechazos": 1,
+      "soloCitas": 0,
+      "redactadas": 1,
+      "juzgadas": 1,
+      "peores": 0,
+      "controlJuzgados": 3,
+      "controlAciertos": 2
+    }
+  },
+  "k": 45,
+  "m": 46,
+  "minimo": 43,
+  "inventados": 0,
+  "redactadas": 2,
+  "porResultado": {
+    "Ok": 25,
+    "Abstencion": 6,
+    "Afuera": 5,
+    "Rechazado": 10
+  },
+  "p50ms": 5,
+  "p95ms": 3917,
+  "maxms": 4315
+}

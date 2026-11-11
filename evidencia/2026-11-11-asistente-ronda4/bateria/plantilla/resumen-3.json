@@ -1,0 +1,84 @@
+{
+  "bateria": "bateria.v3",
+  "hash": "277b9cb581f90141",
+  "corrida": "3",
+  "camino": "plantilla",
+  "fecha": "2026-11-11T19:11:39+00:00",
+  "modelo": "ninguno",
+  "semilla": "23",
+  "temperatura": "0.5",
+  "redaccion": "apagada",
+  "comparacionACiegas": {
+    "compuerta": "EJERCIDA",
+    "juez": "reglas deterministas declaradas (R1–R8)",
+    "paresJuzgados": 9,
+    "control": {
+      "pares": "pares-a-ciegas.v1",
+      "juzgados": 9,
+      "aciertos": 9,
+      "aciertosReglas": 9,
+      "peores": 6,
+      "peoresDetectadosPorReglas": 6
+    },
+    "redactadas": {
+      "comparadas": 0,
+      "juzgadas": 0,
+      "identicas": 0,
+      "peores": 0,
+      "mejores": 0,
+      "iguales": 0
+    }
+  },
+  "validador": {
+    "intentos": 0,
+    "rechazos": 0,
+    "soloCitas": 0,
+    "porMotivo": {}
+  },
+  "porForma": {
+    "distribucion_medios": {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "redactadas": 0,
+      "juzgadas": 0,
+      "peores": 0,
+      "controlJuzgados": 4,
+      "controlAciertos": 4
+    },
+    "distribucion_motivos": {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "redactadas": 0,
+      "juzgadas": 0,
+      "peores": 0,
+      "controlJuzgados": 2,
+      "controlAciertos": 2
+    },
+    "distribucion_frecuencias": {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "redactadas": 0,
+      "juzgadas": 0,
+      "peores": 0,
+      "controlJuzgados": 3,
+      "controlAciertos": 3
+    }
+  },
+  "k": 43,
+  "m": 46,
+  "minimo": 43,
+  "inventados": 0,
+  "redactadas": 0,
+  "porResultado": {
+    "Degradado": 27,
+    "Ok": 8,
+    "Abstencion": 6,
+    "Afuera": 5
+  },
+  "p50ms": 2,
+  "p95ms": 42,
+  "maxms": 77
+}
