@@ -566,6 +566,8 @@ public sealed class AsistenteService(
     private async Task<RespuestaDelAsistente> RedactarAsync(RespuestaDelAsistente basica, PedidoDeRedaccion pedido, IReadOnlyList<Cita> citas, CancellationToken ct)
     {
         if (estado.Motivo != MotivoDeHabilitacion.Habilitada) return basica with { Resultado = ResultadoDelTurno.Degradado };
+        // Fuera de las distribuciones la plantilla fija es la respuesta: el modelo no se llama.
+        if (!Intenciones.ConRedaccion.Contains(pedido.Intencion)) return basica;
 
         var redactado = await redactor.RedactarAsync(pedido, ct);
         return redactado.Tipo switch

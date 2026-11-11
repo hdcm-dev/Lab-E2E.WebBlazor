@@ -1,0 +1,30 @@
+{
+  "bateria": "bateria.v3",
+  "hash": "277b9cb581f90141",
+  "corrida": "2",
+  "camino": "plantilla",
+  "fecha": "2026-11-11T18:23:33+00:00",
+  "modelo": "ninguno",
+  "semilla": "11",
+  "temperatura": "0.5",
+  "comparacionACiegas": {
+    "comparadas": 0,
+    "peores": 0,
+    "mejores": 0,
+    "iguales": 0
+  },
+  "k": 43,
+  "m": 46,
+  "minimo": 43,
+  "inventados": 0,
+  "redactadas": 0,
+  "porResultado": {
+    "Degradado": 27,
+    "Ok": 8,
+    "Abstencion": 6,
+    "Afuera": 5
+  },
+  "p50ms": 3,
+  "p95ms": 64,
+  "maxms": 92
+}

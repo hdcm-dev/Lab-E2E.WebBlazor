@@ -24,8 +24,8 @@ public class RedaccionTests
     [Test(Description = "REQ-IA-24: la redacción no ofrece herramientas")]
     public async Task Redaccion_SinHerramientas()
     {
-        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Hay 20 encuestas registradas en tu sesión [1]."));
-        var r = await arnes.PreguntarAsync(Sesion, "¿Cuántas encuestas hay?");
+        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Auto particular: 4 de 20 encuestas de tu sesión [1]. Una persona puede marcar varios medios, así que no suman 100 % [1]."));
+        var r = await arnes.PreguntarAsync(Sesion, "¿Cuántos van en auto?");
         Assert.Multiple(() =>
         {
             Assert.That(r.RedactadaConIa, Is.True);
@@ -39,13 +39,13 @@ public class RedaccionTests
     [Test(Description = "REQ-IA-22: «hay 7» con 20 → texto fijo con la cifra del código")]
     public async Task CifraSinOrigen_TextoFijoConCifrasDelCodigo()
     {
-        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Hay 7 encuestas en tu sesión [1]."));
-        var r = await arnes.PreguntarAsync(Sesion, "¿Cuántas encuestas hay?");
+        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Auto particular: 7 de 20 encuestas de tu sesión [1]. Una persona puede marcar varios medios, así que no suman 100 % [1]."));
+        var r = await arnes.PreguntarAsync(Sesion, "¿Cuántos van en auto?");
         Assert.Multiple(() =>
         {
             Assert.That(r.Resultado, Is.EqualTo(Web.Domain.Entities.ResultadoDelTurno.Rechazado));
             Assert.That(r.RedactadaConIa, Is.False);
-            Assert.That(r.Texto, Does.Contain("20 encuestas"));
+            Assert.That(r.Texto, Does.Contain("4 de 20 encuestas"));
             Assert.That(r.Texto, Does.Not.Contain("7"));
         });
     }
@@ -137,7 +137,7 @@ public class RedaccionTests
         using var sinIa = new Arnes(habilitada: false);
         await sinIa.SembrarEncuestasAsync(Sesion, FixtureDeEncuestas.Veinte());
 
-        foreach (var pregunta in new[] { "¿Qué medio usa más la gente?", "¿Cómo doy de alta una localidad?", "¿Cuántas encuestas hay?" })
+        foreach (var pregunta in new[] { "¿Qué medio usa más la gente?", "¿Cuántos van en auto?", "¿Con qué frecuencia viajan?" })
         {
             var a = await conFalla.PreguntarAsync(Sesion, pregunta);
             var b = await sinIa.PreguntarAsync(Sesion, pregunta);
@@ -206,8 +206,8 @@ public class RedaccionTests
     [Test(Description = "REQ-IA-27: el doble que devuelve un enlace queda sin enlace")]
     public async Task UrlLibre_SeElimina()
     {
-        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Entrá a [Localidades](/admin) y tocá **Guardar** [1]."));
-        var r = await arnes.PreguntarAsync(Sesion, "¿Cómo doy de alta una localidad?");
+        using var arnes = await ConFixtureAsync(new ClienteDeChatGuionado("Auto particular: 4 de 20 encuestas de tu sesión en [Resultados](/admin) [1]. Una persona puede marcar varios medios, así que no suman 100 % [1]."));
+        var r = await arnes.PreguntarAsync(Sesion, "¿Cuántos van en auto?");
         Assert.Multiple(() =>
         {
             Assert.That(r.RedactadaConIa, Is.True);

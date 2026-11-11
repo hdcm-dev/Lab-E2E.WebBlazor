@@ -139,3 +139,51 @@ menos frecuentes»), textos sin ninguna cita y B40 con «8 veces por semana». N
 
 Queda a la vista: B25 redactado usa «la vuestra» (no es voseo); ningún control lo mira. Siguen pendientes los
 críticos independientes y la lectura a ciegas (§6).
+
+## 8. Tercera ronda: la redactada no puede ser peor que la fija
+
+La ronda 2 no pasó: crítico de conversación 6, seguridad 8 y lectura a ciegas 5,5 (la redactada fue mejor en 2
+de 13 y peor en 6: B09, B11, B14, B24, B25, B26). Las tres corridas eran además idénticas palabra por palabra,
+así que «×3» no medía estabilidad.
+
+| Hallazgo | Cambio | Prueba que falla con el código de la ronda 2 |
+| --- | --- | --- |
+| La IA empeora el glosario, el «cómo», los promedios y el conteo | `Intenciones.ConRedaccion`: sólo medios, motivos y frecuencias pasan por el modelo; el resto es la plantilla fija y el modelo no se llama | `FueraDeLasDistribuciones_PlantillaFija_SinLlamada` (B09, B14, B19, B24, B25, B26), `ConRedaccion_SonLasTresDistribuciones` |
+| Registro «vuestra», «tú» (B25) | control «registro ajeno» (vosotros, vuestro/a, tú, tienes, puedes…) | `Forma_Rechazada` |
+| Más larga y repetida (B09, B26) | tope de largo 1,5 × plantilla + 40 (mínimo 80) y rechazo de trigramas repetidos | `MasLargaQueLaPlantilla_Rechazada`, `Forma_Rechazada` |
+| B11 «no llegan al cien» (falso) | la nota de multirrespuesta tiene que decir «no suman 100 %»; «no llega…», «menos de cien» se rechazan | `Forma_Rechazada` (B11 tal cual y B10 de esta ronda) |
+| B17, B42 «los porcentajes no suman» sin porcentajes | control «nota de porcentaje sin porcentajes»; al modelo la nota le llega una vez y sin «porcentajes» | `NotaDePorcentaje_SinPorcentajes_Rechazada`, `Mensaje_NotaUnaVezSinPorcentajes` |
+| B24 «una encuesta en Corrientes» | control «entidad sin origen»: provincias, localidades de la siembra, medios, frecuencias y motivos sólo si están en las fuentes (la pregunta no cuenta) | `EntidadQueSoloEstaEnLaPregunta_Rechazada`, `MedioQueNoEstaEnLasCifras_Rechazado` |
+| B13 pasó una cláusula sin cita | el validador exige lo que `CitarCadaOracion` le muestra al modelo: la cita cierra la oración | `ClausulaDespuesDeLaCita_Rechazada` |
+| Corridas idénticas | `Asistente:Semilla` y `Asistente:Temperatura` (producción 7 y 0); `bateria.sh` corre 7/0, 11/0,5 y 23/0,5 y registra la variación y los casos idénticos | `SemillaYTemperatura_PorConfiguracion` |
+| Eco de instrucción con variantes | «dejá de lado», «pasá por alto», inglés (ignore, disregard, forget, instructions); el enrutador ya no manda «pasá por alto» a horarios | `EcoDeInstruccion_Variantes_Rechazadas`, ruteo de B46; casos B44–B46 en `bateria.v3` |
+| Intercambio con cifras en palabras | (ya cubierto por el vínculo; queda fijado) | `Intercambio_CifrasEnPalabras_Rechazado` |
+| `**<script>**` | `TextoMarcado` (componente del panel): el contenido de la negrita se escapa | `TextoMarcadoTests` (bUnit: `<script>`, `<b>`, `<img onerror>`) |
+
+**Compuerta a ciegas en la batería.** Cada redactada se compara con la fija de la misma pregunta sobre los
+mismos datos: orden X/Y sorteado por caso y corrida, sin citas ni negritas (la plantilla cita una sola vez y
+delataría el origen); el juez es el mismo modelo, con temperatura 0. Un veredicto ilegible cuenta como peor;
+dos textos iguales sin citas cuentan como iguales sin preguntar. Cada línea de `corrida-N.jsonl` guarda
+`comparacion` (orden, veredicto, ganadora y la fija) y `bateria.sh` exige cero peores.
+
+| Corrida | Semilla / temperatura | k/M | Inventados | Redactadas | Peor a ciegas |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 7 / 0 | 46/46 | 0 | 6 | 0 |
+| 2 | 11 / 0,5 | 46/46 | 0 | 1 | 0 |
+| 3 | 23 / 0,5 | 46/46 | 0 | 1 | 0 |
+| Línea base | — | 43/46 (B03, B04, B36) | 0 | — | — |
+
+[MEDIDO, 2026-11-11, `bateria.v3`, 46 casos, umbral 43; p95 1,3–1,5 s]. Evidencia en
+[`evidencia/2026-11-11-asistente-ronda3/`](../../evidencia/2026-11-11-asistente-ronda3/).
+
+**Lectura honesta.** Con este modelo la redacción casi no aporta: lo que pasa los controles es, salvo las
+citas, la plantilla misma, y con temperatura 0,5 cae a 1 redactada por corrida (los rechazos son sobre todo
+«oración sin cita al final» y la nota de multirrespuesta). Ninguna redactada es peor que la fija, que es lo
+que exige el criterio; que sea *mejor* no se demostró. Ningún caso dio el mismo texto en las tres corridas.
+
+| Suite | Resultado |
+| --- | --- |
+| Compilación `-warnaserror` (`SinMaui.slnf`) | 0 avisos, 0 errores |
+| Unitarias, bUnit y arquitectura | 338/338 (27 de las nuevas fallan con el código de la ronda 2) |
+| API / ViewModels de Android | 13/13 · 18/18 |
+| E2E Chromium / emulación móvil | 41/41 · 41/41 |

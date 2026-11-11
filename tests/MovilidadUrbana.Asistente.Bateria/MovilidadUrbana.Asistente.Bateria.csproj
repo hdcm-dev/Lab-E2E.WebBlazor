@@ -26,6 +26,7 @@
     <Compile Include="..\MovilidadUrbana.UnitTests\Dobles\FixtureDeEncuestas.cs" Link="FixtureDeEncuestas.cs" />
     <None Include="bateria.v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="bateria.v2.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="bateria.v3.json" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 

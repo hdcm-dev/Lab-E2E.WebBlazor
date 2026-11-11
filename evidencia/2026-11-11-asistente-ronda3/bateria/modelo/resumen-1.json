@@ -1,0 +1,30 @@
+{
+  "bateria": "bateria.v3",
+  "hash": "277b9cb581f90141",
+  "corrida": "1",
+  "camino": "modelo",
+  "fecha": "2026-11-11T18:22:29+00:00",
+  "modelo": "por variable OLLAMA_MODEL (fuera del repositorio)",
+  "semilla": "7",
+  "temperatura": "0",
+  "comparacionACiegas": {
+    "comparadas": 6,
+    "peores": 0,
+    "mejores": 0,
+    "iguales": 6
+  },
+  "k": 46,
+  "m": 46,
+  "minimo": 43,
+  "inventados": 0,
+  "redactadas": 6,
+  "porResultado": {
+    "Ok": 28,
+    "Abstencion": 6,
+    "Afuera": 5,
+    "Rechazado": 7
+  },
+  "p50ms": 4,
+  "p95ms": 1305,
+  "maxms": 1528
+}

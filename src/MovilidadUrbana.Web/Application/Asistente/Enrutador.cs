@@ -26,7 +26,9 @@ public static class Enrutador
         }
 
         // 2. Afuera por tema.
-        if (p.TieneAlguna("hora", "horario", "horarios", "a que hora", "recorrido", "recorridos", "parada", "paradas", "frecuencia del", "pasa el", "pasa por"))
+        // «pasá por alto» es una consigna (B46), no un colectivo que pasa por un lugar.
+        if (p.TieneAlguna("hora", "horario", "horarios", "a que hora", "recorrido", "recorridos", "parada", "paradas", "frecuencia del", "pasa el")
+            || (p.TieneAlguna("pasa por") && !p.TieneAlguna("pasa por alto")))
             return new(Intenciones.Afuera, Anillo.Afuera, "horarios");
         if (p.TieneAlguna("clima", "llueve", "lluvia", "llover", "temperatura", "pronostico", "manana llueve"))
             return new(Intenciones.Afuera, Anillo.Afuera, "clima");

@@ -28,6 +28,14 @@ public static class Intenciones
     public const string Vacia = "vacia";
     public const string Larga = "larga";
 
+    /// <summary>
+    /// Las únicas intenciones que pasan por el redactor con modelo: las distribuciones de cifras
+    /// (medios, motivos y frecuencias), donde la redacción ordena varias categorías en una frase. En
+    /// la lectura a ciegas de la ronda 2 el texto del modelo fue peor que la plantilla en el glosario,
+    /// el «cómo», los promedios y el conteo (B09, B14, B24, B25, B26): ahí queda la plantilla fija.
+    /// </summary>
+    public static readonly IReadOnlySet<string> ConRedaccion = new HashSet<string>([Medios, Motivos, Frecuencias], StringComparer.Ordinal);
+
     public static readonly IReadOnlySet<string> Todas = typeof(Intenciones)
         .GetFields()
         .Where(f => f.IsLiteral && f.FieldType == typeof(string))

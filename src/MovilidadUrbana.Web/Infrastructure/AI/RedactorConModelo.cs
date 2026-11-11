@@ -18,7 +18,7 @@ public sealed class RedactorConModelo(
     OpcionesDelModelo opciones,
     ILogger<RedactorConModelo> registro) : IRedactorDeAyuda
 {
-    public static readonly string Prompt = LeerPrompt("redactor.v2.txt");
+    public static readonly string Prompt = LeerPrompt("redactor.v3.txt");
 
     public async Task<Resultado<string>> RedactarAsync(PedidoDeRedaccion pedido, CancellationToken cancellationToken = default)
     {
@@ -73,13 +73,27 @@ public sealed class RedactorConModelo(
         }
         else
         {
+            // La nota va una vez y con las palabras de la plantilla: la del código habla de «los
+            // porcentajes» de la pantalla, y el modelo la copiaba en una respuesta sin porcentajes (B17).
+            var notas = pedido.Cifras.Select(c => NotaParaElModelo(c.Nota)).Distinct(StringComparer.Ordinal).ToList();
             sb.Append("[1] Cifras calculadas por la aplicación: ");
-            sb.AppendLine(string.Join("; ", pedido.Cifras.Select(c => $"{MarcarTerceros(c.Etiqueta)} = {Plantillas.N(c.Valor)} ({c.Nota})")));
+            if (notas.Count == 1)
+            {
+                sb.AppendLine(string.Join("; ", pedido.Cifras.Select(c => $"{MarcarTerceros(c.Etiqueta)} = {Plantillas.N(c.Valor)}")) + $" (nota: {notas[0]})");
+            }
+            else
+            {
+                sb.AppendLine(string.Join("; ", pedido.Cifras.Select(c => $"{MarcarTerceros(c.Etiqueta)} = {Plantillas.N(c.Valor)} ({NotaParaElModelo(c.Nota)})")));
+            }
         }
         sb.AppendLine();
         sb.AppendLine("RESPUESTA FIJA DE REFERENCIA (podés mejorar su claridad, no su contenido): " + CitarCadaOracion(pedido.Plantilla));
         return sb.ToString();
     }
+
+    public static string NotaParaElModelo(string nota) =>
+        nota.Replace("los porcentajes de medios no suman", "no suman", StringComparison.Ordinal)
+            .Replace("los porcentajes no suman", "no suman", StringComparison.Ordinal);
 
     /// <summary>
     /// La referencia que ve el modelo lleva la cita en cada oración, como se le exige al texto:

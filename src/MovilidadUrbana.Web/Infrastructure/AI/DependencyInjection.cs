@@ -23,7 +23,9 @@ public static class DependencyInjection
         services.AddSingleton<IEstadoDelAsistente>(habilitacion);
 
         var segundos = int.TryParse(configuracion["Asistente:TiempoMaximoSegundos"], out var s) && s > 0 ? s : 20;
-        services.AddSingleton(new OpcionesDelModelo { TiempoMaximo = TimeSpan.FromSeconds(segundos), NumCtx = habilitacion.NumCtx });
+        var semilla = int.TryParse(configuracion["Asistente:Semilla"], System.Globalization.CultureInfo.InvariantCulture, out var se) ? se : 7;
+        var temperatura = float.TryParse(configuracion["Asistente:Temperatura"], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var te) && te is >= 0 and <= 2 ? te : 0f;
+        services.AddSingleton(new OpcionesDelModelo { TiempoMaximo = TimeSpan.FromSeconds(segundos), NumCtx = habilitacion.NumCtx, Semilla = semilla, Temperatura = temperatura });
         services.AddSingleton<LimitadorDelModelo>();
 
         if (habilitacion.Motivo != MotivoDeHabilitacion.Habilitada)

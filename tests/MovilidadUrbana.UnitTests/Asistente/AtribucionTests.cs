@@ -168,7 +168,9 @@ public class LecturaPropiaTests
             "El medio más usado en tu sesión es Colectivo: 12 de 20 encuestas. Una persona puede marcar varios medios, así que no suman 100 %.");
         Assert.Multiple(() =>
         {
-            Assert.That(ValidadorDeCifras.Validar("En tu sesión el más usado es Colectivo, con 12 de 20 encuestas [1]. Los medios no suman el cien por ciento [1].", pedido), Is.Null);
+            // «cien» pasa el control de origen; desde la ronda 3 la nota se rechaza igual, por otra
+            // razón: tiene que decir «no suman 100 %» como la plantilla (RedaccionNoPeorTests).
+            Assert.That(ValidadorDeCifras.Validar("En tu sesión el más usado es Colectivo, con 12 de 20 encuestas [1]. Los medios no suman el cien por ciento [1].", pedido), Is.EqualTo("nota de multirrespuesta alterada"));
             Assert.That(ValidadorDeCifras.Validar("En tu sesión el más usado es Colectivo, con 12 de 20 encuestas [1]. Son noventa marcas [1].", pedido), Does.StartWith("cifra en palabras sin origen"));
         });
     }

@@ -32,17 +32,7 @@
             <div class="mq-burbuja mq-burbuja--asistente" data-testid="burbuja-asistente"
                  data-forma="@turno.Respuesta.Forma" data-intencion="@turno.Respuesta.Intencion" data-anillo="@turno.Respuesta.Anillo">
                 <Badge Tone="@(turno.Respuesta.RedactadaConIa ? BadgeTone.Info : BadgeTone.Neutro)" Testid="rotulo">@turno.Respuesta.Rotulo</Badge>
-                <p class="mq-burbuja__texto" data-testid="respuesta-texto">@foreach (var segmento in TextoConMarcas.Segmentar(turno.Respuesta.Texto))
-                {
-                    if (segmento.Negrita)
-                    {
-                        <strong>@segmento.Texto</strong>
-                    }
-                    else
-                    {
-                        @segmento.Texto
-                    }
-                }</p>
+                <p class="mq-burbuja__texto" data-testid="respuesta-texto"><TextoMarcado Texto="@turno.Respuesta.Texto" /></p>
 
                 @if (turno.Respuesta.Distribucion is { } d)
                 {

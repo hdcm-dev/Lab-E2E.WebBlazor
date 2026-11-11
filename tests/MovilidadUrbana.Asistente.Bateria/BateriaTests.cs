@@ -43,7 +43,7 @@ public class BateriaTests
     [Test]
     public async Task Corrida()
     {
-        var ruta = Path.Combine(TestContext.CurrentContext.TestDirectory, Environment.GetEnvironmentVariable("BATERIA_ARCHIVO") ?? "bateria.v2.json");
+        var ruta = Path.Combine(TestContext.CurrentContext.TestDirectory, Environment.GetEnvironmentVariable("BATERIA_ARCHIVO") ?? "bateria.v3.json");
         var crudo = await File.ReadAllBytesAsync(ruta);
         var hash = Convert.ToHexString(SHA256.HashData(crudo))[..16].ToLowerInvariant();
         var bateria = JsonSerializer.Deserialize<Archivo>(crudo, Json)!;
@@ -64,6 +64,8 @@ public class BateriaTests
         var aciertos = 0;
         var inventados = 0;
         var porResultado = new Dictionary<string, int>();
+        using var juez = camino == "modelo" ? new JuezACiegas(entorno[Habilitacion.ClaveEndpoint]!, entorno[Habilitacion.ClaveModelo]!) : null;
+        int comparadas = 0, peores = 0, mejores = 0, iguales = 0;
         foreach (var c in bateria.Casos)
         {
             var composicion = c.SinModelo ? sinModelo : conModelo;
@@ -82,6 +84,24 @@ public class BateriaTests
             if (cruzadas.Count > 0) { inventados++; fallas.AddRange(cruzadas); }
             var inventado = NumerosInventados(c, r);
             if (inventado.Count > 0) { inventados++; fallas.Add($"cifra inventada: {string.Join(", ", inventado)}"); }
+
+            // Compuerta «la redactada no puede ser peor que la fija»: la misma pregunta por el camino
+            // de la plantilla, sobre los mismos datos, y una comparación a ciegas (orden sorteado por
+            // caso y corrida, sin citas ni marcas que delaten el origen). Se registra en la línea.
+            object? comparacion = null;
+            if (r.RedactadaConIa && juez is not null)
+            {
+                var sesionFija = sesion + "-fija";
+                if (c.Sesion != "sinEncuestas") await sinModelo.SembrarAsync(sesionFija, c.Sesion == "empates" ? FixtureDeEncuestas.EmpatesCercanos() : FixtureDeEncuestas.Veinte());
+                if (c.Sesion == "sinLocalidades") await sinModelo.VaciarLocalidadesAsync(sesionFija);
+                var fija = await sinModelo.PreguntarAsync(sesionFija, c.Pregunta);
+                var v = await juez.CompararAsync(c.Pregunta, r.Texto, fija.Texto, $"{c.Id}-{corrida}");
+                comparadas++;
+                if (v.Ganadora == "fija") { peores++; fallas.Add("a ciegas, la redactada es peor que la fija"); }
+                else if (v.Ganadora == "redactada") mejores++;
+                else iguales++;
+                comparacion = new { x = v.X, veredicto = v.Crudo, ganadora = v.Ganadora, fija = fija.Texto };
+            }
             if (fallas.Count == 0) aciertos++;
             porResultado[r.Resultado.ToString()] = porResultado.GetValueOrDefault(r.Resultado.ToString()) + 1;
 
@@ -90,7 +110,7 @@ public class BateriaTests
                 id = c.Id, persona = c.Persona, tipo = c.Tipo, ok = fallas.Count == 0, fallas,
                 intencion = r.Intencion, anillo = r.Anillo.ToString(), forma = r.Forma.ToString(), resultado = r.Resultado.ToString(),
                 redactadaConIa = r.RedactadaConIa, destino = r.Destinos.FirstOrDefault()?.DestinoId, href = r.Destinos.FirstOrDefault()?.Href,
-                grafico = r.Grafico.ToString(), motivo = r.MotivoDelResultado, texto = r.Texto, crudo = r.Resultado == ResultadoDelTurno.Rechazado ? composicion.UltimoCrudo : null, aviso = r.Aviso, ms = Math.Round(reloj.Elapsed.TotalMilliseconds)
+                grafico = r.Grafico.ToString(), motivo = r.MotivoDelResultado, texto = r.Texto, comparacion, crudo = r.Resultado == ResultadoDelTurno.Rechazado ? composicion.UltimoCrudo : null, aviso = r.Aviso, ms = Math.Round(reloj.Elapsed.TotalMilliseconds)
             }, Json));
         }
 
@@ -101,6 +121,8 @@ public class BateriaTests
         {
             bateria = bateria.Version, hash, corrida, camino, fecha = DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture),
             modelo = camino == "modelo" ? "por variable OLLAMA_MODEL (fuera del repositorio)" : "ninguno",
+            semilla = entorno["Asistente:Semilla"] ?? "7", temperatura = entorno["Asistente:Temperatura"] ?? "0",
+            comparacionACiegas = new { comparadas, peores, mejores, iguales },
             k = aciertos, m = bateria.Casos.Length, minimo, inventados, redactadas = lineas.Count(l => l.Contains("\"redactadaConIa\":true", StringComparison.Ordinal)), porResultado,
             p50ms = Math.Round(Percentil(0.5)), p95ms = Math.Round(Percentil(0.95)), maxms = Math.Round(ordenadas[^1])
         };
@@ -115,6 +137,7 @@ public class BateriaTests
         Assert.Multiple(() =>
         {
             Assert.That(inventados, Is.Zero);
+            Assert.That(peores, Is.Zero, "a ciegas, ninguna redactada peor que la fija");
             Assert.That(aciertos, Is.GreaterThanOrEqualTo(minimo));
         });
     }
@@ -181,6 +204,51 @@ public class BateriaTests
     }
 
     private static readonly CorpusDeAyuda Corpus = new();
+
+    /// <summary>
+    /// Juez a ciegas: ve la pregunta y dos respuestas, X e Y, sin saber cuál es la del modelo. El
+    /// orden sale del hash del caso y la corrida; citas y negritas se quitan de las dos porque la
+    /// plantilla cita una sola vez y delataría el origen. Un veredicto ilegible cuenta como peor; dos textos idénticos sin citas cuentan como iguales sin preguntar.
+    /// </summary>
+    private sealed class JuezACiegas(string endpoint, string modelo) : IDisposable
+    {
+        public sealed record Veredicto(string X, string Crudo, string Ganadora);
+
+        private const string Prompt =
+            "Sos un evaluador a ciegas de respuestas de ayuda de una aplicación web, en español rioplatense. " +
+            "Vas a ver una pregunta y dos respuestas, X e Y, armadas con los mismos datos. Decidí cuál es mejor para la persona que preguntó: " +
+            "primero que sea exacta (que no diga nada falso, no cambie el sentido de una nota ni agregue datos), después que sea clara y breve, " +
+            "y por último que use voseo y suene natural. Si son igual de buenas, respondé IGUAL. Respondé sólo una palabra: X, Y o IGUAL.";
+
+        private readonly OllamaSharp.OllamaApiClient _cliente = new(new Uri(endpoint), modelo);
+
+        public async Task<Veredicto> CompararAsync(string pregunta, string redactada, string fija, string clave)
+        {
+            // Dos textos iguales sin citas ni marcas no pueden ser uno peor que otro: no se le pregunta al juez.
+            if (string.Equals(Ciega(redactada), Ciega(fija), StringComparison.Ordinal)) return new Veredicto("-", "idénticas sin citas", "igual");
+            var redactadaEsX = SHA256.HashData(Encoding.UTF8.GetBytes(clave))[0] % 2 == 0;
+            var (x, y) = redactadaEsX ? (redactada, fija) : (fija, redactada);
+            var opciones = new Microsoft.Extensions.AI.ChatOptions { Temperature = 0, Seed = 7, Tools = [] };
+            opciones.RawRepresentationFactory = _ => new OllamaSharp.Models.Chat.ChatRequest { Think = false };
+            var r = await ((Microsoft.Extensions.AI.IChatClient)_cliente).GetResponseAsync(
+                [new(Microsoft.Extensions.AI.ChatRole.System, Prompt),
+                 new(Microsoft.Extensions.AI.ChatRole.User, $"PREGUNTA: {pregunta}\n\nX: {Ciega(x)}\n\nY: {Ciega(y)}")], opciones);
+            var crudo = (r.Text ?? string.Empty).Trim();
+            var palabra = Regex.Match(crudo.ToUpperInvariant(), @"\b(IGUAL|X|Y)\b").Value;
+            var ganadora = palabra switch
+            {
+                "IGUAL" => "igual",
+                "X" => redactadaEsX ? "redactada" : "fija",
+                "Y" => redactadaEsX ? "fija" : "redactada",
+                _ => "fija"
+            };
+            return new Veredicto(redactadaEsX ? "redactada" : "fija", crudo.Length > 40 ? crudo[..40] : crudo, ganadora);
+        }
+
+        private static string Ciega(string texto) => Regex.Replace(Regex.Replace(Regex.Replace(texto, @"\s*\[\d+\]", string.Empty), @"\*\*", string.Empty), @"\s+", " ").Trim();
+
+        public void Dispose() => _cliente.Dispose();
+    }
 
     /// <summary>La composición de producción sobre una base en memoria propia de la corrida.</summary>
     private sealed class Composicion : IDisposable

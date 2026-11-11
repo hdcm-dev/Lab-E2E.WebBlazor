@@ -1,0 +1,17 @@
+@* El texto de una respuesta con las marcas **…** pintadas en negrita. Cada segmento se escribe como
+   texto: lo que venga dentro de las marcas (también «<script>» o «<b>») se escapa y no es marcado. *@
+@foreach (var segmento in TextoConMarcas.Segmentar(Texto))
+{
+    if (segmento.Negrita)
+    {
+        <strong>@segmento.Texto</strong>
+    }
+    else
+    {
+        @segmento.Texto
+    }
+}
+
+@code {
+    [Parameter] public string? Texto { get; set; }
+}

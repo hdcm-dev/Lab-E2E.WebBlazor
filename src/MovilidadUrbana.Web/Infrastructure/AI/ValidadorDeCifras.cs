@@ -68,6 +68,7 @@ public static partial class ValidadorDeCifras
 
         if (PrimeraPersonaDeAccion().IsMatch(texto)) return "primera persona de acción";
 
+
         // Lo que pide la pregunta («ignorá los datos») no se repite en la respuesta (B17).
         var deLaAyuda = VinculoDeCifras.SinTildes(string.Join(' ', pedido.Fragmentos.Select(f => f.Texto))).ToLowerInvariant();
         foreach (Match m in EcoDeInstruccion().Matches(VinculoDeCifras.SinTildes(texto).ToLowerInvariant()))
@@ -88,6 +89,9 @@ public static partial class ValidadorDeCifras
         {
             var citas = CitaRx().Matches(oracion).Select(m => int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)).ToList();
             if (citas.Count == 0) return "oración sin cita";
+            // Como en la referencia (CitarCadaOracion): la cita cierra la oración. Lo que sigue a la
+            // última cita es una cláusula sin respaldo (B13: «… [1], mientras que …»).
+            if (!CitaAlFinal().IsMatch(oracion)) return "oración sin cita al final";
             if (citas.Any(c => c < 1 || c > fuentes)) return "cita a una fuente no entregada";
             if (CitaColgante().IsMatch(oracion)) return "cita colgante";
         }
@@ -103,8 +107,82 @@ public static partial class ValidadorDeCifras
         var vinculo = VinculoDeCifras.Revisar(texto, pedido.Cifras);
         if (vinculo is not null) return vinculo;
 
+        // La redactada no puede ser peor que la fija (ronda 2): ni otro registro, ni más larga sin
+        // motivo, ni repetida, ni con la nota de multirrespuesta cambiada de sentido.
+        var forma = ControlarForma(texto, pedido.Plantilla);
+        if (forma is not null) return forma;
+
+        // Un lugar, un medio o un motivo que no está en las fuentes es un hecho inventado aunque no
+        // tenga números (B24: «una encuesta en Corrientes»). La pregunta no cuenta como fuente.
+        var entidad = EntidadSinOrigen(texto, pedido);
+        if (entidad is not null) return $"entidad sin origen: {entidad}";
+
         return null;
     }
+
+    /// <summary>Controles de forma contra la plantilla fija; motivo del rechazo o <c>null</c>.</summary>
+    public static string? ControlarForma(string texto, string plantilla)
+    {
+        if (RegistroAjeno().IsMatch(texto)) return $"registro ajeno: {RegistroAjeno().Match(texto).Value}";
+
+        var largo = SinMarcas(texto).Length;
+        var tope = Math.Max(80, (int)(SinMarcas(plantilla).Length * 1.5) + 40);
+        if (plantilla.Length > 0 && largo > tope) return $"más larga que la plantilla: {largo} > {tope}";
+
+        var palabras = PalabraRx().Matches(VinculoDeCifras.SinTildes(SinMarcas(texto)).ToLowerInvariant()).Select(m => m.Value).ToList();
+        var vistos = new HashSet<string>(StringComparer.Ordinal);
+        for (var i = 0; i + 2 < palabras.Count; i++)
+        {
+            var trigrama = $"{palabras[i]} {palabras[i + 1]} {palabras[i + 2]}";
+            if (!vistos.Add(trigrama)) return $"redundancia: «{trigrama}»";
+        }
+
+        var t = VinculoDeCifras.SinTildes(texto).ToLowerInvariant();
+        var p = VinculoDeCifras.SinTildes(plantilla).ToLowerInvariant();
+        // B17, B42: «los porcentajes no suman» cuando la respuesta no muestra ningún porcentaje.
+        if (t.Contains("porcentaje", StringComparison.Ordinal) && !p.Contains("porcentaje", StringComparison.Ordinal))
+        {
+            return "nota de porcentaje sin porcentajes";
+        }
+        if (p.Contains("no suman 100 %", StringComparison.Ordinal))
+        {
+            // B11: «no llegan al cien» dice lo contrario: con varias marcas por persona se pasa de cien.
+            if (NotaInvertida().IsMatch(t)) return "nota de multirrespuesta con otro sentido";
+            // La nota se copia con las palabras de la plantilla: «el cien por ciento» y otras vueltas
+            // fueron peores a ciegas (B10, ronda 3).
+            if (!NotaMultirrespuesta().IsMatch(t)) return "nota de multirrespuesta alterada";
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Entidades del dominio que el texto puede nombrar sólo si están en las fuentes: provincias,
+    /// localidades de la siembra y las categorías de medios, frecuencias y motivos.
+    /// </summary>
+    public static readonly IReadOnlyList<string> EntidadesDelDominio =
+        MovilidadUrbana.Web.Domain.Catalogos.Provincias
+            .Concat(["Resistencia"])
+            .Concat(MovilidadUrbana.Web.Domain.Catalogos.Medios.SelectMany(m => new[] { m.Clave, m.Etiqueta }))
+            .Concat(MovilidadUrbana.Web.Domain.Catalogos.Frecuencias.Select(f => f.Etiqueta))
+            .Concat(MovilidadUrbana.Web.Domain.Catalogos.Motivos.Where(m => m.Clave != "otros").Select(m => m.Etiqueta))
+            .Select(e => VinculoDeCifras.SinTildes(e).ToLowerInvariant())
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+    private static string? EntidadSinOrigen(string texto, PedidoDeRedaccion pedido)
+    {
+        var t = VinculoDeCifras.SinTildes(texto).ToLowerInvariant();
+        var fuentes = VinculoDeCifras.SinTildes(string.Join(' ', new[] { pedido.Plantilla }
+            .Concat(pedido.Fragmentos.Select(f => f.Titulo + " " + f.Texto))
+            .Concat(pedido.Cifras.Select(c => c.Etiqueta + " " + c.Nota)))).ToLowerInvariant();
+        foreach (var e in EntidadesDelDominio)
+        {
+            if (Regex.IsMatch(t, $@"\b{Regex.Escape(e)}\b") && !Regex.IsMatch(fuentes, $@"\b{Regex.Escape(e)}\b")) return e;
+        }
+        return null;
+    }
+
+    private static string SinMarcas(string s) => CitaRx().Replace(s, string.Empty).Replace("**", string.Empty, StringComparison.Ordinal).Trim();
 
     private static readonly Dictionary<string, int> Palabras = new(StringComparer.Ordinal)
     {
@@ -136,11 +214,28 @@ public static partial class ValidadorDeCifras
     [GeneratedRegex(@"(?i)\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|diecis[eé]is|diecisiete|dieciocho|diecinueve|veinte|veinti\w+|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|(?<!por )ciento|mil|millones)\b")]
     private static partial Regex NumeroEnPalabras();
 
-    [GeneratedRegex(@"\b(ignor\w*|olvid\w*|instruccion\w*)")]
+    // Sin tildes: «dejá de lado», «pasá por alto», y en inglés («ignore», «disregard», «instructions»).
+    [GeneratedRegex(@"\b(ignor\w*|olvid\w*|instruccion\w*|instruction\w*|disregard\w*|forget\w*|deja\w* de lado|pasa\w* por alto|no tengas en cuenta)")]
     private static partial Regex EcoDeInstruccion();
 
     [GeneratedRegex(@"\bveces\b|\ben una semana\b|\ba la semana\b|\b(por|cada|al|una vez por) (semana|dia|mes|ano)\b")]
     private static partial Regex PeriodoRx();
+
+    [GeneratedRegex(@"\[\d+\]\**\s*[.!?…]?\**\s*$|[.!?]\s*\[\d+\]\s*$")]
+    private static partial Regex CitaAlFinal();
+
+    // Voseo rioplatense: el tuteo y el «vosotros» peninsular son otro registro.
+    [GeneratedRegex(@"(?i)(?<!\p{L})(vosotr[oa]s|vuestr[oa]s?|tú|ti mism[oa]|contigo|tienes|puedes|debes|quieres|sabes|eres|haz)(?!\p{L})")]
+    private static partial Regex RegistroAjeno();
+
+    [GeneratedRegex(@"[\p{L}\d]+")]
+    private static partial Regex PalabraRx();
+
+    [GeneratedRegex(@"no suman 100 %")]
+    private static partial Regex NotaMultirrespuesta();
+
+    [GeneratedRegex(@"no llega\w*|menos del? (100|cien)|no alcanza\w*")]
+    private static partial Regex NotaInvertida();
 
     [GeneratedRegex(@"[:;,]\s*\[\d+\]")]
     private static partial Regex CitaColgante();

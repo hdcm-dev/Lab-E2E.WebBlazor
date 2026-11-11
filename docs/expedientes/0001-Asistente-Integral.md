@@ -69,3 +69,13 @@ Corrección de los tres defectos de la verificación (atribución de cifras, red
 crudas) y de B14, B17 y B19 de la lectura propia; investigación de la tasa de redacción. Detalle y conteos en
 [`verificacion-2026-11-11.md` §7](../asistente/verificacion-2026-11-11.md). La batería pasa a `bateria.v2`
 (v1 más seis casos sobre el fixture de empates cercanos, umbral 40 de 43); el prompt pasa a `redactor.v2`.
+
+## 7. Tercera ronda (2026-11-11)
+
+La ronda 2 no pasó (conversación 6, seguridad 8, lectura a ciegas 5,5). Criterio nuevo: la redactada no puede
+ser peor que la fija. La redacción con IA queda limitada a medios, motivos y frecuencias; el glosario, el
+«cómo», los promedios y los conteos son la plantilla. Se suman controles de registro, largo, redundancia,
+sentido de la nota de multirrespuesta, entidades sin origen y cita al final de cada oración; la batería
+(`bateria.v3`, 46 casos) varía semilla y temperatura y compara a ciegas cada redactada con la fija como
+compuerta registrada. Prompt `redactor.v3`. Detalle en
+[`verificacion-2026-11-11.md` §8](../asistente/verificacion-2026-11-11.md).
