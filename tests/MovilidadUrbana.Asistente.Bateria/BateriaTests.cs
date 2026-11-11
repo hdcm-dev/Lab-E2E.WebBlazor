@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MovilidadUrbana.UnitTests.Asistente;
 using MovilidadUrbana.UnitTests.Dobles;
 using MovilidadUrbana.Web.Application;
 using MovilidadUrbana.Web.Application.Asistente;
@@ -85,7 +86,8 @@ public class BateriaTests
         var inventados = 0;
         var porResultado = new Dictionary<string, int>();
         // Juez distinto del redactor (K7 R9.8): otro modelo del servidor (BATERIA_JUEZ_MODELO) o, si no
-        // hay, las reglas deterministas declaradas en JuezPorReglas. Las reglas corren siempre.
+        // hay, las reglas deterministas declaradas (R1–R10). Las reglas corren siempre y deciden el
+        // veredicto (ADR 0008): el juez por modelo se registra al lado y se mide con los pares de control.
         var reglas = new JuezPorReglas();
         var modeloJuez = Environment.GetEnvironmentVariable("BATERIA_JUEZ_MODELO");
         var endpoint = entorno[Habilitacion.ClaveEndpoint];
@@ -93,9 +95,10 @@ public class BateriaTests
             ? new JuezPorModelo(endpoint!, modeloJuez!) : null;
         IJuez juez = juezModelo is null ? reglas : juezModelo;
         var porForma = Intenciones.ConRedaccion.ToDictionary(i => i, _ => new PorForma(), StringComparer.Ordinal);
-        int comparadas = 0, juzgadas = 0, identicas = 0, peores = 0, mejores = 0, iguales = 0;
+        int comparadas = 0, juzgadas = 0, identicas = 0, peores = 0, mejores = 0, iguales = 0, peoresSegunElJuez = 0;
         var motivosDeRechazo = new Dictionary<string, int>(StringComparer.Ordinal);
         var distintasDeLaFija = new List<string>();
+        var comparadasConLaPlantilla = 0;
         foreach (var c in bateria.Casos)
         {
             var composicion = c.SinModelo ? sinModelo : conModelo;
@@ -145,6 +148,7 @@ public class BateriaTests
                 if (!r.RedactadaConIa)
                 {
                     // Bandera apagada: la respuesta tiene que ser la plantilla, palabra por palabra.
+                    comparadasConLaPlantilla++;
                     if (!string.Equals(r.Texto, fija.Texto, StringComparison.Ordinal)) { distintasDeLaFija.Add(c.Id); fallas.Add("con la redacción apagada, distinta de la plantilla"); }
                 }
                 else
@@ -163,8 +167,9 @@ public class BateriaTests
                         var v = await juez.CompararAsync(c.Pregunta, datos, r.Texto, fija.Texto, $"{c.Id}-{corrida}");
                         var vr = juez == reglas ? v : await reglas.CompararAsync(c.Pregunta, datos, r.Texto, fija.Texto, $"{c.Id}-{corrida}");
                         juzgadas++; forma!.Juzgadas++;
-                        if (v.Ganadora == "fija") { peores++; forma.Peores++; fallas.Add("a ciegas, la redactada es peor que la fija"); }
-                        else if (v.Ganadora == "redactada") mejores++;
+                        if (v.Ganadora == "fija") peoresSegunElJuez++;
+                        if (vr.Ganadora == "fija") { peores++; forma.Peores++; fallas.Add("a ciegas, la redactada es peor que la fija"); }
+                        else if (vr.Ganadora == "redactada") mejores++;
                         else iguales++;
                         comparacion = new { juez = juez.Nombre, x = v.X, veredicto = v.Crudo, ganadora = v.Ganadora, reglas = vr.Ganadora, fija = fija.Texto };
                     }
@@ -184,9 +189,9 @@ public class BateriaTests
 
         // Pares fijos de control: la compuerta se ejerce en cada corrida aunque ninguna redactada
         // difiera de la fija (K7 R9.8). El juez principal decide; las reglas se registran al lado.
-        var pares = JsonSerializer.Deserialize<ArchivoDePares>(await File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "pares-a-ciegas.v1.json")), Json)!;
+        var pares = JsonSerializer.Deserialize<ArchivoDePares>(await File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "pares-a-ciegas.v2.json")), Json)!;
         var lineasDeControl = new List<string>();
-        int controlJuzgados = 0, controlAciertos = 0, controlAciertosReglas = 0, controlPeores = 0, controlPeoresDetectadosReglas = 0;
+        int controlJuzgados = 0, controlAciertos = 0, controlAciertosReglas = 0, controlPeores = 0, controlPeoresDetectadosReglas = 0, controlPeoresDetectadosJuez = 0;
         foreach (var par in pares.Pares)
         {
             var v = await juez.CompararAsync(par.Pregunta, par.Datos, par.Redactada, par.Fija, $"{par.Id}-{corrida}");
@@ -195,7 +200,7 @@ public class BateriaTests
             controlJuzgados++;
             if (Acierta(v.Ganadora)) controlAciertos++;
             if (Acierta(vr.Ganadora)) controlAciertosReglas++;
-            if (par.Esperado == "peor") { controlPeores++; if (vr.Ganadora == "fija") controlPeoresDetectadosReglas++; }
+            if (par.Esperado == "peor") { controlPeores++; if (vr.Ganadora == "fija") controlPeoresDetectadosReglas++; if (v.Ganadora == "fija") controlPeoresDetectadosJuez++; }
             if (porForma.TryGetValue(par.Intencion, out var f)) { f.ControlJuzgados++; if (Acierta(v.Ganadora)) f.ControlAciertos++; }
             lineasDeControl.Add(JsonSerializer.Serialize(new { id = par.Id, intencion = par.Intencion, esperado = par.Esperado, defecto = par.Defecto, juez = juez.Nombre, x = v.X, veredicto = v.Crudo, ganadora = v.Ganadora, acierta = Acierta(v.Ganadora), reglas = vr.Ganadora, motivoReglas = vr.Crudo }, Json));
         }
@@ -216,12 +221,13 @@ public class BateriaTests
             comparacionACiegas = new
             {
                 compuerta, juez = juez.Nombre, paresJuzgados,
-                control = new { pares = pares.Version, juzgados = controlJuzgados, aciertos = controlAciertos, aciertosReglas = controlAciertosReglas, peores = controlPeores, peoresDetectadosPorReglas = controlPeoresDetectadosReglas },
-                redactadas = new { comparadas, juzgadas, identicas, peores, mejores, iguales }
+                control = new { pares = pares.Version, juzgados = controlJuzgados, aciertos = controlAciertos, aciertosReglas = controlAciertosReglas, peores = controlPeores, peoresDetectadosPorReglas = controlPeoresDetectadosReglas, peoresDetectadosPorElJuez = controlPeoresDetectadosJuez },
+                decide = ReglasDelJuez.Nombre,
+                redactadas = new { comparadas, juzgadas, identicas, peores, mejores, iguales, peoresSegunElJuez }
             },
             validador = new { intentos, rechazos, tasaDeRechazo = intentos == 0 ? (double?)null : Math.Round((double)rechazos / intentos, 3), soloCitas = porForma.Values.Sum(f => f.SoloCitas), porMotivo = motivosDeRechazo },
             porForma = porForma.ToDictionary(kv => kv.Key, kv => new { intentos = kv.Value.Intentos, rechazos = kv.Value.Rechazos, soloCitas = kv.Value.SoloCitas, redactadas = kv.Value.Redactadas, juzgadas = kv.Value.Juzgadas, peores = kv.Value.Peores, controlJuzgados = kv.Value.ControlJuzgados, controlAciertos = kv.Value.ControlAciertos }),
-            igualesALaPlantilla = camino == "modelo" && !redaccion ? new { distintas = distintasDeLaFija } : null,
+            igualesALaPlantilla = camino == "modelo" && !redaccion ? new { comparadas = comparadasConLaPlantilla, distintas = distintasDeLaFija } : null,
             k = aciertos, m = bateria.Casos.Length, minimo, inventados, redactadas = lineas.Count(l => l.Contains("\"redactadaConIa\":true", StringComparison.Ordinal)), porResultado,
             p50ms = Math.Round(Percentil(0.5)), p95ms = Math.Round(Percentil(0.95)), maxms = Math.Round(ordenadas[^1])
         };
@@ -230,7 +236,7 @@ public class BateriaTests
         await File.WriteAllLinesAsync(Path.Combine(salida, $"control-{corrida}.jsonl"), lineasDeControl, new UTF8Encoding(false));
         await File.WriteAllTextAsync(Path.Combine(salida, $"resumen-{corrida}.json"), JsonSerializer.Serialize(resumen, new JsonSerializerOptions(Json) { WriteIndented = true }), new UTF8Encoding(false));
         TestContext.Progress.WriteLine($"BATERIA corrida {corrida} ({camino}, redacción {resumen.redaccion}): {aciertos}/{bateria.Casos.Length}, inventados {inventados}, p50 {resumen.p50ms} ms, p95 {resumen.p95ms} ms");
-        TestContext.Progress.WriteLine($"BATERIA compuerta {compuerta}: juez {juez.Nombre}, pares juzgados {paresJuzgados} (control {controlJuzgados}, aciertos {controlAciertos}; redactadas {juzgadas}), peores {peores}; validador {rechazos}/{intentos} rechazos");
+        TestContext.Progress.WriteLine($"BATERIA compuerta {compuerta}: juez {juez.Nombre}, pares juzgados {paresJuzgados} (control {controlJuzgados}, aciertos {controlAciertos}; redactadas {juzgadas}), peores {peores}; validador {rechazos}/{intentos} rechazos; reintentos del juez {juezModelo?.Reintentos ?? 0}");
         foreach (var l in lineas.Where(l => l.Contains("\"ok\":false", StringComparison.Ordinal))) TestContext.Progress.WriteLine("FALLA " + l);
 
         // El umbral no se baja (K3 §11): el mínimo de la versión (34 de 37, 40 de 43) y cero cifras
@@ -324,7 +330,7 @@ public class BateriaTests
         Task<Veredicto> CompararAsync(string pregunta, IReadOnlyDictionary<string, double> datos, string redactada, string fija, string clave);
     }
 
-    private static string Ciega(string texto) => Regex.Replace(Regex.Replace(Regex.Replace(texto, @"\s*\[\d+\]", string.Empty), @"\*\*", string.Empty), @"\s+", " ").Trim();
+    private static string Ciega(string texto) => ReglasDelJuez.Ciega(texto);
 
     private static bool RedactadaEsX(string clave) => SHA256.HashData(Encoding.UTF8.GetBytes(clave))[0] % 2 == 0;
 
@@ -339,7 +345,12 @@ public class BateriaTests
             "primero que sea exacta (que no diga nada falso respecto de los datos, no cambie el sentido de una nota ni agregue datos), después que sea clara y breve, " +
             "y por último que use voseo y suene natural. Si son igual de buenas, respondé IGUAL. Respondé sólo una palabra: X, Y o IGUAL.";
 
-        private readonly OllamaSharp.OllamaApiClient _cliente = new(new Uri(endpoint), modelo);
+        // El servidor de modelos es compartido y descarga un modelo para cargar otro: la carga del juez
+        // puede pasar los 100 s del HttpClient por omisión. Plazo de 5 min y hasta 3 intentos; los
+        // reintentos se informan (no cambian el veredicto, que deciden las reglas).
+        private readonly OllamaSharp.OllamaApiClient _cliente = new(new HttpClient { BaseAddress = new Uri(endpoint), Timeout = TimeSpan.FromMinutes(5) }, modelo);
+
+        public int Reintentos { get; private set; }
 
         public string Nombre => "modelo distinto del redactor (BATERIA_JUEZ_MODELO)";
 
@@ -350,9 +361,22 @@ public class BateriaTests
             var opciones = new Microsoft.Extensions.AI.ChatOptions { Temperature = 0, Seed = 7, Tools = [] };
             opciones.RawRepresentationFactory = _ => new OllamaSharp.Models.Chat.ChatRequest { Think = false };
             var listaDeDatos = string.Join("; ", datos.Select(d => $"{d.Key} = {d.Value.ToString(CultureInfo.InvariantCulture)}"));
-            var r = await ((Microsoft.Extensions.AI.IChatClient)_cliente).GetResponseAsync(
-                [new(Microsoft.Extensions.AI.ChatRole.System, Prompt),
-                 new(Microsoft.Extensions.AI.ChatRole.User, $"PREGUNTA: {pregunta}\n\nDATOS: {listaDeDatos}\n\nX: {Ciega(x)}\n\nY: {Ciega(y)}")], opciones);
+            Microsoft.Extensions.AI.ChatResponse r;
+            for (var intento = 1; ; intento++)
+            {
+                try
+                {
+                    r = await ((Microsoft.Extensions.AI.IChatClient)_cliente).GetResponseAsync(
+                        [new(Microsoft.Extensions.AI.ChatRole.System, Prompt),
+                         new(Microsoft.Extensions.AI.ChatRole.User, $"PREGUNTA: {pregunta}\n\nDATOS: {listaDeDatos}\n\nX: {Ciega(x)}\n\nY: {Ciega(y)}")], opciones);
+                    break;
+                }
+                catch (Exception e) when (intento < 3 && e is HttpRequestException or TaskCanceledException or OllamaSharp.Models.Exceptions.OllamaException)
+                {
+                    Reintentos++;
+                    await Task.Delay(TimeSpan.FromSeconds(10 * intento));
+                }
+            }
             var crudo = (r.Text ?? string.Empty).Trim();
             var palabra = Regex.Match(crudo.ToUpperInvariant(), @"\b(IGUAL|X|Y)\b").Value;
             var ganadora = palabra switch
@@ -369,53 +393,23 @@ public class BateriaTests
     }
 
     /// <summary>
-    /// Juez por reglas deterministas, declaradas y simétricas: cada texto suma un defecto por regla
-    /// que rompe y gana el que tiene menos (empate = igual). No sabe cuál es la redactada.
-    /// R1 registro ajeno (tuteo, vosotros) · R2 habla de porcentajes y el otro no · R3 nota de
-    /// multirrespuesta invertida («no llega», «menos de cien») · R4 un número que no está en los
-    /// datos ni en la pregunta · R5 una categoría con una cifra distinta de la de los datos · R6 más
-    /// larga que 1,5 × la otra + 40 · R7 un trigrama repetido · R8 eco de instrucción.
+    /// Juez por reglas deterministas, declaradas y simétricas (<see cref="ReglasDelJuez"/>): cada texto
+    /// suma un defecto por regla que rompe y gana el que tiene menos (empate = igual). No sabe cuál es la redactada.
     /// </summary>
     private sealed class JuezPorReglas : IJuez
     {
-        public string Nombre => "reglas deterministas declaradas (R1–R8)";
+        public string Nombre => ReglasDelJuez.Nombre;
 
         public Task<Veredicto> CompararAsync(string pregunta, IReadOnlyDictionary<string, double> datos, string redactada, string fija, string clave)
         {
             var redactadaEsX = RedactadaEsX(clave);
             var (x, y) = redactadaEsX ? (Ciega(redactada), Ciega(fija)) : (Ciega(fija), Ciega(redactada));
-            var dx = Defectos(x, y, pregunta, datos);
-            var dy = Defectos(y, x, pregunta, datos);
+            var dx = ReglasDelJuez.Defectos(x, y, pregunta, datos);
+            var dy = ReglasDelJuez.Defectos(y, x, pregunta, datos);
             var ganaX = dx.Count < dy.Count;
             var ganadora = dx.Count == dy.Count ? "igual" : (ganaX == redactadaEsX ? "redactada" : "fija");
             var crudo = $"X[{string.Join(",", dx)}] Y[{string.Join(",", dy)}]";
             return Task.FromResult(new Veredicto(redactadaEsX ? "redactada" : "fija", crudo, ganadora));
-        }
-
-        public static List<string> Defectos(string a, string b, string pregunta, IReadOnlyDictionary<string, double> datos)
-        {
-            var d = new List<string>();
-            var ta = VinculoDeCifras.SinTildes(a).ToLowerInvariant();
-            var tb = VinculoDeCifras.SinTildes(b).ToLowerInvariant();
-            if (Regex.IsMatch(a, @"(?i)(?<!\p{L})(vosotr[oa]s|vuestr[oa]s?|tú|contigo|tienes|puedes|debes|quieres|sabes|eres)(?!\p{L})")) d.Add("R1");
-            bool Porcentual(string t) => t.Contains('%') || t.Contains("porcentaje", StringComparison.Ordinal);
-            if (Porcentual(ta) && !Porcentual(tb)) d.Add("R2");
-            if (Regex.IsMatch(ta, @"no llega\w*|menos del? (100|cien)|no alcanza\w*")) d.Add("R3");
-            var permitidos = datos.Values.Concat(ValidadorDeCifras.Numeros(pregunta)).ToList();
-            if (ValidadorDeCifras.Numeros(a).Any(n => !permitidos.Any(p => Math.Abs(p - n) < 0.05))) d.Add("R4");
-            foreach (var (etiqueta, valor) in datos)
-            {
-                foreach (Match m in Regex.Matches(a, $@"(?i)\b{Regex.Escape(etiqueta)}\b\s*(?::|,)?\s*(?:con)?\s*(\d+)\b"))
-                {
-                    if (Math.Abs(double.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) - valor) > 0.05) { d.Add("R5"); break; }
-                }
-            }
-            if (a.Length > b.Length * 1.5 + 40) d.Add("R6");
-            var palabras = Regex.Matches(ta, @"[\p{L}\d]+").Select(m => m.Value).ToList();
-            var vistos = new HashSet<string>(StringComparer.Ordinal);
-            for (var i = 0; i + 2 < palabras.Count; i++) if (!vistos.Add($"{palabras[i]} {palabras[i + 1]} {palabras[i + 2]}")) { d.Add("R7"); break; }
-            if (ValidadorDeCifras.Eco(a, b) is not null) d.Add("R8");
-            return d.Distinct().ToList();
         }
     }
 

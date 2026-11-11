@@ -236,7 +236,10 @@ public static partial class ValidadorDeCifras
     // Sin tildes y en minúsculas: «dejá de lado», «pasá por alto», «omití», «no hagas caso», «salteá»
     // (voseo, tuteo e infinitivo), y en inglés («ignore», «disregard», «override», «system prompt»).
     // Es un control adicional, no la frontera (K7 R9.9): el texto de la persona nunca es instrucción.
-    [GeneratedRegex(@"\b(ignor\w*|olvid\w*|instruccion\w*|instruction\w*|disregard\w*|forget\w*|deja\w* de lado|pasa\w* por alto|no tengas en cuenta|omit\w*|omiti\w*|no (?:le |les )?hag\w* caso|no (?:le |les )?hace\w* caso|saltea\w*|override\w*|overrid\w*|system prompt|prompt del sistema|skip\w*)")]
+    // Cada forma termina en \b (no «skipper», «omitido» ni «instructivo»). «Instrucciones» sólo cuenta
+    // como consigna dirigida al modelo («tus instrucciones», «las instrucciones anteriores», «nuevas
+    // instrucciones»), no «las instrucciones del formulario» de la ayuda.
+    [GeneratedRegex(@"\b(ignor\w*|olvid\w*|(?:tus|sus|mis|estas|nuevas|otras) instrucciones\b|instrucci(?:on|ones) (?:anterior|anteriores|previa|previas|original|originales|del sistema)\b|(?:previous|prior|above|new|your|all|these|the|tus|sus|mis) instructions?\b|instructions? (?:above|below)\b|disregard\w*|forget\w*|deja\w* de lado|pasa\w* por alto|no tengas en cuenta|omit(?:i|e|a|as|an|ir|is|imos|amos|en|iendo|ile|iles|ilo|ila|ilos|ilas|elo|ela|elos|elas|ime|ite|inos|ted|ting|s)?\b|no (?:le |les )?hag\w* caso|no (?:le |les )?hace\w* caso|saltea\w*|override\w*|overrid\w*|system prompt|prompt del sistema|skip(?:s|ped|ping)?\b)")]
     private static partial Regex EcoDeInstruccion();
 
     [GeneratedRegex(@"\bveces\b|\ben una semana\b|\ba la semana\b|\b(por|cada|al|una vez por) (semana|dia|mes|ano)\b")]
