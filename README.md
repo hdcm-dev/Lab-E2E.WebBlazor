@@ -12,6 +12,8 @@ en una base **SQLite**, y cada interacción viaja por el circuito de Blazor.
 | --- | --- | --- |
 | ABM de localidades | [Localidades.razor](src/MovilidadUrbana.Web/Components/Pages/Localidades.razor) | Alta, modificación y baja sobre una tabla, validación en el servidor, diálogo de confirmación y persistencia |
 | Encuesta de transporte | [Encuesta.razor](src/MovilidadUrbana.Web/Components/Pages/Encuesta.razor) | Asistente de tres pasos: datos de la persona, medios que utiliza para viajar y distancia recorrida |
+| Resultados | [Resultados.razor](src/MovilidadUrbana.Web/Components/Pages/Resultados.razor) | Cifras de la encuesta calculadas por código, con barras, torta y tabla según una regla de forma |
+| Asistente | [PanelDelAsistente.razor](src/MovilidadUrbana.Web/Components/Shared/Asistente/PanelDelAsistente.razor) | Capa de IA de punta a punta: el código elige y el modelo redacta. Ver [docs/asistente](docs/asistente/README.md) |
 
 El diseño **no usa librería de componentes ni framework de CSS**: es el template del Framework
 SDD —[Knowledge-Template-HTML-SDD-Default](../../IA/SDD/IA.SDD/Conocimiento/Knowledge-Template-HTML-SDD-Default.md)
@@ -40,6 +42,8 @@ src/MovilidadUrbana.Web/              La web Blazor. Independiente: trae sus cap
   Domain/                             Entidades, reglas y catálogos. No depende de nada.
   Application/                        Casos de uso: servicios, modelos, políticas, Result
   Infrastructure/                     EF Core sobre SQLite, repositorios, siembra y contexto de sesión
+  Infrastructure/AI/                  La capa de IA: adaptadores del modelo, validador, habilitación (único lugar con el SDK)
+  Ayuda/                              El corpus de ayuda del asistente, embebido en el ensamblado
   Components/                         App.razor, Routes.razor, Layout/, Shared/, Pages/
   Sessions/                           La cookie de sesión y su middleware
   Theme/, Services/, wwwroot/         Íconos; diálogos, foco y versión; tokens, patrones y js/
@@ -57,8 +61,9 @@ src/MovilidadUrbana.MAUI/             La app Android (XAML nativo + MVVM). Indep
   Services/                           Sesión del dispositivo, navegación con Shell, avisos, teclado
   Controls/, Converters/              DecimalEntry y los convertidores de las vistas
   MauiProgram.cs                      Composición: la base SQLite en el teléfono + las mismas capas
-tests/MovilidadUrbana.E2ETests/       22 casos Playwright sobre la web + su fixture
-tests/MovilidadUrbana.UnitTests/      49 casos sobre las reglas de dominio de la web, sin navegador
+tests/MovilidadUrbana.E2ETests/       39 casos Playwright sobre la web (22 + 17 del asistente) + su fixture
+tests/MovilidadUrbana.UnitTests/      253 casos sobre la web sin navegador: reglas, asistente, arquitectura y bUnit
+tests/MovilidadUrbana.Asistente.Bateria/  La batería del asistente contra el modelo real (no corre en la CI)
 tests/MovilidadUrbana.ApiWeb.Tests/   13 casos sobre la API en proceso, con WebApplicationFactory
 tests/MovilidadUrbana.MAUI.Tests/     18 casos sobre los ViewModels de Android, con sus capas enlazadas
 tests/MovilidadUrbana.MAUI.UITests/   5 casos de interfaz con Appium sobre la app instalada en el teléfono
@@ -70,6 +75,8 @@ scripts/
   dotnet.sh             Ejecuta el SDK de .NET dentro del contenedor oficial
   publicar.sh           Publica el binario autocontenido que usa CI, en `publicacion/`
   pruebas.sh            Corre las E2E sin tener nada instalado (contenedor + SDK local); el proyecto se elige con PROYECTO
+tools/asistente/        bateria.sh (batería ×3 del asistente) y cifras.sql (oráculo de las cifras)
+docs/                   asistente/ (especificación, verificación), adr/ (decisiones), expedientes/, propuestas/
 pruebas.runsettings     Navegador, timeouts y paralelismo de las pruebas
 .github/workflows/      CI, un workflow de E2E por proyecto web, el APK de Android y verificación de entornos
 .devcontainer/          Contenedor para compilar y depurar la app Android en el teléfono USB (dev.sh)
@@ -77,7 +84,7 @@ Lab-E2E.WebBlazor.SinMaui.slnf  La solución sin la app Android: lo que compila 
 evidencia/              Registros de corridas que respaldan lo que afirman las guías
 ```
 
-Son doce proyectos. De Movilidad Urbana, tres aplicaciones independientes y cinco proyectos de
+Son trece proyectos. De Movilidad Urbana, tres aplicaciones independientes y seis proyectos de
 prueba; de Hola Mundo y Login, cada uno su web y su E2E. Las tres aplicaciones web tienen grados de
 complejidad distintos a propósito —Hola Mundo, Login y Movilidad Urbana, en ese orden—, para que la
 temática se pueda estudiar de a un escalón. Hola Mundo y Login llegaron desde

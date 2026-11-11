@@ -9,6 +9,32 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-11-11
+
+### Agregado
+
+- **Asistente integral en `MovilidadUrbana.Web`** ([docs/asistente](docs/asistente/README.md), expediente
+  [0001](docs/expedientes/0001-Asistente-Integral.md)). El código elige y el modelo, cuando está
+  configurado por variables de entorno, sólo redacta: cuatro anillos de competencia, glosario y sinónimos
+  como datos, cifras por código con gráficos según una regla de forma, aclaración con opciones, rechazo
+  amable, abstención, degradación sin modelo, catálogo de destinos con deeplinks que abren la acción,
+  votos sin texto y tablero de medición. El asistente no escribe: el alta se abre prellenada y la baja
+  abre la confirmación de siempre. Sin modelo responde con plantillas; con `Asistente__Habilitado=false`
+  no hay panel.
+- Pantalla **`/resultados`**: medios en barras (multirrespuesta), motivo y frecuencia en torta con su
+  tabla, distancias y tiempos en tabla; `?vista=` para abrir una sola.
+- `/asistente/medicion` y `/health/asistente`.
+- `docs/adr/` con las decisiones 0001–0007, `tools/asistente/bateria.sh` (batería ×3) y
+  `tools/asistente/cifras.sql` (oráculo de las cifras).
+- `tests/MovilidadUrbana.Asistente.Bateria` (no corre en la CI) y 204 pruebas unitarias nuevas, bUnit
+  incluido; 17 E2E nuevas.
+
+### Cambiado
+
+- `LocalidadRules` de la web, endurecidas a causa de la capa de IA: el nombre aplica el máximo de 60, la
+  provincia tiene que ser del catálogo y el código postal acepta sólo dígitos 0-9. Las 49 pruebas previas
+  siguen sin cambios.
+
 ## [Sin publicar] - 2026-09-18
 
 ### Cambiado

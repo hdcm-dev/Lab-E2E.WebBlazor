@@ -1,0 +1,5 @@
+An issue was encountered verifying workloads. For more information, run "dotnet workload update".
+Test run for <repo>/tests/MovilidadUrbana.E2ETests/bin/Release/net10.0/MovilidadUrbana.E2ETests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    22, Skipped:     0, Total:    22, Duration: 7 s - MovilidadUrbana.E2ETests.dll (net10.0)
