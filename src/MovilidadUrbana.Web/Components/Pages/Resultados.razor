@@ -1,0 +1,84 @@
+@page "/resultados"
+@* Resultados de la encuesta (escalón −1 del analista): cifras calculadas por código, sin IA. La
+   forma de cada gráfico la decide ReglaDeForma: los medios, multirrespuesta, van en barras; el
+   motivo y la frecuencia, de respuesta única, en torta con su tabla; los promedios, en tabla. *@
+@using MovilidadUrbana.Web.Application.Asistente
+@using MovilidadUrbana.Web.Application.Resultados
+@using MovilidadUrbana.Web.Components.Shared.Charts
+
+<PageTitle>Movilidad Urbana — Resultados</PageTitle>
+
+<div class="mq-encabezado">
+    <div>
+        <h1 data-testid="titulo">Resultados de la encuesta</h1>
+        <p class="mq-caption">Cifras de las encuestas de tu sesión, calculadas por la aplicación.</p>
+    </div>
+</div>
+
+<p class="mq-sr-only" role="status" aria-live="polite">@_anuncio</p>
+
+@if (_estado is SurfaceState.Cargando)
+{
+    <Skeleton />
+}
+else if (_estado is SurfaceState.Indisponible)
+{
+    <UnavailableState Title="No pudimos traer los resultados" Body="El servicio no respondió."
+                      ActionLabel="Reintentar traer los resultados" OnRetry="CargarAsync" Testid="indisponible" />
+}
+else if (_estado is SurfaceState.Vacio)
+{
+    <EmptyState Title="Todavía no hay encuestas en tu sesión"
+                Body="Cuando registres la primera encuesta, sus cifras van a aparecer acá."
+                ActionLabel="Empezar una encuesta" ActionHref="encuesta/1" Testid="sin-encuestas" />
+}
+else
+{
+    <nav class="mq-pestanas" aria-label="Vistas de los resultados">
+        @foreach (var (clave, rotulo) in Vistas)
+        {
+            var activa = VistaActual == clave;
+            <a class="mq-chip @(activa ? "mq-chip--destino" : null)" href="@(clave == "resumen" ? "resultados" : $"resultados?vista={clave}")"
+               aria-current="@(activa ? "page" : null)" data-testid="@($"vista-{clave}")">@rotulo</a>
+        }
+    </nav>
+
+    <section class="mq-panel mq-mb-6" aria-labelledby="titulo-total">
+        <div class="mq-panel__cuerpo">
+            <h2 id="titulo-total" class="mq-caption">Encuestas registradas</h2>
+            <p class="mq-cifra-grande" data-testid="total-encuestas">@_total</p>
+            <p class="mq-grafico__nota">@ResultadosDeEncuestaService.NotaDeSesion.</p>
+            @if (_total < 5)
+            {
+                <Band Tone="BandTone.Atencion" Testid="advertencia-n-chico">@Plantillas.NChico</Band>
+            }
+        </div>
+    </section>
+
+    <div class="mq-grilla-resultados">
+        @if (Mostrar("medios") && _medios is not null)
+        {
+            <section class="mq-panel" data-testid="seccion-medios"><div class="mq-panel__cuerpo">
+                <Grafico Distribucion="_medios" Titulo="Medios de transporte" Testid="grafico-medios" />
+            </div></section>
+        }
+        @if (Mostrar("motivos") && _motivos is not null)
+        {
+            <section class="mq-panel" data-testid="seccion-motivos"><div class="mq-panel__cuerpo">
+                <Grafico Distribucion="_motivos" Titulo="Motivo del viaje" Testid="grafico-motivos" />
+            </div></section>
+        }
+        @if (Mostrar("frecuencias") && _frecuencias is not null)
+        {
+            <section class="mq-panel" data-testid="seccion-frecuencias"><div class="mq-panel__cuerpo">
+                <Grafico Distribucion="_frecuencias" Titulo="Frecuencia de uso" Testid="grafico-frecuencias" />
+            </div></section>
+        }
+        @if (Mostrar("distancias") && _promedios is not null)
+        {
+            <section class="mq-panel" data-testid="seccion-distancias"><div class="mq-panel__cuerpo">
+                <TablaDePromedios Promedios="_promedios" Titulo="Distancia y minutos por medio" />
+            </div></section>
+        }
+    </div>
+}

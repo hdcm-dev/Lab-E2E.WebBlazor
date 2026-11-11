@@ -1,0 +1,21 @@
+@* Elige la forma de una distribución con ReglaDeForma: la vista no decide si va torta o barras. *@
+@using MovilidadUrbana.Web.Application.Asistente
+@using MovilidadUrbana.Web.Application.Resultados
+
+@switch (ReglaDeForma.Decidir(TipoDeDato.Distribucion, Distribucion.Filas.Count, Distribucion.Sumable))
+{
+    case FormaDeGrafico.TortaConTabla:
+        <Torta Filas="Distribucion.Filas" Titulo="@Titulo" Nota="@Distribucion.Nota" Testid="@Testid" />
+        break;
+    default:
+        <Barras Filas="Distribucion.Filas" Denominador="Distribucion.Encuestas" Titulo="@Titulo" Nota="@Distribucion.Nota" Testid="@Testid" />
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired] public Distribucion Distribucion { get; set; } = default!;
+
+    [Parameter, EditorRequired] public string Titulo { get; set; } = string.Empty;
+
+    [Parameter] public string? Testid { get; set; }
+}

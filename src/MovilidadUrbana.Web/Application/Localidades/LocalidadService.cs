@@ -69,17 +69,25 @@ public sealed class LocalidadService(ILocalidadRepository repository)
         return Result.Success($"Se eliminó la localidad {localidad.Nombre}.");
     }
 
+    /// <summary>
+    /// Los errores por campo sin guardar nada: la pantalla los muestra cuando el formulario llega
+    /// prellenado desde el asistente, para que la regla marque lo que falta antes del intento.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> ValidarSinGuardar(LocalidadModel model) => Validate(model);
+
     private static Dictionary<string, string> Validate(LocalidadModel model)
     {
         var errors = new Dictionary<string, string>();
 
         if (!LocalidadRules.NombreValido(model.Nombre))
         {
-            errors["nombre"] = $"El nombre debe tener al menos {LocalidadRules.LargoMinimoDelNombre} caracteres.";
+            errors["nombre"] = (model.Nombre ?? string.Empty).Trim().Length > LocalidadRules.LargoMaximoDelNombre
+                ? $"El nombre puede tener hasta {LocalidadRules.LargoMaximoDelNombre} caracteres."
+                : $"El nombre debe tener al menos {LocalidadRules.LargoMinimoDelNombre} caracteres.";
         }
         if (!LocalidadRules.ProvinciaValida(model.Provincia))
         {
-            errors["provincia"] = "Seleccione una provincia.";
+            errors["provincia"] = "Seleccione una provincia del catálogo.";
         }
         if (!LocalidadRules.CodigoPostalValido(model.CodigoPostal))
         {

@@ -14,6 +14,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> opciones) : DbContext(o
 
     public DbSet<Session> Sessions => Set<Session>();
 
+    /// <summary>Votos y señales del asistente: sólo campos cerrados, sin sesión (ADR 0007).</summary>
+    public DbSet<Voto> Votos => Set<Voto>();
+
     protected override void OnModelCreating(ModelBuilder model)
     {
         model.Entity<Session>(entidad =>
@@ -30,6 +33,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> opciones) : DbContext(o
             entidad.Property(l => l.CodigoPostal).HasMaxLength(4).IsRequired();
             // Toda consulta del ABM filtra por sesión: el índice acompaña ese acceso.
             entidad.HasIndex(l => l.SessionId);
+        });
+
+        model.Entity<Voto>(entidad =>
+        {
+            entidad.Property(v => v.Intencion).HasMaxLength(64).IsRequired();
+            entidad.Property(v => v.Destino).HasMaxLength(64);
+            entidad.Property(v => v.VersionGlosario).HasMaxLength(32).IsRequired();
+            entidad.Property(v => v.VersionCorpus).HasMaxLength(32).IsRequired();
+            entidad.HasIndex(v => v.Dia);
         });
 
         model.Entity<RespuestaDeEncuesta>(entidad =>

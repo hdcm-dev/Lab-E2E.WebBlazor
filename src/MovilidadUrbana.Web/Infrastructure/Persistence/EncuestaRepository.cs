@@ -22,4 +22,13 @@ public sealed class EncuestaRepository(
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
         return await context.Encuestas.CountAsync(e => e.SessionId == session.Id, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<RespuestaDeEncuesta>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        await using var context = await factory.CreateDbContextAsync(cancellationToken);
+        return await context.Encuestas.AsNoTracking()
+            .Where(e => e.SessionId == session.Id)
+            .OrderBy(e => e.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

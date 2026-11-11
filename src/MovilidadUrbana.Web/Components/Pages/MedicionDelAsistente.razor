@@ -1,0 +1,75 @@
+@page "/asistente/medicion"
+@* Tablero de medición del asistente, de sólo lectura: tasa útil por anillo y por forma, y cuántas
+   veces la respuesta fue «No está en la ayuda» o «Afuera», por intención y por día. Los votos no
+   traen texto: se mide sin guardar lo que se preguntó. *@
+@using MovilidadUrbana.Web.Application.Asistente
+@using MovilidadUrbana.Web.Application.Resultados
+@using MovilidadUrbana.Web.Components.Shared.Charts
+@using MovilidadUrbana.Web.Domain.Asistente
+
+<PageTitle>Movilidad Urbana — Medición del asistente</PageTitle>
+
+<div class="mq-encabezado">
+    <div>
+        <h1 data-testid="titulo">Medición del asistente</h1>
+        <p class="mq-caption">Votos 👍/👎 y señales automáticas. Sin preguntas, sin respuestas y sin sesión.</p>
+    </div>
+</div>
+
+@if (_votos is null)
+{
+    <Skeleton />
+}
+else if (_votos.Count == 0)
+{
+    <EmptyState Title="Todavía no hay votos" Body="Cuando alguien vote una respuesta del asistente, la tasa aparece acá." Testid="sin-votos" />
+}
+else
+{
+    <div class="mq-grilla-resultados">
+        <section class="mq-panel" data-testid="tasa-por-anillo"><div class="mq-panel__cuerpo">
+            @* La tasa útil por anillo no es parte de un todo: va en barras (ReglaDeForma). *@
+            <Barras Filas="TasaPor(v => v.Anillo.ToString(), v => v.Anillo.ToString())" Denominador="100" Titulo="Tasa útil por anillo (%)"
+                    EncabezadoDelValor="% útil" Nota="@NotaDeVotos" Testid="grafico-anillos" />
+        </div></section>
+        <section class="mq-panel" data-testid="tasa-por-forma"><div class="mq-panel__cuerpo">
+            <Barras Filas="TasaPor(v => v.Forma.ToString(), v => v.Forma.ToString())" Denominador="100" Titulo="Tasa útil por forma (%)"
+                    EncabezadoDelValor="% útil" Nota="@NotaDeVotos" Testid="grafico-formas" />
+        </div></section>
+        <section class="mq-panel" data-testid="senales"><div class="mq-panel__cuerpo">
+            <TablaDeDistribucion Filas="Senales" Denominador="Senales.Sum(f => f.Cantidad)" Titulo="Señales «No está en la ayuda» y «Afuera» por intención" EncabezadoDelValor="Señales" />
+        </div></section>
+        <section class="mq-panel" data-testid="por-dia"><div class="mq-panel__cuerpo">
+            <TablaDeDistribucion Filas="PorDia" Denominador="PorDia.Sum(f => f.Cantidad)" Titulo="Votos y señales por día" EncabezadoDelValor="Registros" />
+        </div></section>
+    </div>
+}
+
+@code {
+    private IReadOnlyList<Domain.Entities.Voto>? _votos;
+
+    [Inject] private ILectorDeVotos Lector { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync() => _votos = await Lector.GetAllAsync();
+
+    private IEnumerable<Domain.Entities.Voto> DePersonas => _votos!.Where(v => v.Origen == Domain.Entities.OrigenDelVoto.Persona);
+
+    private string NotaDeVotos => $"Sobre {DePersonas.Count()} votos de personas; las señales automáticas no cuentan en la tasa.";
+
+    private IReadOnlyList<FilaDeDistribucion> TasaPor(Func<Domain.Entities.Voto, string> clave, Func<Domain.Entities.Voto, string> etiqueta) =>
+        DePersonas.GroupBy(clave)
+            .Select(g => new FilaDeDistribucion(g.Key, etiqueta(g.First()), (int)Math.Round(g.Count(v => v.Util) * 100.0 / g.Count())))
+            .ToList();
+
+    private IReadOnlyList<FilaDeDistribucion> Senales =>
+        _votos!.Where(v => v.Origen == Domain.Entities.OrigenDelVoto.Senal)
+            .GroupBy(v => $"{v.Forma} · {v.Intencion}")
+            .OrderByDescending(g => g.Count())
+            .Select(g => new FilaDeDistribucion(g.Key, g.Key, g.Count()))
+            .ToList();
+
+    private IReadOnlyList<FilaDeDistribucion> PorDia =>
+        _votos!.GroupBy(v => v.Dia).OrderBy(g => g.Key)
+            .Select(g => new FilaDeDistribucion(g.Key.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), g.Key.ToString("d"), g.Count()))
+            .ToList();
+}

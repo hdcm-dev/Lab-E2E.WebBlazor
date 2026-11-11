@@ -1,0 +1,72 @@
+@* Torta para una distribución de respuesta única con 2 a 6 categorías (REQ-IA-40): las porciones
+   son partes de un todo y suman el total (REQ-IA-41). Va siempre con su tabla debajo. *@
+@using MovilidadUrbana.Web.Application.Resultados
+
+<figure class="mq-grafico" data-testid="@Testid" data-forma="torta">
+    <figcaption class="mq-grafico__titulo">@Titulo</figcaption>
+    <div class="mq-torta">
+        <svg viewBox="-1 -1 2 2" role="img" aria-label="@($"{Titulo}: torta de {Total} respuestas")" focusable="false">
+            @foreach (var porcion in Porciones())
+            {
+                @if (porcion.Completa)
+                {
+                    <circle class="@porcion.Clase" cx="0" cy="0" r="1" data-testid="porcion" data-cantidad="@porcion.Cantidad" />
+                }
+                else
+                {
+                    <path class="@porcion.Clase" d="@porcion.Camino" data-testid="porcion" data-cantidad="@porcion.Cantidad" />
+                }
+            }
+        </svg>
+        <ul class="mq-leyenda" aria-hidden="true">
+            @foreach (var (fila, i) in Filas.Select((f, i) => (f, i)))
+            {
+                <li><span class="mq-leyenda__muestra mq-serie-@((i % 6) + 1)"></span>@fila.Etiqueta</li>
+            }
+        </ul>
+    </div>
+    <TablaDeDistribucion Filas="Filas" Denominador="Total" Titulo="@Titulo" EncabezadoDelValor="Respuestas" />
+    @if (Nota is not null)
+    {
+        <p class="mq-grafico__nota" data-testid="nota-de-metrica">@Nota</p>
+    }
+</figure>
+
+@code {
+    private sealed record Porcion(string Clase, string Camino, int Cantidad, bool Completa);
+
+    [Parameter, EditorRequired] public IReadOnlyList<FilaDeDistribucion> Filas { get; set; } = [];
+
+    [Parameter, EditorRequired] public string Titulo { get; set; } = string.Empty;
+
+    [Parameter] public string? Nota { get; set; }
+
+    [Parameter] public string? Testid { get; set; }
+
+    private int Total => Filas.Sum(f => f.Cantidad);
+
+    private IEnumerable<Porcion> Porciones()
+    {
+        var total = Total;
+        if (total == 0) yield break;
+        double acumulado = 0;
+        for (var i = 0; i < Filas.Count; i++)
+        {
+            var f = Filas[i];
+            if (f.Cantidad == 0) continue;
+            var clase = $"mq-serie-{(i % 6) + 1}";
+            if (f.Cantidad == total)
+            {
+                yield return new Porcion(clase, string.Empty, f.Cantidad, true);
+                continue;
+            }
+            var desde = acumulado / total * 2 * Math.PI;
+            acumulado += f.Cantidad;
+            var hasta = acumulado / total * 2 * Math.PI;
+            var grande = hasta - desde > Math.PI ? 1 : 0;
+            string P(double v) => v.ToString("0.####", CultureInfo.InvariantCulture);
+            var camino = $"M 0 0 L {P(Math.Sin(desde))} {P(-Math.Cos(desde))} A 1 1 0 {grande} 1 {P(Math.Sin(hasta))} {P(-Math.Cos(hasta))} Z";
+            yield return new Porcion(clase, camino, f.Cantidad, false);
+        }
+    }
+}

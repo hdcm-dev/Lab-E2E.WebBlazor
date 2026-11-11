@@ -23,9 +23,27 @@ public static class DatabaseInitializer
         if (!string.IsNullOrEmpty(carpeta)) Directory.CreateDirectory(carpeta);
 
         context.Database.EnsureCreated();
+        AsegurarTablaDeVotos(context);
 
         // WAL permite leer mientras otra conexión escribe. Con las pruebas E2E en paralelo,
         // varias sesiones tocan el mismo archivo al mismo tiempo.
         context.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+    }
+
+    /// <summary>
+    /// El repo crea el esquema con <c>EnsureCreated</c>, sin migraciones (ADR 0007). Sobre un
+    /// archivo de una versión anterior, <c>EnsureCreated</c> no agrega tablas: la de votos se crea
+    /// con la misma sentencia que genera EF, con <c>IF NOT EXISTS</c>.
+    /// </summary>
+    private static void AsegurarTablaDeVotos(AppDbContext context)
+    {
+        var script = context.Database.GenerateCreateScript();
+        foreach (var sentencia in script.Split(";", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (sentencia.StartsWith("CREATE TABLE \"Votos\"", StringComparison.Ordinal))
+                context.Database.ExecuteSqlRaw(sentencia.Replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS "));
+            else if (sentencia.StartsWith("CREATE INDEX \"IX_Votos_", StringComparison.Ordinal))
+                context.Database.ExecuteSqlRaw(sentencia.Replace("CREATE INDEX ", "CREATE INDEX IF NOT EXISTS "));
+        }
     }
 }

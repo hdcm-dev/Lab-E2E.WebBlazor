@@ -1,0 +1,81 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
+using MovilidadUrbana.Web.Application.Asistente;
+
+namespace MovilidadUrbana.Web.Infrastructure.AI;
+
+/// <summary>
+/// Controles sobre el texto del modelo (paso 7): cada número afirmado tiene que estar anclado en
+/// lo que se le entregó (cifras, fragmentos, pregunta, plantilla), cada oración cita una fuente
+/// entregada y ninguna dice que el asistente hizo algo. Si un control falla, el texto se rechaza
+/// y la respuesta es la plantilla con las cifras del código (REQ-IA-14, REQ-IA-22).
+/// </summary>
+public static partial class ValidadorDeCifras
+{
+    public const int LargoMaximo = 700;
+
+    public static readonly CultureInfo Cultura = CultureInfo.GetCultureInfo("es-AR");
+
+    /// <summary>Números de un texto en es-AR: «346.334» es un entero; «12,5» y «12.5» son decimales.</summary>
+    public static IReadOnlyList<double> Numeros(string texto)
+    {
+        var lista = new List<double>();
+        foreach (Match m in Numero().Matches(CitaRx().Replace(texto, " ")))
+        {
+            var t = m.Value;
+            double v;
+            if (MilesRx().IsMatch(t)) v = double.Parse(t.Replace(".", string.Empty).Replace(',', '.'), CultureInfo.InvariantCulture);
+            else v = double.Parse(t.Replace(',', '.'), CultureInfo.InvariantCulture);
+            lista.Add(v);
+        }
+        return lista;
+    }
+
+    public static string? Validar(string texto, PedidoDeRedaccion pedido)
+    {
+        if (string.IsNullOrWhiteSpace(texto)) return "texto vacío";
+        if (texto.Length > LargoMaximo) return "texto demasiado largo";
+
+        var permitidos = new List<double>();
+        permitidos.AddRange(pedido.Cifras.Select(c => c.Valor));
+        permitidos.AddRange(Numeros(pedido.Pregunta));
+        permitidos.AddRange(Numeros(pedido.Plantilla));
+        foreach (var f in pedido.Fragmentos) permitidos.AddRange(Numeros(f.Texto));
+
+        foreach (var n in Numeros(texto))
+        {
+            if (!permitidos.Any(p => Math.Abs(p - n) < 0.05)) return $"cifra sin origen: {n.ToString(Cultura)}";
+        }
+
+        if (PrimeraPersonaDeAccion().IsMatch(texto)) return "primera persona de acción";
+
+        var fuentes = Math.Max(pedido.Fragmentos.Count, pedido.Cifras.Count > 0 ? 1 : 0);
+        foreach (var oracion in Oraciones(texto))
+        {
+            var citas = CitaRx().Matches(oracion).Select(m => int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)).ToList();
+            if (citas.Count == 0) return "oración sin cita";
+            if (citas.Any(c => c < 1 || c > fuentes)) return "cita a una fuente no entregada";
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> Oraciones(string texto) =>
+        OracionRx().Split(texto.Trim()).Select(o => o.Trim()).Where(o => o.Length > 0 && o.Any(char.IsLetter));
+
+    [GeneratedRegex(@"\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?")]
+    private static partial Regex Numero();
+
+    [GeneratedRegex(@"^\d{1,3}(?:\.\d{3})+(?:,\d+)?$")]
+    private static partial Regex MilesRx();
+
+    [GeneratedRegex(@"\[(\d+)\]")]
+    private static partial Regex CitaRx();
+
+    // Una oración termina en punto, signo de cierre o salto de línea, después de su cita.
+    [GeneratedRegex(@"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡«*])|\n+")]
+    private static partial Regex OracionRx();
+
+    [GeneratedRegex(@"(?i)\b(yo\s|agregu[eé]|borr[eé]|elimin[eé]|cargu[eé]|guard[eé]|cre[eé]\s+la|registr[eé]|actualic[eé]|lo hice|la hice|ya (la|lo) (agregu|borr|elimin))")]
+    private static partial Regex PrimeraPersonaDeAccion();
+}

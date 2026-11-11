@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="bunit" Version="2.15.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
     <PackageReference Include="NUnit" Version="4.3.2" />
     <PackageReference Include="NUnit.Analyzers" Version="4.7.0" />
@@ -21,6 +22,14 @@
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Las pruebas de arquitectura y de repositorio leen el código fuente: la raíz se ubica desde acá. -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RaizDelRepositorio</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)../..</_Parameter2>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

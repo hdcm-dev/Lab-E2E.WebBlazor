@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MovilidadUrbana.Web.Application.Abstractions;
+using MovilidadUrbana.Web.Application.Asistente;
 using MovilidadUrbana.Web.Infrastructure.Persistence;
 using MovilidadUrbana.Web.Infrastructure.Sessions;
 
@@ -25,6 +26,8 @@ public static class DependencyInjection
         services.AddScoped<SessionSeeder>();
         services.AddScoped<ILocalidadRepository, LocalidadRepository>();
         services.AddScoped<IEncuestaRepository, EncuestaRepository>();
+        services.AddScoped<IRegistroDeSenales, RegistroDeVotos>();
+        services.AddScoped<ILectorDeVotos, LectorDeVotos>();
         return services;
     }
 }
