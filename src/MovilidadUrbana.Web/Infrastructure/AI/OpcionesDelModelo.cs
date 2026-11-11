@@ -25,6 +25,10 @@ public sealed class OpcionesDelModelo
     private ChatOptions Base()
     {
         var o = new ChatOptions { Temperature = 0, Seed = 7, Tools = [] };
+        // Sin razonamiento visible: el redactor y el extractor no lo necesitan, y en un modelo que
+        // razona por defecto el tiempo se iría antes de la primera palabra útil. Es una opción propia
+        // del proveedor, así que se fija acá, en el único lugar que lo conoce.
+        o.RawRepresentationFactory = _ => new OllamaSharp.Models.Chat.ChatRequest { Think = false };
         if (NumCtx is int n) (o.AdditionalProperties ??= [])["num_ctx"] = n;
         return o;
     }

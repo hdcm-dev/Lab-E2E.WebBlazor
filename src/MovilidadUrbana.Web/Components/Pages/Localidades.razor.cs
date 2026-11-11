@@ -55,6 +55,19 @@ public partial class Localidades : ComponentBase
     [SupplyParameterFromQuery(Name = "propuesta")] public string? Propuesta { get; set; }
 
     private bool _propuestaDeIa;
+    private bool _enfocarElNombre;
+
+    /// <summary>
+    /// El foco va al nombre después del render, y después del foco que la navegación pone en el
+    /// contenido principal (<c>FocusOnNavigate</c>): si no, la navegación se lo vuelve a llevar.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_enfocarElNombre) return;
+        _enfocarElNombre = false;
+        await Task.Delay(50);
+        try { await FocusNameAsync(); } catch (InvalidOperationException) { } catch (Microsoft.JSInterop.JSException) { }
+    }
 
     private bool HasFilter => _texto.Length > 0 || _provincia.Length > 0;
 
@@ -79,8 +92,7 @@ public partial class Localidades : ComponentBase
             _errors = prellenado ? Servicio.ValidarSinGuardar(_model) : NoErrors;
             _notice = null;
             LimpiarLaDireccion();
-            await InvokeAsync(StateHasChanged);
-            try { await FocusNameAsync(); } catch (InvalidOperationException) { }
+            _enfocarElNombre = true;
             return;
         }
 

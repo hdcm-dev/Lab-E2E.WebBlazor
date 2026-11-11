@@ -65,10 +65,19 @@ public class RedaccionTests
     [TestCase("Agregué la localidad [1].", "primera persona de acción")]
     [TestCase("Hay 20 encuestas registradas en tu sesión.", "oración sin cita")]
     [TestCase("Hay 20 encuestas [4].", "cita a una fuente no entregada")]
+    [TestCase("Hay veinte encuestas [1].", "cifra en palabras sin origen")]
     public void Validador_RechazaConMotivo(string texto, string motivo)
     {
         var pedido = new PedidoDeRedaccion("contar_encuestas", Anillo.Operar, "cuantas encuestas hay", [new Cifra("encuestas", 20, "de tu sesión")], [], "Hay 20 encuestas registradas en tu sesión.");
         Assert.That(ValidadorDeCifras.Validar(texto, pedido), Does.StartWith(motivo));
+    }
+
+    [TestCase("Lo que cargues por la API no aparece acá [1].")]
+    [TestCase("Revisá los datos y tocá **Guardar** [1].")]
+    public void Validador_SegundaPersona_NoEsPrimeraPersona(string texto)
+    {
+        var pedido = new PedidoDeRedaccion("ayuda", Anillo.Operar, "como cargo", [], [new FragmentoDeAyuda("a#b", "a", "A", "B", "", Anillo.Operar, "vigente", [], [], "texto")], "texto [1]");
+        Assert.That(ValidadorDeCifras.Validar(texto, pedido), Is.Null);
     }
 
     [TestCase("Corrientes tiene 346.334 habitantes [1].", 346334d)]

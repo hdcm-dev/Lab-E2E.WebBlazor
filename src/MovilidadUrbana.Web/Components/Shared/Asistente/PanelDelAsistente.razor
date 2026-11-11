@@ -66,7 +66,9 @@
                     <div class="mq-chips">
                         @foreach (var chip in turno.Respuesta.Destinos)
                         {
-                            <a class="mq-chip mq-chip--destino" href="@chip.Href" data-testid="chip-destino" data-destino="@chip.DestinoId">@chip.Rotulo</a>
+                            @* Tocar un destino cierra el panel: la acción se abre en la pantalla y se confirma ahí. *@
+                            <a class="mq-chip mq-chip--destino" href="@chip.Href" data-testid="chip-destino" data-destino="@chip.DestinoId"
+                               @onclick="() => Panel.Fijar(false)">@chip.Rotulo</a>
                         }
                     </div>
                 }

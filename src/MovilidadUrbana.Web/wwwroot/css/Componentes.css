@@ -939,6 +939,7 @@ main:focus-visible {
 .mq-burbuja { border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); font-size: var(--font-size-body); line-height: var(--line-height-prosa); display: flex; flex-direction: column; gap: var(--space-3); }
 .mq-burbuja--persona { align-self: flex-end; max-width: 85%; background-color: var(--color-brand-primary-tint); color: var(--color-text-primary); }
 .mq-burbuja--asistente { align-self: stretch; background-color: var(--color-background-tertiary); border: var(--border-hairline); }
+.mq-burbuja > .mq-insignia { align-self: flex-start; }
 .mq-burbuja__texto { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
 .mq-burbuja__citas { margin: 0; padding: 0; list-style: none; font-size: var(--font-size-caption); color: var(--color-text-secondary); }
 .mq-burbuja__votos { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--font-size-caption); color: var(--color-text-secondary); }
@@ -963,7 +964,7 @@ main:focus-visible {
 .mq-chip--contexto { color: var(--color-text-secondary); }
 
 /* La tabla de un gráfico no conmuta a tarjetas: es corta y es la versión accesible del dibujo. */
-.mq-tabla-envoltorio--siempre { display: block; }
+.mq-tabla-envoltorio--siempre { display: block; overflow-x: auto; }
 
 /* == 6. El único punto de quiebre ============================================================
    La barra lateral pasa a navegación superior, y la colección conmuta de tabla a tarjetas

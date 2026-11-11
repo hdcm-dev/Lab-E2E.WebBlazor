@@ -35,6 +35,9 @@ public sealed record RespuestaDelAsistente
     public IReadOnlyList<Cita> Citas { get; init; } = [];
     public IReadOnlyList<string> Sugerencias { get; init; } = [];
 
+    /// <summary>Por qué la redacción cayó a la plantilla (control que falló, o «sin respuesta»), para la medición.</summary>
+    public string? MotivoDelResultado { get; init; }
+
     /// <summary>Aviso de degradación (F8) que acompaña la respuesta, si lo hay.</summary>
     public string? Aviso { get; init; }
 

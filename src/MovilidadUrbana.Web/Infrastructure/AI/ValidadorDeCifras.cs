@@ -47,6 +47,13 @@ public static partial class ValidadorDeCifras
             if (!permitidos.Any(p => Math.Abs(p - n) < 0.05)) return $"cifra sin origen: {n.ToString(Cultura)}";
         }
 
+        // Un número escrito en palabras escapa al control de cifras: sólo vale si ya está en las fuentes.
+        var fuentesEnTexto = Texto(pedido);
+        foreach (Match m in NumeroEnPalabras().Matches(texto))
+        {
+            if (!fuentesEnTexto.Contains(m.Value.ToLowerInvariant(), StringComparison.Ordinal)) return $"cifra en palabras sin origen: {m.Value}";
+        }
+
         if (PrimeraPersonaDeAccion().IsMatch(texto)) return "primera persona de acción";
 
         var fuentes = Math.Max(pedido.Fragmentos.Count, pedido.Cifras.Count > 0 ? 1 : 0);
@@ -60,6 +67,11 @@ public static partial class ValidadorDeCifras
         return null;
     }
 
+    private static string Texto(PedidoDeRedaccion pedido) =>
+        string.Join(' ', new[] { pedido.Pregunta, pedido.Plantilla }
+            .Concat(pedido.Fragmentos.Select(f => f.Texto))
+            .Concat(pedido.Cifras.Select(c => c.Etiqueta + " " + c.Nota))).ToLowerInvariant();
+
     private static IEnumerable<string> Oraciones(string texto) =>
         OracionRx().Split(texto.Trim()).Select(o => o.Trim()).Where(o => o.Length > 0 && o.Any(char.IsLetter));
 
@@ -69,6 +81,9 @@ public static partial class ValidadorDeCifras
     [GeneratedRegex(@"^\d{1,3}(?:\.\d{3})+(?:,\d+)?$")]
     private static partial Regex MilesRx();
 
+    [GeneratedRegex(@"(?i)\b(dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|diecis[eé]is|diecisiete|dieciocho|diecinueve|veinte|veinti\w+|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|ciento|mil|millones)\b")]
+    private static partial Regex NumeroEnPalabras();
+
     [GeneratedRegex(@"\[(\d+)\]")]
     private static partial Regex CitaRx();
 
@@ -76,6 +91,8 @@ public static partial class ValidadorDeCifras
     [GeneratedRegex(@"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡«*])|\n+")]
     private static partial Regex OracionRx();
 
-    [GeneratedRegex(@"(?i)\b(yo\s|agregu[eé]|borr[eé]|elimin[eé]|cargu[eé]|guard[eé]|cre[eé]\s+la|registr[eé]|actualic[eé]|lo hice|la hice|ya (la|lo) (agregu|borr|elimin))")]
+    // Pretérito en primera persona («agregué», «borré»), con borde de palabra al final: «cargues» o
+    // «guardes» son de la persona y no cuentan.
+    [GeneratedRegex(@"(?i)\b(yo\s|(agregu|borr|elimin|cargu|guard|registr|actualic)[eé]\b|cre[eé]\s+la\b|lo hice|la hice)")]
     private static partial Regex PrimeraPersonaDeAccion();
 }

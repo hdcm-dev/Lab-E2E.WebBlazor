@@ -39,7 +39,7 @@ public sealed class AsistenteService(
             var p = Sinonimos.Aplicar(pregunta);
             var ruteo = Enrutador.Clasificar(p);
             var contexto = Plantillas.ContextoDe(rutaActual)?.Contexto;
-            respuesta = await ResponderAsync(p, ruteo, contexto, cancellationToken);
+            respuesta = await ResponderAsync(pregunta, p, ruteo, contexto, cancellationToken);
         }
 
         if (estado.Motivo != MotivoDeHabilitacion.Habilitada)
@@ -91,7 +91,7 @@ public sealed class AsistenteService(
         }
     }
 
-    private async Task<RespuestaDelAsistente> ResponderAsync(PreguntaNormalizada p, Ruteo ruteo, string? contexto, CancellationToken ct)
+    private async Task<RespuestaDelAsistente> ResponderAsync(string original, PreguntaNormalizada p, Ruteo ruteo, string? contexto, CancellationToken ct)
     {
         switch (ruteo.Intencion)
         {
@@ -106,7 +106,7 @@ public sealed class AsistenteService(
             case Intenciones.DerivacionPruebas:
                 return await AyudaAsync(p, ruteo, contexto, f => f.Anillo == Anillo.LoDeAlLado, [Destinos.LocalidadesLista], ct);
             case Intenciones.AltaDesdeFrase:
-                return await AltaDesdeFraseAsync(p, ct);
+                return await AltaDesdeFraseAsync(original, ct);
             case Intenciones.Baja:
                 return await BajaAsync(p, ct);
             case Intenciones.Glosario:
@@ -154,7 +154,7 @@ public sealed class AsistenteService(
         return Fija(Intenciones.Navegacion, Anillo.Operar, Forma.F4, ResultadoDelTurno.Ok, $"Abrí «{destino.Rotulo}» con el botón de abajo.") with { Destinos = [catalogo.Resolver(destino.Id)] };
     }
 
-    private async Task<RespuestaDelAsistente> AltaDesdeFraseAsync(PreguntaNormalizada p, CancellationToken ct)
+    private async Task<RespuestaDelAsistente> AltaDesdeFraseAsync(string frase, CancellationToken ct)
     {
         var intencion = Intenciones.AltaDesdeFrase;
         if (estado.Motivo != MotivoDeHabilitacion.Habilitada)
@@ -163,7 +163,8 @@ public sealed class AsistenteService(
                 "Leer los datos de una frase necesita la ayuda con IA, que está apagada. Abrí el alta y completá los datos en el formulario.") with { Destinos = [catalogo.Resolver(Destinos.LocalidadesAlta)] };
         }
 
-        var resultado = await extractor.ExtraerAsync(p.Texto, ct);
+        // Al extractor viaja sólo la frase, tal como la escribió la persona (C-13).
+        var resultado = await extractor.ExtraerAsync(frase, ct);
         if (resultado.Tipo != TipoDeResultado.Ok || resultado.Valor is null)
         {
             var texto = resultado.Tipo == TipoDeResultado.Degradado
@@ -570,8 +571,8 @@ public sealed class AsistenteService(
         return redactado.Tipo switch
         {
             TipoDeResultado.Ok => basica with { Texto = redactado.Valor!, RedactadaConIa = true, Citas = citas.Count > 0 ? citas : basica.Citas },
-            TipoDeResultado.Rechazado => basica with { Resultado = ResultadoDelTurno.Rechazado },
-            _ => basica with { Resultado = ResultadoDelTurno.Degradado, Aviso = redactado.Motivo == "ocupado" ? Plantillas.Ocupado : null }
+            TipoDeResultado.Rechazado => basica with { Resultado = ResultadoDelTurno.Rechazado, MotivoDelResultado = redactado.Motivo },
+            _ => basica with { Resultado = ResultadoDelTurno.Degradado, MotivoDelResultado = redactado.Motivo, Aviso = redactado.Motivo == "ocupado" ? Plantillas.Ocupado : null }
         };
     }
 

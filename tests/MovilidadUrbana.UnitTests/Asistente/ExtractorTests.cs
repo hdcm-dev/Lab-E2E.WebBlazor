@@ -54,6 +54,7 @@ public class ExtractorTests
             Assert.That(r.Destinos.Single().Href, Is.EqualTo("localidades?alta=1&nombre=Goya&provincia=Corrientes&cp=3450&habitantes=90000&propuesta=ia"));
             Assert.That(r.Texto, Does.Not.Contain("agregué").And.Not.Contain("la agregué"));
             Assert.That(localidades.Select(l => l.Nombre), Has.No.Member("Goya"), "el asistente no escribe");
+            Assert.That(modelo.Pedidos.Single().Mensajes.Last().Text, Is.EqualTo("Agregá Goya, Corrientes, código postal 3450, 90000 habitantes"), "al extractor viaja sólo la frase, tal cual");
         });
     }
 

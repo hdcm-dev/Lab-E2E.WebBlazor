@@ -84,6 +84,7 @@ public sealed partial class ExtractorDeLocalidad(IChatClient cliente, LimitadorD
             var crudo = h.ValueKind switch
             {
                 JsonValueKind.Number when h.TryGetInt64(out var n) => n.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                JsonValueKind.Number when h.TryGetDouble(out var d) && d == Math.Floor(d) => ((long)d).ToString(System.Globalization.CultureInfo.InvariantCulture),
                 JsonValueKind.String => new string((h.GetString() ?? string.Empty).Where(char.IsAsciiDigit).ToArray()),
                 _ => null
             };
