@@ -93,6 +93,19 @@ public class AsistenteTests : E2ETestBase
     }
 
     [Test]
+    [Description("Una pregunta compuesta (concepto y acción) se responde entera y el chip abre el alta (marco §4, Q18)")]
+    public async Task Compuesta_ConceptoYAccion_ChipAbreElAlta()
+    {
+        await IrAAsync("/");
+        await PreguntarAsync("¿Qué es una localidad y dónde la cargo?");
+
+        await Expect(Ultima.GetByTestId("respuesta-texto")).ToContainTextAsync("Localidad:");
+        await Expect(Ultima.GetByTestId("respuesta-texto")).ToContainTextAsync("Guardar");
+        await Ultima.GetByTestId("chip-destino").Filter(new() { HasText = "alta" }).First.ClickAsync();
+        await Expect(Page.GetByTestId("titulo-formulario")).ToHaveTextAsync("Alta de localidad");
+    }
+
+    [Test]
     [Description("Resultados sin encuestas: estado vacío con el chip para empezar una")]
     public async Task Resultados_SinEncuestas()
     {

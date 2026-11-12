@@ -29,6 +29,7 @@
     <None Include="bateria.v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="bateria.v2.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="bateria.v3.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="bateria.v4.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="pares-a-ciegas.v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="pares-a-ciegas.v2.json" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="NUnit.Framework" />

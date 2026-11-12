@@ -1,0 +1,103 @@
+{
+  "k": [
+    51,
+    51,
+    51
+  ],
+  "m": 52,
+  "minimo": 51,
+  "umbral": 49,
+  "inventados": 0,
+  "inestables": [
+    "B46"
+  ],
+  "peoresACiegas": 0,
+  "paresJuzgados": [
+    16,
+    16,
+    15
+  ],
+  "compuerta": "EJERCIDA",
+  "validador": [
+    {
+      "intentos": 17,
+      "rechazos": 3,
+      "tasaDeRechazo": 0.176,
+      "soloCitas": 8,
+      "porMotivo": {
+        "eco de una instrucción": 1,
+        "cifra sin la nota de la sesión": 1,
+        "cifra sin origen": 1
+      }
+    },
+    {
+      "intentos": 17,
+      "rechazos": 3,
+      "tasaDeRechazo": 0.176,
+      "soloCitas": 8,
+      "porMotivo": {
+        "eco de una instrucción": 1,
+        "cifra sin la nota de la sesión": 1,
+        "cifra sin origen": 1
+      }
+    },
+    {
+      "intentos": 17,
+      "rechazos": 3,
+      "tasaDeRechazo": 0.176,
+      "soloCitas": 9,
+      "porMotivo": {
+        "cifra sin origen": 1,
+        "cifra sin la nota de la sesión": 1,
+        "oración sin cita": 1
+      }
+    }
+  ],
+  "distintasDeLaPlantilla": [],
+  "comparadasConLaPlantilla": [
+    null,
+    null,
+    null
+  ],
+  "peoresDeControl": [
+    8,
+    8,
+    8
+  ],
+  "peoresDetectadosPorReglas": [
+    8,
+    8,
+    8
+  ],
+  "peoresDetectadosPorElJuez": [
+    4,
+    5,
+    4
+  ],
+  "juezDetectaTodos": false,
+  "redaccion": "habilitada",
+  "variacion": [
+    {
+      "corrida": "1",
+      "semilla": "7",
+      "temperatura": "0"
+    },
+    {
+      "corrida": "2",
+      "semilla": "11",
+      "temperatura": "0.5"
+    },
+    {
+      "corrida": "3",
+      "semilla": "23",
+      "temperatura": "0.5"
+    }
+  ],
+  "conIa": [
+    "B12",
+    "B38",
+    "B46"
+  ],
+  "identicosEntreCorridas": [],
+  "cumple": true
+}

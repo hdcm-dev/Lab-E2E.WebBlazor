@@ -1,0 +1,10 @@
+An issue was encountered verifying workloads. For more information, run "dotnet workload update".
+  Determining projects to restore...
+  Restored /trabajo/tests/MovilidadUrbana.ApiWeb.Tests/MovilidadUrbana.ApiWeb.Tests.csproj (in 10.07 sec).
+  Restored /trabajo/src/MovilidadUrbana.ApiWeb/MovilidadUrbana.ApiWeb.csproj (in 10.07 sec).
+  MovilidadUrbana.ApiWeb -> /trabajo/src/MovilidadUrbana.ApiWeb/bin/Debug/net10.0/MovilidadUrbana.ApiWeb.dll
+  MovilidadUrbana.ApiWeb.Tests -> /trabajo/tests/MovilidadUrbana.ApiWeb.Tests/bin/Debug/net10.0/MovilidadUrbana.ApiWeb.Tests.dll
+Test run for /trabajo/tests/MovilidadUrbana.ApiWeb.Tests/bin/Debug/net10.0/MovilidadUrbana.ApiWeb.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    13, Skipped:     0, Total:    13, Duration: 46 s - MovilidadUrbana.ApiWeb.Tests.dll (net10.0)

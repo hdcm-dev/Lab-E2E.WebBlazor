@@ -1,0 +1,86 @@
+{
+  "k": [
+    49,
+    49,
+    49
+  ],
+  "m": 52,
+  "minimo": 49,
+  "umbral": 49,
+  "inventados": 0,
+  "inestables": [
+    "B03",
+    "B04",
+    "B36"
+  ],
+  "peoresACiegas": 0,
+  "paresJuzgados": [
+    13,
+    13,
+    13
+  ],
+  "compuerta": "EJERCIDA",
+  "validador": [
+    {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "porMotivo": {}
+    },
+    {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "porMotivo": {}
+    },
+    {
+      "intentos": 0,
+      "rechazos": 0,
+      "soloCitas": 0,
+      "porMotivo": {}
+    }
+  ],
+  "distintasDeLaPlantilla": [],
+  "comparadasConLaPlantilla": [
+    null,
+    null,
+    null
+  ],
+  "peoresDeControl": [
+    8,
+    8,
+    8
+  ],
+  "peoresDetectadosPorReglas": [
+    8,
+    8,
+    8
+  ],
+  "peoresDetectadosPorElJuez": [
+    8,
+    8,
+    8
+  ],
+  "juezDetectaTodos": true,
+  "redaccion": "apagada",
+  "variacion": [
+    {
+      "corrida": "1",
+      "semilla": "7",
+      "temperatura": "0"
+    },
+    {
+      "corrida": "2",
+      "semilla": "11",
+      "temperatura": "0.5"
+    },
+    {
+      "corrida": "3",
+      "semilla": "23",
+      "temperatura": "0.5"
+    }
+  ],
+  "conIa": [],
+  "identicosEntreCorridas": [],
+  "cumple": true
+}

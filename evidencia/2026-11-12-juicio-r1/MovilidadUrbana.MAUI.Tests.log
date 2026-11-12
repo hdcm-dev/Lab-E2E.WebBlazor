@@ -1,0 +1,7 @@
+  Determining projects to restore...
+  Restored /trabajo/tests/MovilidadUrbana.MAUI.Tests/MovilidadUrbana.MAUI.Tests.csproj (in 4.98 sec).
+  MovilidadUrbana.MAUI.Tests -> /trabajo/tests/MovilidadUrbana.MAUI.Tests/bin/Debug/net10.0/MovilidadUrbana.MAUI.Tests.dll
+Test run for /trabajo/tests/MovilidadUrbana.MAUI.Tests/bin/Debug/net10.0/MovilidadUrbana.MAUI.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    18, Skipped:     0, Total:    18, Duration: 1 m 59 s - MovilidadUrbana.MAUI.Tests.dll (net10.0)

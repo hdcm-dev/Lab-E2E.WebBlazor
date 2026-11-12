@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Batería del asistente (bateria.v3 por defecto; BATERIA_ARCHIVO=bateria.v2.json para la anterior), tres
+# Batería del asistente (bateria.v4 por defecto; BATERIA_ARCHIVO=bateria.v3.json para la anterior), tres
 # corridas (K3 §2, R2.5): mínimo de las tres ≥ el de la versión (43/46; 40/43 en v2), cero cifras
 # inventadas o atribuidas a otra categoría y, a ciegas, ninguna redactada peor que la fija. El modelo llega por el entorno y nunca se escribe en el repositorio:
 #

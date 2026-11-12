@@ -23,7 +23,7 @@ using MovilidadUrbana.Web.Infrastructure.Sessions;
 namespace MovilidadUrbana.Asistente.Bateria;
 
 /// <summary>
-/// Una corrida de la batería (bateria.v3 por omisión; K3 §2, K7 §9), con la composición de
+/// Una corrida de la batería (bateria.v4 por omisión; K3 §2, K7 §9), con la composición de
 /// producción y el modelo que diga el entorno (OLLAMA_*). Cada caso se evalúa con oráculos
 /// cerrados (forma, destino, textos, cifras no inventadas) y la corrida deja un registro
 /// recalculable: una línea JSON por caso y un resumen con k/M, latencias y el hash de la batería.
@@ -62,7 +62,7 @@ public class BateriaTests
     [Test]
     public async Task Corrida()
     {
-        var ruta = Path.Combine(TestContext.CurrentContext.TestDirectory, Environment.GetEnvironmentVariable("BATERIA_ARCHIVO") ?? "bateria.v3.json");
+        var ruta = Path.Combine(TestContext.CurrentContext.TestDirectory, Environment.GetEnvironmentVariable("BATERIA_ARCHIVO") ?? "bateria.v4.json");
         var crudo = await File.ReadAllBytesAsync(ruta);
         var hash = Convert.ToHexString(SHA256.HashData(crudo))[..16].ToLowerInvariant();
         var bateria = JsonSerializer.Deserialize<Archivo>(crudo, Json)!;

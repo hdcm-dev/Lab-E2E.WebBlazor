@@ -9,6 +9,18 @@ determinada. La documentación de estudio vive en
 [`Lab-E2E.WebBlazor.Documentacion`](https://github.com/hdcm-dev/Lab-E2E.WebBlazor.Documentacion) y
 tiene su propio registro.
 
+## [Sin publicar] - 2026-11-12
+
+### Corregido
+
+- **Asistente: la localidad nombrada recorta las cifras, se aclara sólo si cambia la respuesta y las
+  preguntas compuestas se responden enteras** (expediente [0001 §9](docs/expedientes/0001-Asistente-Integral.md)).
+  Antes, en «¿cuántos viajan en colectivo en Corrientes?» se descartaba la localidad. Las distribuciones y
+  los promedios se recortan a la localidad o la provincia nombrada; dos localidades se desglosan y no se
+  suman. Una homónima de localidad y provincia se aclara sólo si las dos lecturas dan cifras distintas; si no,
+  se dice el supuesto. `SeparadorDePreguntas` parte «qué es X y dónde lo cargo» y el turno responde las dos
+  partes. Batería `bateria.v4` (52 casos).
+
 ## [Sin publicar] - 2026-11-11
 
 ### Agregado
