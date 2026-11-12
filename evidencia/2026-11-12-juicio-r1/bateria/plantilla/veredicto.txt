@@ -1,0 +1,8 @@
+bateria.v4 (plantilla): k = [49, 49, 49] / 52; mínimo 49 (umbral 49); inventados 0; redactadas con IA [0, 0, 0]; p50 [9, 9, 6] ms; p95 [148, 141, 98] ms
+variación [{'corrida': '1', 'semilla': '7', 'temperatura': '0'}, {'corrida': '2', 'semilla': '11', 'temperatura': '0.5'}, {'corrida': '3', 'semilla': '23', 'temperatura': '0.5'}]; a ciegas, redactada peor que la fija: 0; casos con IA idénticos en todas las corridas: 0 de 0
+redacción apagada; compuerta a ciegas: juez reglas deterministas declaradas (R1–R10); pares juzgados [13, 13, 13] (control [13, 13, 13], aciertos del juez [13, 13, 13], redactadas juzgadas [0, 0, 0])
+veredicto por reglas: peores de control detectados [8, 8, 8] de [8, 8, 8]; juez reglas deterministas declaradas (R1–R10): [8, 8, 8] de [8, 8, 8] (detecta todos)
+validador: rechazos [0, 0, 0] de [0, 0, 0] intentos; tasa [None, None, None]; sólo citas [0, 0, 0]; motivos [{}, {}, {}]
+casos con alguna falla: B03, B04, B36
+VEREDICTO: CUMPLE
+salida 0

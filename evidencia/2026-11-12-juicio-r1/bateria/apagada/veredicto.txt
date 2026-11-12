@@ -1,0 +1,9 @@
+bateria.v4 (modelo): k = [52, 52, 52] / 52; mínimo 52 (umbral 49); inventados 0; redactadas con IA [0, 0, 0]; p50 [10, 6, 7] ms; p95 [355, 178, 1116] ms
+variación [{'corrida': '1', 'semilla': '7', 'temperatura': '0'}, {'corrida': '2', 'semilla': '11', 'temperatura': '0.5'}, {'corrida': '3', 'semilla': '23', 'temperatura': '0.5'}]; a ciegas, redactada peor que la fija: 0; casos con IA idénticos en todas las corridas: 0 de 0
+redacción apagada; compuerta a ciegas: juez modelo distinto del redactor (BATERIA_JUEZ_MODELO); pares juzgados [13, 13, 13] (control [13, 13, 13], aciertos del juez [9, 9, 8], redactadas juzgadas [0, 0, 0])
+veredicto por reglas: peores de control detectados [8, 8, 8] de [8, 8, 8]; juez modelo distinto del redactor (BATERIA_JUEZ_MODELO): [4, 5, 4] de [8, 8, 8] (NO detecta todos: la bandera no se prende (ADR 0008))
+validador: rechazos [0, 0, 0] de [0, 0, 0] intentos; tasa [None, None, None]; sólo citas [0, 0, 0]; motivos [{}, {}, {}]
+con la redacción apagada, comparadas respuesta por respuesta con la plantilla [50, 50, 50]; diferencias de redacción: 0
+casos con alguna falla: ninguno
+VEREDICTO: CUMPLE
+salida 0

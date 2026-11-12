@@ -16,9 +16,21 @@ public sealed class ResultadosDeEncuestaService(IEncuestaRepository repository)
     public async Task<int> ContarAsync(CancellationToken cancellationToken = default) =>
         await repository.CountAsync(cancellationToken);
 
-    public async Task<Distribucion> MediosAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Las respuestas de la sesión, recortadas a las localidades pedidas si las hay. El recorte es
+    /// por nombre de localidad, que es lo que guarda la encuesta.
+    /// </summary>
+    private async Task<IReadOnlyList<RespuestaDeEncuesta>> RespuestasAsync(IReadOnlyCollection<string>? localidades, CancellationToken cancellationToken)
     {
         var respuestas = await repository.GetAllAsync(cancellationToken);
+        return localidades is null ? respuestas : respuestas.Where(r => localidades.Contains(r.Localidad)).ToList();
+    }
+
+    public async Task<Distribucion> MediosAsync(CancellationToken cancellationToken = default) => await MediosAsync(null, cancellationToken);
+
+    public async Task<Distribucion> MediosAsync(IReadOnlyCollection<string>? localidades, CancellationToken cancellationToken = default)
+    {
+        var respuestas = await RespuestasAsync(localidades, cancellationToken);
         var filas = Catalogos.Medios
             .Select(m => new FilaDeDistribucion(m.Clave, m.Etiqueta, respuestas.Count(r => r.Medios.Contains(m.Clave))))
             .OrderByDescending(f => f.Cantidad).ThenBy(f => f.Etiqueta, StringComparer.Ordinal)
@@ -27,21 +39,27 @@ public sealed class ResultadosDeEncuestaService(IEncuestaRepository repository)
             $"{NotaDeSesion}, n = {respuestas.Count} respuestas; una persona puede marcar varios medios, así que los porcentajes no suman 100 %.");
     }
 
-    public async Task<Distribucion> MotivosAsync(CancellationToken cancellationToken = default)
+    public async Task<Distribucion> MotivosAsync(CancellationToken cancellationToken = default) => await MotivosAsync(null, cancellationToken);
+
+    public async Task<Distribucion> MotivosAsync(IReadOnlyCollection<string>? localidades, CancellationToken cancellationToken = default)
     {
-        var respuestas = await repository.GetAllAsync(cancellationToken);
+        var respuestas = await RespuestasAsync(localidades, cancellationToken);
         return Unica("motivos", respuestas, Catalogos.Motivos, r => r.Motivo);
     }
 
-    public async Task<Distribucion> FrecuenciasAsync(CancellationToken cancellationToken = default)
+    public async Task<Distribucion> FrecuenciasAsync(CancellationToken cancellationToken = default) => await FrecuenciasAsync(null, cancellationToken);
+
+    public async Task<Distribucion> FrecuenciasAsync(IReadOnlyCollection<string>? localidades, CancellationToken cancellationToken = default)
     {
-        var respuestas = await repository.GetAllAsync(cancellationToken);
+        var respuestas = await RespuestasAsync(localidades, cancellationToken);
         return Unica("frecuencias", respuestas, Catalogos.Frecuencias, r => r.Frecuencia);
     }
 
-    public async Task<Promedios> PromediosAsync(AgrupacionDePromedios por, CancellationToken cancellationToken = default)
+    public async Task<Promedios> PromediosAsync(AgrupacionDePromedios por, CancellationToken cancellationToken = default) => await PromediosAsync(por, null, cancellationToken);
+
+    public async Task<Promedios> PromediosAsync(AgrupacionDePromedios por, IReadOnlyCollection<string>? localidades, CancellationToken cancellationToken = default)
     {
-        var respuestas = await repository.GetAllAsync(cancellationToken);
+        var respuestas = await RespuestasAsync(localidades, cancellationToken);
         IEnumerable<(string Grupo, string Etiqueta, IReadOnlyList<RespuestaDeEncuesta> Items)> grupos = por switch
         {
             AgrupacionDePromedios.Medio => Catalogos.Medios

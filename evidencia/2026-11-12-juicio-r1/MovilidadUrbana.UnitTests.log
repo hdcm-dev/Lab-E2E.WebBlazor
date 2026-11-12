@@ -1,0 +1,8 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  MovilidadUrbana.Web -> /trabajo/src/MovilidadUrbana.Web/bin/Debug/net10.0/MovilidadUrbana.Web.dll
+  MovilidadUrbana.UnitTests -> /trabajo/tests/MovilidadUrbana.UnitTests/bin/Debug/net10.0/MovilidadUrbana.UnitTests.dll
+Test run for /trabajo/tests/MovilidadUrbana.UnitTests/bin/Debug/net10.0/MovilidadUrbana.UnitTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   443, Skipped:     0, Total:   443, Duration: 29 s - MovilidadUrbana.UnitTests.dll (net10.0)

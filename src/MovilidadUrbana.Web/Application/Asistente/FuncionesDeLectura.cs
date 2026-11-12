@@ -34,20 +34,20 @@ public sealed class FuncionesDeLectura(LocalidadService localidades, ResultadosD
         resultados.ContarAsync(cancellationToken);
 
     [FuncionDeSoloLectura("distribucion_medios")]
-    public Task<Distribucion> DistribucionMediosAsync(CancellationToken cancellationToken = default) =>
-        resultados.MediosAsync(cancellationToken);
+    public Task<Distribucion> DistribucionMediosAsync(IReadOnlyCollection<string>? localidades = null, CancellationToken cancellationToken = default) =>
+        resultados.MediosAsync(localidades, cancellationToken);
 
     [FuncionDeSoloLectura("distribucion_motivos")]
-    public Task<Distribucion> DistribucionMotivosAsync(CancellationToken cancellationToken = default) =>
-        resultados.MotivosAsync(cancellationToken);
+    public Task<Distribucion> DistribucionMotivosAsync(IReadOnlyCollection<string>? localidades = null, CancellationToken cancellationToken = default) =>
+        resultados.MotivosAsync(localidades, cancellationToken);
 
     [FuncionDeSoloLectura("distribucion_frecuencias")]
-    public Task<Distribucion> DistribucionFrecuenciasAsync(CancellationToken cancellationToken = default) =>
-        resultados.FrecuenciasAsync(cancellationToken);
+    public Task<Distribucion> DistribucionFrecuenciasAsync(IReadOnlyCollection<string>? localidades = null, CancellationToken cancellationToken = default) =>
+        resultados.FrecuenciasAsync(localidades, cancellationToken);
 
     [FuncionDeSoloLectura("promedios_viaje")]
-    public Task<Promedios> PromediosViajeAsync(AgrupacionDePromedios por, CancellationToken cancellationToken = default) =>
-        resultados.PromediosAsync(por, cancellationToken);
+    public Task<Promedios> PromediosViajeAsync(AgrupacionDePromedios por, IReadOnlyCollection<string>? localidades = null, CancellationToken cancellationToken = default) =>
+        resultados.PromediosAsync(por, localidades, cancellationToken);
 
     [FuncionDeSoloLectura("encuestas_por_localidad")]
     public Task<Promedios> EncuestasPorLocalidadAsync(CancellationToken cancellationToken = default) =>

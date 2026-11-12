@@ -1,0 +1,406 @@
+An issue was encountered verifying workloads. For more information, run "dotnet workload update".
+Test run for /trabajo/tests/MovilidadUrbana.UnitTests/bin/Debug/net10.0/MovilidadUrbana.UnitTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+  Failed Compuesta_ConceptoYAccion [4 s]
+  Error Message:
+     Assert.That(r.Partes, Has.Count.EqualTo(2))
+  Expected: property Count equal to 2
+  But was:  0
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_ConceptoYAccion() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 123
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass9_0.<Compuesta_ConceptoYAccion>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 125
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_ConceptoYAccion() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 123
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_ConceptoYAccion()
+
+
+  Failed Compuesta_DosCategorias [443 ms]
+  Error Message:
+     Assert.That(r.Texto, Does.Contain("Moto: 1").And.Contain("Tren: 2"))
+  Expected: String containing "Moto: 1" and containing "Tren: 2"
+  But was:  "Tren: 2 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_DosCategorias() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 137
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_DosCategorias() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 137
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_DosCategorias()
+
+
+  Failed Compuesta_GlosarioYCifra [358 ms]
+  Error Message:
+   Multiple failures or warnings in test:
+  1)   Assert.That(r.Partes, Is.EqualTo(new[] { Intenciones.Glosario, Intenciones.Frecuencias }))
+  Expected is <System.String[2]>, actual is <System.String[0]>
+  Values differ at index [0]
+  Missing:  < "glosario", "distribucion_frecuencias" >
+  2)   Assert.That(r.Texto, Does.Contain("Frecuencia:").And.Contain("11 de 20"))
+  Expected: String containing "Frecuencia:" and String containing "11 de 20"
+  But was:  "Frecuencia: Con qué asiduidad usás esos medios: todos los días, algunos días por semana u ocasionalmente. [1]"
+
+  3)   Assert.That(r.Distribucion, Is.Not.Null)
+  Expected: not null
+  But was:  null
+
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_GlosarioYCifra() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 144
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass11_0.<Compuesta_GlosarioYCifra>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 146
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_GlosarioYCifra() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 144
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_GlosarioYCifra()
+
+2)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass11_0.<Compuesta_GlosarioYCifra>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 147
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_GlosarioYCifra() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 144
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_GlosarioYCifra()
+
+3)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass11_0.<Compuesta_GlosarioYCifra>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 148
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_GlosarioYCifra() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 144
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_GlosarioYCifra()
+
+
+  Failed Compuesta_UnaParteAfuera [448 ms]
+  Error Message:
+   Multiple failures or warnings in test:
+  1)   Assert.That(r.Texto, Does.Contain("Bicicleta: 5 de 20"))
+  Expected: String containing "Bicicleta: 5 de 20"
+  But was:  "No tengo información del clima. Acá te ayudo con las localidades, la encuesta y sus resultados."
+
+  2)   Assert.That(r.Partes, Does.Contain(Intenciones.Afuera))
+  Expected: some item equal to "afuera"
+  But was:  <empty>
+
+  3)   Assert.That(r.Resultado, Is.EqualTo(ResultadoDelTurno.Ok))
+  Expected: Ok
+  But was:  Afuera
+
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_UnaParteAfuera() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 156
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass12_0.<Compuesta_UnaParteAfuera>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 158
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_UnaParteAfuera() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 156
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_UnaParteAfuera()
+
+2)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass12_0.<Compuesta_UnaParteAfuera>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 159
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_UnaParteAfuera() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 156
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_UnaParteAfuera()
+
+3)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass12_0.<Compuesta_UnaParteAfuera>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 160
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_UnaParteAfuera() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 156
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Compuesta_UnaParteAfuera()
+
+
+  Failed Distribucion_DosLocalidades_Desglose [95 ms]
+  Error Message:
+   Multiple failures or warnings in test:
+  1)   Assert.That(r.Texto, Does.Contain("la localidad Corrientes").And.Contain("3 de 12"))
+  Expected: String containing "la localidad Corrientes" and containing "3 de 12"
+  But was:  "«Bici» se entiende como bicicleta. Bicicleta: 5 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+  2)   Assert.That(r.Texto, Does.Contain("la localidad Resistencia").And.Contain("2 de 8"))
+  Expected: String containing "la localidad Resistencia" and containing "2 de 8"
+  But was:  "«Bici» se entiende como bicicleta. Bicicleta: 5 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+  3)   Assert.That(r.Texto, Does.Not.Contain("de 20"))
+  Expected: not String containing "de 20"
+  But was:  "«Bici» se entiende como bicicleta. Bicicleta: 5 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_DosLocalidades_Desglose() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 90
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass6_0.<Distribucion_DosLocalidades_Desglose>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 93
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_DosLocalidades_Desglose() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 90
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_DosLocalidades_Desglose()
+
+2)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass6_0.<Distribucion_DosLocalidades_Desglose>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 94
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_DosLocalidades_Desglose() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 90
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_DosLocalidades_Desglose()
+
+3)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass6_0.<Distribucion_DosLocalidades_Desglose>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 95
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_DosLocalidades_Desglose() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 90
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_DosLocalidades_Desglose()
+
+
+  Failed Distribucion_Homonima_CambiaLaRespuesta_Aclara [95 ms]
+  Error Message:
+   Multiple failures or warnings in test:
+  1)   Assert.That(r.Forma, Is.EqualTo(Forma.F3))
+  Expected: F3
+  But was:  F1
+
+  2)   Assert.That(r.Opciones.Select(o => o.Rotulo), Has.Some.Contain("La localidad Corrientes").And.Some.Contain("La provincia Corrientes"))
+  Expected: some item containing "La localidad Corrientes" and some item containing "La provincia Corrientes"
+  But was:  <empty>
+
+  3)   Assert.That(r.Opciones.Select(o => o.Pregunta), Has.Some.Contain("la localidad Corrientes").And.Some.Contain("la provincia Corrientes"))
+  Expected: some item containing "la localidad Corrientes" and some item containing "la provincia Corrientes"
+  But was:  <empty>
+
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_CambiaLaRespuesta_Aclara() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 65
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass4_0.<Distribucion_Homonima_CambiaLaRespuesta_Aclara>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 67
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_CambiaLaRespuesta_Aclara() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 65
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_CambiaLaRespuesta_Aclara()
+
+2)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass4_0.<Distribucion_Homonima_CambiaLaRespuesta_Aclara>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 68
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_CambiaLaRespuesta_Aclara() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 65
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_CambiaLaRespuesta_Aclara()
+
+3)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass4_0.<Distribucion_Homonima_CambiaLaRespuesta_Aclara>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 69
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_CambiaLaRespuesta_Aclara() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 65
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_CambiaLaRespuesta_Aclara()
+
+
+  Failed Distribucion_Homonima_MismaRespuesta_SinAclaracion [63 ms]
+  Error Message:
+   Multiple failures or warnings in test:
+  1)   Assert.That(r.Texto, Does.Contain("Colectivo: 12 de 12 encuestas"))
+  Expected: String containing "Colectivo: 12 de 12 encuestas"
+  But was:  "Colectivo: 12 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+  2)   dice el supuesto (T-7, R9)
+Assert.That(r.Texto, Does.Contain("da lo mismo"))
+  Expected: String containing "da lo mismo"
+  But was:  "Colectivo: 12 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_MismaRespuesta_SinAclaracion() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 46
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass3_0.<Distribucion_Homonima_MismaRespuesta_SinAclaracion>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 50
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_MismaRespuesta_SinAclaracion() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 46
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_MismaRespuesta_SinAclaracion()
+
+2)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass3_0.<Distribucion_Homonima_MismaRespuesta_SinAclaracion>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 51
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_MismaRespuesta_SinAclaracion() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 46
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_Homonima_MismaRespuesta_SinAclaracion()
+
+
+  Failed Distribucion_LocalidadNombrada_Recorta [72 ms]
+  Error Message:
+   Multiple failures or warnings in test:
+  1)   Assert.That(r.Texto, Does.Contain("Colectivo: 0 de 8 encuestas de tu sesión en la localidad Resistencia"))
+  Expected: String containing "Colectivo: 0 de 8 encuestas de tu sesión en la localidad Resistencia"
+  But was:  "Colectivo: 12 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+  2)   Assert.That(r.Texto, Does.Not.Contain("de 20"))
+  Expected: not String containing "de 20"
+  But was:  "Colectivo: 12 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+  3)   Assert.That(r.Distribucion!.Encuestas, Is.EqualTo(8))
+  Expected: 8
+  But was:  20
+
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_LocalidadNombrada_Recorta() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 32
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass2_0.<Distribucion_LocalidadNombrada_Recorta>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 36
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_LocalidadNombrada_Recorta() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 32
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_LocalidadNombrada_Recorta()
+
+2)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass2_0.<Distribucion_LocalidadNombrada_Recorta>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 37
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_LocalidadNombrada_Recorta() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 32
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_LocalidadNombrada_Recorta()
+
+3)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass2_0.<Distribucion_LocalidadNombrada_Recorta>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 38
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_LocalidadNombrada_Recorta() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 32
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_LocalidadNombrada_Recorta()
+
+
+  Failed Distribucion_ProvinciaForzada_SumaSusLocalidades [148 ms]
+  Error Message:
+     Assert.That(r.Texto, Does.Contain("Colectivo: 13 de 13 encuestas de tu sesión en la provincia Corrientes"))
+  Expected: String containing "Colectivo: 13 de 13 encuestas de tu sesión en la provincia Corrientes"
+  But was:  "Colectivo: 13 de 21 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas."
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_ProvinciaForzada_SumaSusLocalidades() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 83
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_ProvinciaForzada_SumaSusLocalidades() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 83
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Distribucion_ProvinciaForzada_SumaSusLocalidades()
+
+
+  Failed Promedios_LocalidadNombrada_Recorta [134 ms]
+  Error Message:
+   Multiple failures or warnings in test:
+  1)   Assert.That(r.Texto, Does.Contain("localidad Resistencia").And.Contain("sobre 8 respuestas"))
+  Expected: String containing "localidad Resistencia" and containing "sobre 8 respuestas"
+  But was:  "Las personas encuestadas tardan en promedio 41,5 minutos (mediana 41,5) y recorren 15,8 km por día (mediana 15,8), sobre 20 respuestas de tu sesión."
+
+  2)   Assert.That(r.Promedios!.Filas.Single().Encuestas, Is.EqualTo(8))
+  Expected: 8
+  But was:  20
+
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Promedios_LocalidadNombrada_Recorta() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 110
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Execution.SimpleWorkItem.<>c__DisplayClass3_0.<PerformWork>b__0()
+   at NUnit.Framework.Internal.ContextUtils.<>c__DisplayClass1_0`1.<DoIsolated>b__0(Object _)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass8_0.<Promedios_LocalidadNombrada_Recorta>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 112
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Promedios_LocalidadNombrada_Recorta() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 110
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Promedios_LocalidadNombrada_Recorta()
+
+2)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.<>c__DisplayClass8_0.<Promedios_LocalidadNombrada_Recorta>b__0() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 113
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Promedios_LocalidadNombrada_Recorta() in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 110
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Promedios_LocalidadNombrada_Recorta()
+
+
+  Failed Separador_ParteLasCompuestas("¿Qué es una localidad y dónde la cargo?",2) [1 ms]
+  Error Message:
+     Assert.That(SeparadorDePreguntas.Partir(pregunta), Has.Count.EqualTo(partes))
+  Expected: property Count equal to 2
+  But was:  1
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Separador_ParteLasCompuestas(String pregunta, Int32 partes) in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 174
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Separador_ParteLasCompuestas(String pregunta, Int32 partes) in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 174
+
+
+  Failed Separador_ParteLasCompuestas("¿Cuántos usan moto y cuántos el tren?",2) [1 ms]
+  Error Message:
+     Assert.That(SeparadorDePreguntas.Partir(pregunta), Has.Count.EqualTo(partes))
+  Expected: property Count equal to 2
+  But was:  1
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Separador_ParteLasCompuestas(String pregunta, Int32 partes) in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 174
+   at InvokeStub_JuicioR1Tests.Separador_ParteLasCompuestas(Object, Span`1)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Separador_ParteLasCompuestas(String pregunta, Int32 partes) in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 174
+   at InvokeStub_JuicioR1Tests.Separador_ParteLasCompuestas(Object, Span`1)
+
+
+  Failed Separador_ParteLasCompuestas("¿Qué es la frecuencia diaria? ¿Cuántos viajan todos los días?",2) [< 1 ms]
+  Error Message:
+     Assert.That(SeparadorDePreguntas.Partir(pregunta), Has.Count.EqualTo(partes))
+  Expected: property Count equal to 2
+  But was:  1
+
+  Stack Trace:
+     at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Separador_ParteLasCompuestas(String pregunta, Int32 partes) in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 174
+   at InvokeStub_JuicioR1Tests.Separador_ParteLasCompuestas(Object, Span`1)
+
+1)    at MovilidadUrbana.UnitTests.Asistente.JuicioR1Tests.Separador_ParteLasCompuestas(String pregunta, Int32 partes) in /trabajo/tests/MovilidadUrbana.UnitTests/Asistente/JuicioR1Tests.cs:line 174
+   at InvokeStub_JuicioR1Tests.Separador_ParteLasCompuestas(Object, Span`1)
+
+
+
+Failed!  - Failed:    13, Passed:     4, Skipped:     0, Total:    17, Duration: 6 s - MovilidadUrbana.UnitTests.dll (net10.0)

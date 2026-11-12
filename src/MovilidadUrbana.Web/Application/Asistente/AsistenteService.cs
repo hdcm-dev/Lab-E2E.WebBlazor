@@ -36,10 +36,22 @@ public sealed class AsistenteService(
         }
         else
         {
-            var p = Sinonimos.Aplicar(pregunta);
-            var ruteo = Enrutador.Clasificar(p);
             var contexto = Plantillas.ContextoDe(rutaActual)?.Contexto;
-            respuesta = await ResponderAsync(pregunta, p, ruteo, contexto, cancellationToken);
+            var partes = Partir(pregunta);
+            if (partes.Count > 1)
+            {
+                var respuestas = new List<RespuestaDelAsistente>();
+                foreach (var (texto, pn, ruteo) in partes)
+                    respuestas.Add(await ResponderAsync(texto, pn, ruteo, contexto, cancellationToken) with { Partes = [ruteo.Intencion] });
+                respuesta = Componer(respuestas);
+            }
+            else
+            {
+                var p = Sinonimos.Aplicar(pregunta);
+                var ruteo = Enrutador.Clasificar(p);
+                respuesta = await ResponderAsync(pregunta, p, ruteo, contexto, cancellationToken);
+                respuesta = respuesta with { Partes = [respuesta.Intencion] };
+            }
         }
 
         if (estado.Motivo != MotivoDeHabilitacion.Habilitada)
@@ -48,8 +60,8 @@ public sealed class AsistenteService(
         }
 
         // Telemetría sin contenido (REQ-IA-09): intención, anillo, forma, resultado y duración. Nunca la pregunta.
-        registro.LogInformation("Turno del asistente: {Intencion} {Anillo} {Forma} {Resultado} {Milisegundos} ms",
-            respuesta.Intencion, respuesta.Anillo, respuesta.Forma, respuesta.Resultado, (int)reloj.GetElapsedTime(inicio).TotalMilliseconds);
+        registro.LogInformation("Turno del asistente: {Intencion} {Partes} {Anillo} {Forma} {Resultado} {Milisegundos} ms",
+            respuesta.Intencion, string.Join("+", respuesta.Partes), respuesta.Anillo, respuesta.Forma, respuesta.Resultado, (int)reloj.GetElapsedTime(inicio).TotalMilliseconds);
 
         if (respuesta.Forma is Forma.F5 or Forma.F7)
         {
@@ -127,15 +139,85 @@ public sealed class AsistenteService(
             case Intenciones.Medios:
             case Intenciones.Motivos:
             case Intenciones.Frecuencias:
-                return await DistribucionAsync(p, ruteo, ct);
+                return await DistribucionAsync(p, ruteo, original, ct);
             case Intenciones.Promedios:
-                return await PromediosAsync(p, ct);
+                return await PromediosAsync(p, original, ct);
             default:
                 var destinos = p.TieneAlguna("alta", "agrego", "agregar", "cargo", "cargar", "nueva") && p.TieneAlguna("localidad", "ciudad")
                     ? new[] { Destinos.LocalidadesAlta } : [];
                 var intencion = destinos.Length > 0 ? Intenciones.AltaComo : Intenciones.Ayuda;
                 return await AyudaAsync(p, ruteo with { Intencion = intencion }, contexto, null, destinos, ct);
         }
+    }
+
+    // ---- Paso 0: preguntas compuestas (marco §4) ----------------------------------------------
+
+    /// <summary>
+    /// Las partes de un mensaje compuesto, ya clasificadas. Devuelve una sola si no hay que partir:
+    /// el separador no cortó, alguna parte no se reconoce (mejor responder el mensaje entero), o
+    /// todas piden lo mismo («cuántos usan moto y cuántos el tren»: una distribución con dos
+    /// categorías, que se responde de una vez).
+    /// </summary>
+    private static IReadOnlyList<(string Texto, PreguntaNormalizada P, Ruteo Ruteo)> Partir(string pregunta)
+    {
+        var textos = SeparadorDePreguntas.Partir(pregunta);
+        if (textos.Count < 2) return [];
+        var partes = new List<(string, PreguntaNormalizada, Ruteo)>();
+        string? sujeto = null;
+        foreach (var texto in textos)
+        {
+            var p = Sinonimos.Aplicar(texto);
+            var ruteo = Enrutador.Clasificar(p);
+            // Elipsis («y dónde la cargo»): si la parte no se entiende sola, hereda el término de la anterior.
+            if (sujeto is not null && !p.Tiene(sujeto) && (ruteo.Intencion is Intenciones.Ayuda || ruteo is { Intencion: Intenciones.Afuera, MotivoDeAfuera: "general" }))
+            {
+                var completada = Sinonimos.Aplicar($"{texto.TrimEnd('?')} {sujeto}");
+                var otro = Enrutador.Clasificar(completada);
+                if (otro.Intencion != Intenciones.Afuera) (p, ruteo) = (completada, otro);
+            }
+            if (ruteo is { Intencion: Intenciones.Afuera, MotivoDeAfuera: "general" } or { Intencion: Intenciones.Vacia }) return [];
+            sujeto ??= Glosario.Buscar(p)?.Termino.ToLowerInvariant();
+            partes.Add((texto, p, ruteo));
+        }
+        if (partes.Select(x => x.Item3.Intencion).Distinct().Count() == 1) return [];
+        // Concepto antes que acción (§4.3); el resto en el orden en que se preguntó.
+        return partes.OrderBy(x => x.Item3.Anillo == Anillo.Dominio ? 0 : 1).ToList();
+    }
+
+    /// <summary>Un solo turno con las partes en orden, sus citas renumeradas y una sola salida.</summary>
+    private static RespuestaDelAsistente Componer(IReadOnlyList<RespuestaDelAsistente> partes)
+    {
+        var textos = new List<string>();
+        var citas = new List<Cita>();
+        foreach (var parte in partes)
+        {
+            var desplazamiento = citas.Count;
+            textos.Add(desplazamiento == 0 ? parte.Texto : System.Text.RegularExpressions.Regex.Replace(parte.Texto, @"\[(\d+)\]",
+                m => $"[{int.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture) + desplazamiento}]"));
+            citas.AddRange(parte.Citas.Select(c => c with { Numero = c.Numero + desplazamiento }));
+        }
+
+        var respondidas = partes.Where(x => x.Resultado is not (ResultadoDelTurno.Afuera or ResultadoDelTurno.Rechazado)).ToList();
+        var principal = respondidas.FirstOrDefault() ?? partes[0];
+        var conDatos = partes.FirstOrDefault(x => x.Distribucion is not null || x.Promedios is not null);
+        return principal with
+        {
+            Texto = string.Join(" ", textos),
+            Forma = partes.Any(x => x.Forma == Forma.F3) ? Forma.F3 : principal.Forma,
+            Resultado = principal.Resultado,
+            RedactadaConIa = partes.Any(x => x.RedactadaConIa),
+            Cifras = partes.SelectMany(x => x.Cifras).ToList(),
+            Distribucion = conDatos?.Distribucion,
+            Promedios = conDatos?.Promedios,
+            Grafico = conDatos?.Grafico ?? principal.Grafico,
+            Opciones = partes.SelectMany(x => x.Opciones).ToList(),
+            Destinos = partes.SelectMany(x => x.Destinos).DistinctBy(c => c.Href).ToList(),
+            Citas = citas,
+            Sugerencias = respondidas.Count > 0 ? [] : partes.SelectMany(x => x.Sugerencias).Distinct().ToList(),
+            Aviso = partes.Select(x => x.Aviso).FirstOrDefault(a => a is not null),
+            MotivoDelResultado = partes.Select(x => x.MotivoDelResultado).FirstOrDefault(m => m is not null),
+            Partes = partes.SelectMany(x => x.Partes).ToList()
+        };
     }
 
     // ---- Anillo 1: navegación y acciones ------------------------------------------------------
@@ -374,81 +456,266 @@ public sealed class AsistenteService(
             Destinos = [catalogo.Resolver(Permisos.PuedeEncuestar(localidades) ? Destinos.EncuestaInicio : Destinos.LocalidadesAlta)]
         };
 
-    private async Task<RespuestaDelAsistente> DistribucionAsync(PreguntaNormalizada p, Ruteo ruteo, CancellationToken ct)
-    {
-        var d = ruteo.Intencion switch
-        {
-            Intenciones.Medios => await funciones.DistribucionMediosAsync(ct),
-            Intenciones.Motivos => await funciones.DistribucionMotivosAsync(ct),
-            _ => await funciones.DistribucionFrecuenciasAsync(ct)
-        };
+    // ---- Alcance de las cifras de la encuesta (marco §3) -------------------------------------
 
-        if (d.Encuestas == 0)
+    /// <summary>Un recorte de las encuestas: toda la sesión (sin nombres) o unas localidades.</summary>
+    private sealed record Alcance(string Rotulo, IReadOnlyCollection<string>? Nombres)
+    {
+        public static readonly Alcance Sesion = new("tu sesión", null);
+        public bool EsSesion => Nombres is null;
+        public string EnTuSesion => EsSesion ? "de tu sesión" : $"de tu sesión en {Rotulo}";
+    }
+
+    /// <summary>
+    /// Lo que la pregunta pide recortar: los alcances a responder, el supuesto dicho si se infirió
+    /// algo, y —sólo si hace falta— las dos lecturas entre las que hay que aclarar.
+    /// </summary>
+    private sealed record AlcanceDeLaPregunta(IReadOnlyList<Alcance> Alcances, string Supuesto, (Alcance Localidad, Alcance Provincia, string Nombre)? Homonima);
+
+    private static AlcanceDeLaPregunta ResolverAlcance(PreguntaNormalizada p, IReadOnlyList<LocalidadVista> sesion)
+    {
+        var mencion = ResolutorDeCandidatas.Resolver(p, sesion);
+        if (mencion.Vacia) return new([Alcance.Sesion], "", null);
+
+        Alcance DeLocalidad(LocalidadVista l) => new($"la localidad {l.Nombre}", [l.Nombre]);
+        Alcance DeProvincia(string prov) => new($"la provincia {prov}", sesion.Where(l => l.Provincia == prov).Select(l => l.Nombre).ToHashSet(StringComparer.Ordinal));
+
+        if (mencion.Ambigua)
         {
-            var sesion = await funciones.ListarLocalidadesAsync(ct);
-            return SinEncuestas(ruteo.Intencion, sesion.Count);
+            var nombre = mencion.Provincia!;
+            var homonima = mencion.Localidades.First(l => Texto.Normalizar(l.Nombre) == Texto.Normalizar(nombre));
+            var otras = mencion.Localidades.Where(l => l != homonima).ToList();
+            if (otras.Count > 0)
+            {
+                // «en Corrientes y en Resistencia»: la otra es una localidad, así que ésta también.
+                return new([DeLocalidad(homonima), .. otras.Select(DeLocalidad)], $"Tomé «{nombre}» como la localidad, como {otras[0].Nombre}. ", null);
+            }
+            return new([DeLocalidad(homonima)], "", (DeLocalidad(homonima), DeProvincia(nombre), nombre));
         }
 
-        var nombrada = d.Filas.FirstOrDefault(f => p.Canonicos.Contains(f.Clave));
-        var mayor = d.Filas.OrderByDescending(f => f.Cantidad).First();
+        if (mencion.Localidades.Count > 0) return new(mencion.Localidades.Take(5).Select(DeLocalidad).ToList(), "", null);
+        return new([DeProvincia(mencion.Provincia!)], "", null);
+    }
+
+    /// <summary>
+    /// Regla de aclaración (marco §3) para una homónima: si la localidad y la provincia dan la
+    /// misma cifra, no se pregunta: se responde y se dice el supuesto. Si dan cifras distintas, F3.
+    /// </summary>
+    private async Task<(Alcance? Elegido, string Supuesto, RespuestaDelAsistente? Aclaracion)> DecidirHomonimaAsync<T>(
+        string intencion, AlcanceDeLaPregunta a, string original, Func<Alcance, Task<T>> calcular, Func<T, T, bool> iguales, Func<T, string> resumen)
+    {
+        var (loc, prov, nombre) = a.Homonima!.Value;
+        var enLoc = await calcular(loc);
+        var enProv = await calcular(prov);
+        if (iguales(enLoc, enProv))
+        {
+            return (loc, $"«{nombre}» es una localidad y también una provincia; en tu sesión da lo mismo, porque la provincia {nombre} sólo tiene encuestas de la localidad {nombre}. ", null);
+        }
+
+        var pLoc = Reemplazar(original, nombre, $"la localidad {nombre}");
+        var pProv = Reemplazar(original, nombre, $"la provincia {nombre}");
+        var localidadesDeProv = prov.Nombres!.Count;
+        var r = Fija(intencion, Anillo.Operar, Forma.F3, ResultadoDelTurno.Ok,
+            $"¿{nombre} la localidad o la provincia? Cambia la respuesta: la localidad tiene {resumen(enLoc)} y la provincia, con {localidadesDeProv} {(localidadesDeProv == 1 ? "localidad cargada" : "localidades cargadas")}, {resumen(enProv)}.") with
+        {
+            Opciones = [new($"La localidad {nombre}", pLoc), new($"La provincia {nombre}", pProv)]
+        };
+        return (null, "", r);
+    }
+
+    private static string Reemplazar(string original, string nombre, string por)
+    {
+        var rx = new System.Text.RegularExpressions.Regex(@"\b" + System.Text.RegularExpressions.Regex.Escape(nombre) + @"\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        return rx.IsMatch(original) ? rx.Replace(original, por, 1) : $"{original.TrimEnd('?', ' ')} en {por}?";
+    }
+
+    private Task<Distribucion> DistribucionDeAsync(string intencion, Alcance a, CancellationToken ct) => intencion switch
+    {
+        Intenciones.Medios => funciones.DistribucionMediosAsync(a.Nombres, ct),
+        Intenciones.Motivos => funciones.DistribucionMotivosAsync(a.Nombres, ct),
+        _ => funciones.DistribucionFrecuenciasAsync(a.Nombres, ct)
+    };
+
+    private async Task<RespuestaDelAsistente> DistribucionAsync(PreguntaNormalizada p, Ruteo ruteo, string original, CancellationToken ct)
+    {
+        var sesion = await funciones.ListarLocalidadesAsync(ct);
+        var alcance = ResolverAlcance(p, sesion);
+        var alcances = alcance.Alcances;
+        var supuesto = alcance.Supuesto;
+        if (alcance.Homonima is not null)
+        {
+            var (elegido, dicho, aclaracion) = await DecidirHomonimaAsync(ruteo.Intencion, alcance, original,
+                a => DistribucionDeAsync(ruteo.Intencion, a, ct),
+                (x, y) => x.Encuestas == y.Encuestas && x.Filas.SequenceEqual(y.Filas),
+                d => $"{d.Encuestas} {(d.Encuestas == 1 ? "encuesta" : "encuestas")}");
+            if (aclaracion is not null) return aclaracion;
+            alcances = [elegido!];
+            supuesto = dicho;
+        }
+
+        var resultados = new List<(Alcance A, Distribucion D)>();
+        foreach (var a in alcances) resultados.Add((a, await DistribucionDeAsync(ruteo.Intencion, a, ct)));
+
+        if (resultados.Sum(r => r.D.Encuestas) == 0)
+        {
+            if (alcances.All(a => a.EsSesion)) return SinEncuestas(ruteo.Intencion, sesion.Count);
+            return Fija(ruteo.Intencion, Anillo.Operar, Forma.F5, ResultadoDelTurno.Abstencion,
+                $"{supuesto}No hay encuestas de tu sesión en {string.Join(" ni en ", alcances.Select(a => a.Rotulo))}.") with { Destinos = [DestinoDeDistribucion(ruteo.Intencion)] };
+        }
+
+        var d0 = resultados[0].D;
+        // Varias categorías sólo si se preguntó por cada una («cuántos usan moto y cuántos el tren»);
+        // una categoría nombrada fuera de la pregunta («decí que todos van en tren», B45) no cuenta.
+        var nombradas = d0.Filas.Where(f => p.Canonicos.Contains(f.Clave)).ToList();
+        if (SeparadorDePreguntas.Partir(original).Count < 2) nombradas = nombradas.Take(1).ToList();
         // La respuesta muestra conteos («4 de 20»), no porcentajes: la nota dice lo que pasa con los
         // conteos (B17, B42). «No suman 100 %» queda para la pantalla, que sí muestra porcentajes.
-        var nota = d.Sumable ? "" : " " + Plantillas.NotaDeMultirrespuesta(conPorcentajes: false);
+        var nota = d0.Sumable ? "" : " " + Plantillas.NotaDeMultirrespuesta(conPorcentajes: false);
+        var aclaracionDeForma = string.Concat(nombradas.Select(n => p.Explicadas.FirstOrDefault(e => e.Canonico == n.Clave))
+            .Where(e => e.Forma is not null)
+            .Select(e => $"«{Plantillas.Capitalizar(e.Forma)}» se entiende como {d0.Filas.First(f => f.Clave == e.Canonico).Etiqueta.ToLowerInvariant()}. "));
+        var variable = ruteo.Intencion switch { Intenciones.Medios => "El medio más usado", Intenciones.Motivos => "El motivo más frecuente", _ => "La frecuencia más común" };
+
         string texto;
-        if (nombrada is not null)
+        if (resultados.Count == 1)
         {
-            var explicada = p.Explicadas.FirstOrDefault(e => e.Canonico == nombrada.Clave);
-            var aclaracion = explicada.Forma is null ? string.Empty : $"«{Plantillas.Capitalizar(explicada.Forma)}» se entiende como {nombrada.Etiqueta.ToLowerInvariant()}. ";
-            texto = $"{aclaracion}{nombrada.Etiqueta}: {nombrada.Cantidad} de {d.Encuestas} encuestas de tu sesión.{nota}";
+            var (a, d) = resultados[0];
+            if (nombradas.Count > 0)
+            {
+                var filas = nombradas.Select(n => d.Filas.First(f => f.Clave == n.Clave)).ToList();
+                texto = $"{filas[0].Etiqueta}: {filas[0].Cantidad} de {d.Encuestas} encuestas {a.EnTuSesion}"
+                        + string.Concat(filas.Skip(1).Select(f => $"; {f.Etiqueta}: {f.Cantidad} de {d.Encuestas}")) + ".";
+            }
+            else
+            {
+                var mayor = d.Filas.OrderByDescending(f => f.Cantidad).First();
+                texto = a.EsSesion
+                    ? $"{variable} en tu sesión es {mayor.Etiqueta}: {mayor.Cantidad} de {d.Encuestas} encuestas."
+                    : $"{variable} en {a.Rotulo} es {mayor.Etiqueta}: {mayor.Cantidad} de {d.Encuestas} encuestas de tu sesión.";
+            }
         }
         else
         {
-            var variable = ruteo.Intencion switch { Intenciones.Medios => "El medio más usado", Intenciones.Motivos => "El motivo más frecuente", _ => "La frecuencia más común" };
-            texto = $"{variable} en tu sesión es {mayor.Etiqueta}: {mayor.Cantidad} de {d.Encuestas} encuestas.{nota}";
+            // Desglose por localidad, nunca una suma (A6): cada una con su propio total.
+            var partes = resultados.Select(r =>
+            {
+                if (nombradas.Count == 0)
+                {
+                    var mayor = r.D.Filas.OrderByDescending(f => f.Cantidad).First();
+                    return $"en {r.A.Rotulo}, {mayor.Etiqueta.ToLowerInvariant()} ({mayor.Cantidad} de {r.D.Encuestas})";
+                }
+                return $"en {r.A.Rotulo}, " + string.Join(" y ", nombradas.Select(n => $"{n.Etiqueta.ToLowerInvariant()} {r.D.Filas.First(f => f.Clave == n.Clave).Cantidad} de {r.D.Encuestas}"));
+            });
+            var cabeza = nombradas.Count == 0 ? $"{variable}, por localidad de tu sesión: " : "Por localidad de tu sesión: ";
+            texto = cabeza + string.Join("; ", partes) + ".";
         }
-        if (d.Encuestas < 5) texto += " " + Plantillas.NChico;
+        texto = supuesto + aclaracionDeForma + texto + nota;
+        if (resultados.Any(r => r.D.Encuestas is > 0 and < 5)) texto += " " + Plantillas.NChico;
 
-        var destino = ruteo.Intencion switch
+        var destino = DestinoDeDistribucion(ruteo.Intencion);
+        if (resultados.Count == 1 && resultados[0].A.EsSesion)
         {
-            Intenciones.Medios => catalogo.Resolver(Destinos.ResultadosMedios),
-            Intenciones.Motivos => catalogo.Resolver(Destinos.ResultadosMotivos),
-            _ => catalogo.Resolver(Destinos.ResultadosResumen, new Dictionary<string, string?> { ["vista"] = "frecuencias" }, "Ver frecuencias")
-        };
+            var cifras = d0.Filas.Select(f => new Cifra(f.Etiqueta, f.Cantidad, d0.Nota)).Append(new Cifra("encuestas", d0.Encuestas, d0.Nota)).ToList();
+            var r = await RedactarCifrasAsync(ruteo.Intencion, Forma.F1, p, texto, cifras, [destino], ct);
+            return r with { Distribucion = d0, Grafico = ReglaDeForma.Decidir(TipoDeDato.Distribucion, d0.Filas.Count, d0.Sumable) };
+        }
 
-        var cifras = d.Filas.Select(f => new Cifra(f.Etiqueta, f.Cantidad, d.Nota)).Append(new Cifra("encuestas", d.Encuestas, d.Nota)).ToList();
-        var r = await RedactarCifrasAsync(ruteo.Intencion, Forma.F1, p, texto, cifras, [destino], ct);
-        return r with { Distribucion = d, Grafico = ReglaDeForma.Decidir(TipoDeDato.Distribucion, d.Filas.Count, d.Sumable) };
+        // Con recorte la plantilla es la respuesta: el alcance dicho no puede perderse en la redacción.
+        var cifrasDelAlcance = resultados.SelectMany(r => r.D.Filas.Select(f => new Cifra($"{f.Etiqueta} en {r.A.Rotulo}", f.Cantidad, r.D.Nota))
+            .Append(new Cifra($"encuestas en {r.A.Rotulo}", r.D.Encuestas, r.D.Nota))).ToList();
+        var respuesta = Fija(ruteo.Intencion, Anillo.Operar, Forma.F1, ResultadoDelTurno.Ok, texto) with { Cifras = cifrasDelAlcance, Destinos = [destino], Grafico = FormaDeGrafico.Numero };
+        if (estado.Motivo != MotivoDeHabilitacion.Habilitada) respuesta = respuesta with { Resultado = ResultadoDelTurno.Degradado };
+        return resultados.Count == 1
+            ? respuesta with { Distribucion = d0, Grafico = ReglaDeForma.Decidir(TipoDeDato.Distribucion, d0.Filas.Count, d0.Sumable) }
+            : respuesta;
     }
 
-    private async Task<RespuestaDelAsistente> PromediosAsync(PreguntaNormalizada p, CancellationToken ct)
+    private Chip DestinoDeDistribucion(string intencion) => intencion switch
+    {
+        Intenciones.Medios => catalogo.Resolver(Destinos.ResultadosMedios),
+        Intenciones.Motivos => catalogo.Resolver(Destinos.ResultadosMotivos),
+        _ => catalogo.Resolver(Destinos.ResultadosResumen, new Dictionary<string, string?> { ["vista"] = "frecuencias" }, "Ver frecuencias")
+    };
+
+    private async Task<RespuestaDelAsistente> PromediosAsync(PreguntaNormalizada p, string original, CancellationToken ct)
     {
         var medio = p.Canonicos.FirstOrDefault(Enrutador.EsMedio);
-        var promedios = await funciones.PromediosViajeAsync(medio is null ? AgrupacionDePromedios.Ninguno : AgrupacionDePromedios.Medio, ct);
-        if (promedios.Filas.Count == 0 && medio is null)
+        var por = medio is null ? AgrupacionDePromedios.Ninguno : AgrupacionDePromedios.Medio;
+        var sesion = await funciones.ListarLocalidadesAsync(ct);
+        var alcance = ResolverAlcance(p, sesion);
+        var alcances = alcance.Alcances;
+        var supuesto = alcance.Supuesto;
+        FilaDePromedio? FilaDe(Promedios x) => medio is null ? x.Filas.FirstOrDefault() : x.Filas.FirstOrDefault(f => f.Grupo == medio);
+        if (alcance.Homonima is not null)
         {
-            var sesion = await funciones.ListarLocalidadesAsync(ct);
+            var (elegido, dicho, aclaracion) = await DecidirHomonimaAsync(Intenciones.Promedios, alcance, original,
+                a => funciones.PromediosViajeAsync(por, a.Nombres, ct),
+                (x, y) => Equals(FilaDe(x), FilaDe(y)),
+                x => FilaDe(x) is { } f ? $"{Plantillas.N(f.MinutosPromedio)} minutos en promedio sobre {f.Encuestas} respuestas" : "ninguna respuesta");
+            if (aclaracion is not null) return aclaracion;
+            alcances = [elegido!];
+            supuesto = dicho;
+        }
+
+        var destino = catalogo.Resolver(Destinos.ResultadosResumen, new Dictionary<string, string?> { ["vista"] = "distancias" }, "Ver distancias y tiempos");
+        var filas = new List<(Alcance A, Promedios P, FilaDePromedio? F)>();
+        foreach (var a in alcances)
+        {
+            var x = await funciones.PromediosViajeAsync(por, a.Nombres, ct);
+            filas.Add((a, x, FilaDe(x)));
+        }
+
+        if (filas.All(f => f.P.Filas.Count == 0) && medio is null && alcances.All(a => a.EsSesion))
+        {
             return SinEncuestas(Intenciones.Promedios, sesion.Count);
         }
 
-        var fila = medio is null ? promedios.Filas[0] : promedios.Filas.FirstOrDefault(f => f.Grupo == medio);
-        var destino = catalogo.Resolver(Destinos.ResultadosResumen, new Dictionary<string, string?> { ["vista"] = "distancias" }, "Ver distancias y tiempos");
-        if (fila is null)
+        var donde = alcances.All(a => a.EsSesion) ? "" : " en " + string.Join(" ni en ", alcances.Select(a => a.Rotulo));
+        if (filas.All(f => f.F is null))
         {
+            var que = medio is null ? "tiene respuestas" : $"marcó {Catalogos.EtiquetaDeMedio(medio).ToLowerInvariant()}";
             return Fija(Intenciones.Promedios, Anillo.Operar, Forma.F5, ResultadoDelTurno.Abstencion,
-                $"Ninguna encuesta de tu sesión marcó {Catalogos.EtiquetaDeMedio(medio!).ToLowerInvariant()}.") with { Destinos = [destino] };
+                $"{supuesto}Ninguna encuesta de tu sesión{donde} {que}.") with { Destinos = [destino] };
         }
 
-        var quienes = medio is null ? "Las personas encuestadas" : $"Quienes marcaron {fila.Etiqueta.ToLowerInvariant()}";
-        var texto = $"{quienes} tardan en promedio {Plantillas.N(fila.MinutosPromedio)} minutos (mediana {Plantillas.N(fila.MinutosMediana)}) y recorren {Plantillas.N(fila.DistanciaPromedio)} km por día (mediana {Plantillas.N(fila.DistanciaMediana)}), sobre {fila.Encuestas} respuestas de tu sesión."
-                    + (fila.Encuestas < 5 ? " " + Plantillas.NChico : string.Empty);
-        var cifras = new List<Cifra>
+        string texto;
+        List<Cifra> cifras;
+        if (filas.Count == 1)
         {
-            new("minutos promedio", fila.MinutosPromedio, promedios.Nota), new("minutos mediana", fila.MinutosMediana, promedios.Nota),
-            new("km promedio", fila.DistanciaPromedio, promedios.Nota), new("km mediana", fila.DistanciaMediana, promedios.Nota),
-            new("respuestas", fila.Encuestas, promedios.Nota)
-        };
-        var r = await RedactarCifrasAsync(Intenciones.Promedios, Forma.F1, p, texto, cifras, [destino], ct);
-        return r with { Promedios = promedios with { Filas = [fila] }, Grafico = ReglaDeForma.Decidir(TipoDeDato.Comparacion) };
+            var (a, promedios, fila) = filas[0];
+            var quienes = medio is null ? "Las personas encuestadas" : $"Quienes marcaron {fila!.Etiqueta.ToLowerInvariant()}";
+            if (!a.EsSesion) quienes += $" en {a.Rotulo}";
+            texto = $"{quienes} tardan en promedio {Plantillas.N(fila!.MinutosPromedio)} minutos (mediana {Plantillas.N(fila.MinutosMediana)}) y recorren {Plantillas.N(fila.DistanciaPromedio)} km por día (mediana {Plantillas.N(fila.DistanciaMediana)}), sobre {fila.Encuestas} respuestas de tu sesión."
+                    + (fila.Encuestas < 5 ? " " + Plantillas.NChico : string.Empty);
+            cifras =
+            [
+                new("minutos promedio", fila.MinutosPromedio, promedios.Nota), new("minutos mediana", fila.MinutosMediana, promedios.Nota),
+                new("km promedio", fila.DistanciaPromedio, promedios.Nota), new("km mediana", fila.DistanciaMediana, promedios.Nota),
+                new("respuestas", fila.Encuestas, promedios.Nota)
+            ];
+            texto = supuesto + texto;
+            if (a.EsSesion)
+            {
+                var r = await RedactarCifrasAsync(Intenciones.Promedios, Forma.F1, p, texto, cifras, [destino], ct);
+                return r with { Promedios = promedios with { Filas = [fila] }, Grafico = ReglaDeForma.Decidir(TipoDeDato.Comparacion) };
+            }
+            return Fija(Intenciones.Promedios, Anillo.Operar, Forma.F1, estado.Motivo == MotivoDeHabilitacion.Habilitada ? ResultadoDelTurno.Ok : ResultadoDelTurno.Degradado, texto)
+                with { Cifras = cifras, Destinos = [destino], Promedios = promedios with { Filas = [fila] }, Grafico = ReglaDeForma.Decidir(TipoDeDato.Comparacion) };
+        }
+
+        // Desglose por localidad: cada una con su promedio; no se promedian entre sí (marco §2).
+        var quienesVarios = medio is null ? "Las personas encuestadas" : $"Quienes marcaron {Catalogos.EtiquetaDeMedio(medio).ToLowerInvariant()}";
+        texto = supuesto + $"{quienesVarios}, por localidad de tu sesión: " + string.Join("; ", filas.Select(f => f.F is null
+            ? $"en {f.A.Rotulo}, sin respuestas"
+            : $"en {f.A.Rotulo}, {Plantillas.N(f.F.MinutosPromedio)} minutos y {Plantillas.N(f.F.DistanciaPromedio)} km por día en promedio ({f.F.Encuestas} respuestas)")) + ".";
+        if (filas.Any(f => f.F is { Encuestas: < 5 })) texto += " " + Plantillas.NChico;
+        cifras = filas.Where(f => f.F is not null).SelectMany(f => new[]
+        {
+            new Cifra($"minutos promedio en {f.A.Rotulo}", f.F!.MinutosPromedio, f.P.Nota), new Cifra($"km promedio en {f.A.Rotulo}", f.F.DistanciaPromedio, f.P.Nota),
+            new Cifra($"respuestas en {f.A.Rotulo}", f.F.Encuestas, f.P.Nota)
+        }).ToList();
+        return Fija(Intenciones.Promedios, Anillo.Operar, Forma.F1, estado.Motivo == MotivoDeHabilitacion.Habilitada ? ResultadoDelTurno.Ok : ResultadoDelTurno.Degradado, texto)
+            with { Cifras = cifras, Destinos = [destino], Grafico = FormaDeGrafico.Numero };
     }
 
     // ---- Anillos 1, 2 y 3: ayuda con cita ----------------------------------------------------

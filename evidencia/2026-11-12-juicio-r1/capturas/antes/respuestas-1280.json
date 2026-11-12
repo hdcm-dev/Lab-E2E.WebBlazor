@@ -1,0 +1,459 @@
+[
+ {
+  "n": 1,
+  "w": 1280,
+  "q": "¿Cuántas localidades tengo?",
+  "forma": "F2",
+  "texto": "Respuesta fija\nTenés 3 localidades cargadas en tu sesión.\n¿Lo abro por provincia?\nAbrir localidades\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Abrir localidades"
+  ],
+  "sug": [],
+  "botones": [
+   "¿Lo abro por provincia?",
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/localidades",
+  "chipTitulo": "Localidades",
+  "dialogo": null
+ },
+ {
+  "n": 2,
+  "w": 1280,
+  "q": "¿Qué medio usa más la gente?",
+  "forma": "F1",
+  "texto": "Respuesta fija\nEl medio más usado en tu sesión es Colectivo: 9 de 20 encuestas. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas.\nMedios de transporte\nColectivo\n9\nMoto\n7\nAuto particular\n5\nA pie\n4\nBicicleta\n3\nTren\n1\nMedios de transporte\nCategoría\tEncuestas\t%\nColectivo\t9\t45 %\nMoto\t7\t35 %\nAuto particular\t5\t25 %\nA pie\t4\t20 %\nBicicleta\t3\t15 %\nTren\t1\t5 %\nde tu sesión, n = 20 respuestas; una persona puede marcar varios medios, así que los porcentajes no suman 100 %.\nVer medios más usados\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver medios más usados"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=medios",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 3,
+  "w": 1280,
+  "q": "¿Cuántos van en bondi?",
+  "forma": "F1",
+  "texto": "Respuesta fija\n«Bondi» se entiende como colectivo. Colectivo: 9 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas.\nMedios de transporte\nColectivo\n9\nMoto\n7\nAuto particular\n5\nA pie\n4\nBicicleta\n3\nTren\n1\nMedios de transporte\nCategoría\tEncuestas\t%\nColectivo\t9\t45 %\nMoto\t7\t35 %\nAuto particular\t5\t25 %\nA pie\t4\t20 %\nBicicleta\t3\t15 %\nTren\t1\t5 %\nde tu sesión, n = 20 respuestas; una persona puede marcar varios medios, así que los porcentajes no suman 100 %.\nVer medios más usados\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver medios más usados"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=medios",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 4,
+  "w": 1280,
+  "q": "¿Cuántos usan bici?",
+  "forma": "F1",
+  "texto": "Respuesta fija\n«Bici» se entiende como bicicleta. Bicicleta: 3 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas.\nMedios de transporte\nColectivo\n9\nMoto\n7\nAuto particular\n5\nA pie\n4\nBicicleta\n3\nTren\n1\nMedios de transporte\nCategoría\tEncuestas\t%\nColectivo\t9\t45 %\nMoto\t7\t35 %\nAuto particular\t5\t25 %\nA pie\t4\t20 %\nBicicleta\t3\t15 %\nTren\t1\t5 %\nde tu sesión, n = 20 respuestas; una persona puede marcar varios medios, así que los porcentajes no suman 100 %.\nVer medios más usados\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver medios más usados"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=medios",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 5,
+  "w": 1280,
+  "q": "¿Cuántas encuestas hay en Corrientes?",
+  "forma": "F3",
+  "texto": "Respuesta fija\n¿Corrientes la localidad (346.334 hab.) o la provincia (2 localidades cargadas)?\nLa localidad Corrientes\nLa provincia Corrientes\n¿Te sirvió?\n👍\n👎",
+  "chips": [],
+  "sug": [],
+  "botones": [
+   "La localidad Corrientes",
+   "La provincia Corrientes",
+   "👍",
+   "👎"
+  ]
+ },
+ {
+  "n": 6,
+  "w": 1280,
+  "q": "¿Cuántos viajan en colectivo en Corrientes?",
+  "forma": "F1",
+  "texto": "Respuesta fija\nColectivo: 9 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas.\nMedios de transporte\nColectivo\n9\nMoto\n7\nAuto particular\n5\nA pie\n4\nBicicleta\n3\nTren\n1\nMedios de transporte\nCategoría\tEncuestas\t%\nColectivo\t9\t45 %\nMoto\t7\t35 %\nAuto particular\t5\t25 %\nA pie\t4\t20 %\nBicicleta\t3\t15 %\nTren\t1\t5 %\nde tu sesión, n = 20 respuestas; una persona puede marcar varios medios, así que los porcentajes no suman 100 %.\nVer medios más usados\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver medios más usados"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=medios",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 7,
+  "w": 1280,
+  "q": "¿Cuántas encuestas hay en Goya?",
+  "forma": "F1",
+  "texto": "Respuesta fija\nHay 4 de 20 encuestas de tu sesión en la localidad Goya. Con menos de 5 respuestas, la cifra es sólo descriptiva.\nVer resultados\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver resultados"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 8,
+  "w": 1280,
+  "q": "¿Cuál es la distancia promedio que recorren?",
+  "forma": "F1",
+  "texto": "Respuesta fija\nLas personas encuestadas tardan en promedio 43,8 minutos (mediana 42,5) y recorren 9,7 km por día (mediana 7,5), sobre 20 respuestas de tu sesión.\nPromedio y mediana\nPromedio y mediana\nGrupo\tn\tKm prom.\tKm mediana\tMin prom.\tMin mediana\nTodas las respuestas\t20\t9,7\t7,5\t43,8\t42,5\nde tu sesión: promedio y mediana sobre las respuestas de cada fila; con menos de 5 son sólo descriptivos.\nVer distancias y tiempos\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver distancias y tiempos"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=distancias",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 9,
+  "w": 1280,
+  "q": "¿Por qué viaja la gente?",
+  "forma": "F1",
+  "texto": "Respuesta fija\nEl motivo más frecuente en tu sesión es Estudio: 10 de 20 encuestas.\nMotivo del viaje\nTrabajo\nEstudio\nSalud\nOtros\nMotivo del viaje\nCategoría\tRespuestas\t%\nTrabajo\t2\t10 %\nEstudio\t10\t50 %\nSalud\t6\t30 %\nOtros\t2\t10 %\nde tu sesión, n = 20 respuestas; cada persona elige una sola opción.\nVer motivos de viaje\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver motivos de viaje"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=motivos",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 10,
+  "w": 1280,
+  "q": "¿Con qué frecuencia viajan?",
+  "forma": "F1",
+  "texto": "Respuesta fija\nLa frecuencia más común en tu sesión es Ocasionalmente: 9 de 20 encuestas.\nFrecuencia de uso\nTodos los días\nAlgunos días por semana\nOcasionalmente\nFrecuencia de uso\nCategoría\tRespuestas\t%\nTodos los días\t5\t25 %\nAlgunos días por semana\t6\t30 %\nOcasionalmente\t9\t45 %\nde tu sesión, n = 20 respuestas; cada persona elige una sola opción.\nVer frecuencias\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver frecuencias"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=frecuencias",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 11,
+  "w": 1280,
+  "q": "¿Qué cuenta como frecuencia semanal?",
+  "forma": "F4",
+  "texto": "Respuesta fija\nFrecuencia: Con qué asiduidad usás esos medios: todos los días, algunos días por semana u ocasionalmente. [1]\nEmpezar una encuesta\n[1] Glosario › Frecuencia\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Empezar una encuesta"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/encuesta/1",
+  "chipTitulo": "Encuesta de uso del transporte",
+  "dialogo": null
+ },
+ {
+  "n": 12,
+  "w": 1280,
+  "q": "¿Qué es un medio de transporte en la encuesta?",
+  "forma": "F4",
+  "texto": "Respuesta fija\nMedio de transporte: Uno de los seis medios de la encuesta: colectivo, auto particular, bicicleta, moto, a pie y tren. [1]\nEmpezar una encuesta\n[1] Glosario › Medio de transporte\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Empezar una encuesta"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/encuesta/1",
+  "chipTitulo": "Encuesta de uso del transporte",
+  "dialogo": null
+ },
+ {
+  "n": 13,
+  "w": 1280,
+  "q": "¿Por qué no veo lo de mi compañero?",
+  "forma": "F4",
+  "texto": "Respuesta fija\nCada navegador tiene su propia sesión, identificada por una cookie. Lo que cargás queda en tu sesión y no lo ve nadie más; por eso tampoco ves lo que cargó tu compañero en su navegador. Cada sesión arranca con dos localidades de ejemplo: Corrientes y Resistencia. [1]\nIr al inicio\n[1] Por qué no ves lo de otra persona › Cada sesión ve sólo sus datos\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ir al inicio"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/",
+  "chipTitulo": "Demostración de pruebas E2E",
+  "dialogo": null
+ },
+ {
+  "n": 14,
+  "w": 1280,
+  "q": "¿Cómo doy de alta una localidad?",
+  "forma": "F4",
+  "texto": "Respuesta fija\nEntrá a Localidades. El panel de la izquierda es el formulario de alta: completá nombre, provincia, código postal y habitantes, y tocá Guardar. Si un dato no cumple su requisito, el campo queda marcado en rojo con el motivo y no se guarda nada. [1]\nDar de alta una localidad\nAbrir localidades\n[1] Dar de alta una localidad › Dar de alta\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Dar de alta una localidad",
+   "Abrir localidades"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/localidades",
+  "chipTitulo": "Localidades",
+  "dialogo": null
+ },
+ {
+  "n": 15,
+  "w": 1280,
+  "q": "Borrá Resistencia",
+  "forma": "F1",
+  "texto": "Respuesta fija\nResistencia (Chaco), con 291.720 habitantes. Para eliminarla, abrí la confirmación con el botón de abajo: la baja se confirma ahí.\nEliminar «Resistencia» (Chaco)\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Eliminar «Resistencia» (Chaco)"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/localidades",
+  "chipTitulo": "Localidades",
+  "dialogo": "Dar de baja la localidad Resistencia"
+ },
+ {
+  "n": 16,
+  "w": 1280,
+  "q": "Agregá Goya, Corrientes, CP 3450, 90000 habitantes",
+  "forma": "F6",
+  "texto": "Respuesta fija\nLeer los datos de una frase necesita la ayuda con IA, que está apagada. Abrí el alta y completá los datos en el formulario.\nDar de alta una localidad\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Dar de alta una localidad"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/localidades",
+  "chipTitulo": "Localidades",
+  "dialogo": null
+ },
+ {
+  "n": 17,
+  "w": 1280,
+  "q": "¿Cómo cargo una localidad por la API?",
+  "forma": "F4",
+  "texto": "Respuesta fija\nLa API REST es otra aplicación del laboratorio, MovilidadUrbana.ApiWeb, independiente de esta web: tiene sus propios datos y su propia sesión, que se manda en el encabezado X-Sesion-Id. Para cargar una localidad se hace un POST a la ruta de localidades de la API, con nombre, provincia, código postal y habitantes; el contrato y la prueba desde el navegador están en su documentación navegable, que se publica en Development. Lo que cargues por la API no aparece en esta web. [1]\nAbrir localidades\n[1] La API de Movilidad Urbana › Otra aplicación\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Abrir localidades"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/localidades",
+  "chipTitulo": "Localidades",
+  "dialogo": null
+ },
+ {
+  "n": 18,
+  "w": 1280,
+  "q": "¿Qué es una localidad y dónde la cargo?",
+  "forma": "F4",
+  "texto": "Respuesta fija\nLocalidad: Una ciudad o pueblo que cargás en el ABM, con su provincia, su código postal y sus habitantes. [1]\nAbrir localidades\n[1] Glosario › Localidad\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Abrir localidades"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/localidades",
+  "chipTitulo": "Localidades",
+  "dialogo": null
+ },
+ {
+  "n": 19,
+  "w": 1280,
+  "q": "¿Cuántos usan moto y cuántos el tren?",
+  "forma": "F1",
+  "texto": "Respuesta fija\nMoto: 7 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas.\nMedios de transporte\nColectivo\n9\nMoto\n7\nAuto particular\n5\nA pie\n4\nBicicleta\n3\nTren\n1\nMedios de transporte\nCategoría\tEncuestas\t%\nColectivo\t9\t45 %\nMoto\t7\t35 %\nAuto particular\t5\t25 %\nA pie\t4\t20 %\nBicicleta\t3\t15 %\nTren\t1\t5 %\nde tu sesión, n = 20 respuestas; una persona puede marcar varios medios, así que los porcentajes no suman 100 %.\nVer medios más usados\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver medios más usados"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=medios",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 20,
+  "w": 1280,
+  "q": "¿Qué es la frecuencia diaria y cuántos viajan todos los días?",
+  "forma": "F4",
+  "texto": "Respuesta fija\nFrecuencia: Con qué asiduidad usás esos medios: todos los días, algunos días por semana u ocasionalmente. [1]\nEmpezar una encuesta\n[1] Glosario › Frecuencia\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Empezar una encuesta"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/encuesta/1",
+  "chipTitulo": "Encuesta de uso del transporte",
+  "dialogo": null
+ },
+ {
+  "n": 21,
+  "w": 1280,
+  "q": "¿Cuántos viajan en bici en Corrientes y en Resistencia?",
+  "forma": "F1",
+  "texto": "Respuesta fija\n«Bici» se entiende como bicicleta. Bicicleta: 3 de 20 encuestas de tu sesión. Una persona puede marcar varios medios, así que los conteos pueden sumar más que el total de encuestas.\nMedios de transporte\nColectivo\n9\nMoto\n7\nAuto particular\n5\nA pie\n4\nBicicleta\n3\nTren\n1\nMedios de transporte\nCategoría\tEncuestas\t%\nColectivo\t9\t45 %\nMoto\t7\t35 %\nAuto particular\t5\t25 %\nA pie\t4\t20 %\nBicicleta\t3\t15 %\nTren\t1\t5 %\nde tu sesión, n = 20 respuestas; una persona puede marcar varios medios, así que los porcentajes no suman 100 %.\nVer medios más usados\n¿Te sirvió?\n👍\n👎",
+  "chips": [
+   "Ver medios más usados"
+  ],
+  "sug": [],
+  "botones": [
+   "👍",
+   "👎"
+  ],
+  "chipUrl": "http://127.0.0.1:18190/resultados?vista=medios",
+  "chipTitulo": "Resultados de la encuesta",
+  "dialogo": null
+ },
+ {
+  "n": 22,
+  "w": 1280,
+  "q": "¿A qué hora pasa el 110 por la plaza?",
+  "forma": "F7",
+  "texto": "Respuesta fija\nNo tengo horarios ni recorridos de colectivos: la aplicación sólo conoce lo que cargás en tu sesión.\n¿Qué medio usa más la gente?\n¿Cómo doy de alta una localidad?\n¿Cuántas localidades tengo?\n¿Te sirvió?\n👍\n👎",
+  "chips": [],
+  "sug": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?"
+  ],
+  "botones": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?",
+   "👍",
+   "👎"
+  ]
+ },
+ {
+  "n": 23,
+  "w": 1280,
+  "q": "¿Va a llover mañana en Resistencia?",
+  "forma": "F7",
+  "texto": "Respuesta fija\nNo tengo información del clima. Acá te ayudo con las localidades, la encuesta y sus resultados.\n¿Qué medio usa más la gente?\n¿Cómo doy de alta una localidad?\n¿Cuántas localidades tengo?\n¿Te sirvió?\n👍\n👎",
+  "chips": [],
+  "sug": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?"
+  ],
+  "botones": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?",
+   "👍",
+   "👎"
+  ]
+ },
+ {
+  "n": 24,
+  "w": 1280,
+  "q": "Dame el teléfono de Ana Pérez",
+  "forma": "F7",
+  "texto": "Respuesta fija\nEso queda fuera de lo que responde este asistente. Acá te ayudo con las localidades, la encuesta y sus resultados.\n¿Qué medio usa más la gente?\n¿Cómo doy de alta una localidad?\n¿Cuántas localidades tengo?\n¿Te sirvió?\n👍\n👎",
+  "chips": [],
+  "sug": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?"
+  ],
+  "botones": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?",
+   "👍",
+   "👎"
+  ]
+ },
+ {
+  "n": 25,
+  "w": 1280,
+  "q": "¿Cuánto cuesta el boleto de colectivo en Corrientes?",
+  "forma": "F7",
+  "texto": "Respuesta fija\nNo tengo estadísticas ni datos oficiales: sólo las cifras de las encuestas de tu sesión.\n¿Qué medio usa más la gente?\n¿Cómo doy de alta una localidad?\n¿Cuántas localidades tengo?\n¿Te sirvió?\n👍\n👎",
+  "chips": [],
+  "sug": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?"
+  ],
+  "botones": [
+   "¿Qué medio usa más la gente?",
+   "¿Cómo doy de alta una localidad?",
+   "¿Cuántas localidades tengo?",
+   "👍",
+   "👎"
+  ]
+ }
+]

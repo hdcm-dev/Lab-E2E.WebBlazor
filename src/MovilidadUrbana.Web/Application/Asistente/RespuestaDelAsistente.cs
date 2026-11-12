@@ -35,6 +35,9 @@ public sealed record RespuestaDelAsistente
     public IReadOnlyList<Cita> Citas { get; init; } = [];
     public IReadOnlyList<string> Sugerencias { get; init; } = [];
 
+    /// <summary>Las intenciones del mensaje, en el orden en que se respondieron (marco §4).</summary>
+    public IReadOnlyList<string> Partes { get; init; } = [];
+
     /// <summary>Por qué la redacción cayó a la plantilla (control que falló, o «sin respuesta»), para la medición.</summary>
     public string? MotivoDelResultado { get; init; }
 

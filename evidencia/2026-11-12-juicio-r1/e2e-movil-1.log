@@ -1,0 +1,30 @@
+10.0.103
+Build succeeded.
+Test run for /trabajo/tests/MovilidadUrbana.E2ETests/bin/Debug/net10.0/MovilidadUrbana.E2ETests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Failed AyudaSinMarcasCrudas(390) [16 s]
+  Error Message:
+     ayuda-negrita a 390: CLS
+Assert.That(cls, Is.LessThan(0.01))
+  Expected: less than 0.01d
+  But was:  0.033333333333333333d
+
+  Stack Trace:
+     at MovilidadUrbana.E2ETests.CapturasDelAsistenteTests.MedirAsync(String nombre, Int32 ancho) in /trabajo/tests/MovilidadUrbana.E2ETests/CapturasDelAsistenteTests.cs:line 37
+   at MovilidadUrbana.E2ETests.CapturasDelAsistenteTests.AyudaSinMarcasCrudas(Int32 ancho) in /trabajo/tests/MovilidadUrbana.E2ETests/CapturasDelAsistenteTests.cs:line 81
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.<>c__DisplayClass1_0.<Execute>b__0()
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+
+1)    at MovilidadUrbana.E2ETests.CapturasDelAsistenteTests.<>c__DisplayClass2_0.<MedirAsync>b__0() in /trabajo/tests/MovilidadUrbana.E2ETests/CapturasDelAsistenteTests.cs:line 40
+   at NUnit.Framework.Assert.Multiple(TestDelegate testDelegate)
+   at MovilidadUrbana.E2ETests.CapturasDelAsistenteTests.MedirAsync(String nombre, Int32 ancho) in /trabajo/tests/MovilidadUrbana.E2ETests/CapturasDelAsistenteTests.cs:line 37
+
+
+
+Failed!  - Failed:     1, Passed:    41, Skipped:     0, Total:    42, Duration: 2 m - MovilidadUrbana.E2ETests.dll (net10.0)
