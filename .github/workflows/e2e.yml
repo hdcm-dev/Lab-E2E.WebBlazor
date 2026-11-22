@@ -104,6 +104,16 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Fijar el SDK 10 para este trabajo
+        # La imagen de GitHub trae además un SDK más nuevo (net11) que queda por defecto aunque
+        # setup-dotnet instale el 10. Un global.json local al trabajo (no se versiona) elige el 10.
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk10="$(dotnet --list-sdks | awk '/^10\./{print $1}' | sort -V | tail -1)"
+          test -n "$sdk10"
+          dotnet new globaljson --sdk-version "$sdk10" --roll-forward latestFeature --force
+
       - name: Verificar que el SDK coincide con el framework del proyecto
         shell: bash
         run: |
