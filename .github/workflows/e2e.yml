@@ -84,10 +84,12 @@ jobs:
     name: Publicar la aplicación
     # Contra un entorno ya desplegado no hay nada que compilar.
     if: ${{ inputs.url-base == '' }}
-    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
-    # propio: la etiqueta `ci-hdcm` es la que identifica a ese runner en el repositorio.
-    runs-on: [self-hosted, ci-hdcm]
-    # runs-on: ubuntu-latest
+    # Runner de GitHub, igual que el resto de los trabajos: el repositorio es público y de
+    # demostración, así que los minutos son gratis, y un runner propio dejaría correr en la máquina
+    # del laboratorio el código de un pull request desde un fork. Para apuntar a uno propio, la
+    # etiqueta es `ci-hdcm`.
+    # runs-on: [self-hosted, ci-hdcm]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Descargar el código
@@ -101,6 +103,16 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
+
+      - name: Fijar el SDK 10 para este trabajo
+        # La imagen de GitHub trae además un SDK más nuevo (net11) que queda por defecto aunque
+        # setup-dotnet instale el 10. Un global.json local al trabajo (no se versiona) elige el 10.
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk10="$(dotnet --list-sdks | awk '/^10\./{print $1}' | sort -V | tail -1)"
+          test -n "$sdk10"
+          dotnet new globaljson --sdk-version "$sdk10" --roll-forward latestFeature --force
 
       - name: Verificar que el SDK coincide con el framework del proyecto
         shell: bash
