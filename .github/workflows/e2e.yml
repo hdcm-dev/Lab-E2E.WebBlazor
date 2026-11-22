@@ -84,10 +84,12 @@ jobs:
     name: Publicar la aplicación
     # Contra un entorno ya desplegado no hay nada que compilar.
     if: ${{ inputs.url-base == '' }}
-    # Runner autoalojado del laboratorio. Se deja comentado como ejemplo de cómo apuntar a uno
-    # propio: la etiqueta `ci-hdcm` es la que identifica a ese runner en el repositorio.
-    runs-on: [self-hosted, ci-hdcm]
-    # runs-on: ubuntu-latest
+    # Runner de GitHub, igual que el resto de los trabajos: el repositorio es público y de
+    # demostración, así que los minutos son gratis, y un runner propio dejaría correr en la máquina
+    # del laboratorio el código de un pull request desde un fork. Para apuntar a uno propio, la
+    # etiqueta es `ci-hdcm`.
+    # runs-on: [self-hosted, ci-hdcm]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Descargar el código
